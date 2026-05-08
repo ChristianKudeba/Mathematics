@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "PowerShell(Get-ChildItem -Force \"C:\\\\Users\\\\Christian\\\\.claude\\\\backups\" | Select-Object -First 5 Name, PSIsContainer, Length | Format-List; \\(Get-ChildItem -Force \"C:\\\\Users\\\\Christian\\\\.claude\\\\backups\" | Measure-Object\\).Count)",
+      "Bash(python3 -c \"import pdfminer; print\\('pdfminer ok'\\)\")",
+      "Bash(python3 -c \"import pypdf; print\\('pypdf ok'\\)\")",
+      "Bash(python3 -c \"import fitz; print\\('pymupdf ok'\\)\")",
+      "Bash(python -c \"import pypdf; print\\('pypdf ok'\\)\")",
+      "Bash(python -c \"import fitz; print\\('pymupdf ok'\\)\")",
+      "Bash(pdftotext \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Miscellaneous\\\\ShakovPaper.pdf\" -)",
+      "Bash(lake build *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(git -C \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\" diff --stat)",
+      "Bash(git *)"
+    ]
+  }
+}
