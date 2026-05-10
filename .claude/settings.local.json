@@ -16,7 +16,20 @@
       "Bash(echo \"EXIT: $?\")",
       "Bash(git -C \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\" status)",
       "Bash(git -C \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\" diff --stat)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(where gh *)",
+      "Bash(where git *)",
+      "Bash(curl *)",
+      "Bash(gcc -Wall -Wextra -O2 -mwindows -o proof_viz.exe main.c -lcomdlg32 -lgdi32 -luser32 -lm)",
+      "Read(//mingw64/**)",
+      "Read(//c/Program Files/Git/mingw64/bin/**)",
+      "Bash(where.exe gcc *)",
+      "Read(//c//**)",
+      "Read(//c/ProgramData/chocolatey/**)",
+      "PowerShell(Get-Command *)",
+      "Bash(start proof_viz.exe \"..\\\\..\\\\Mathematics\\\\ShakovDivisors.lean\")",
+      "Bash(start proof_viz.exe \"..\\\\..\\\\Mathematics\\\\Basic.lean\")",
+      "Bash(start proof_viz.exe)"
     ]
   }
 }
