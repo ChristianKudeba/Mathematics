@@ -9,8 +9,11 @@
  *
  * Controls:
  *   O          — open a .lean file
- *   drag       — pan
- *   scroll     — zoom
+ *   T          — show the loaded .lean file as text
+ *   G          — show the proof graph
+ *   P          — import/open a PDF in the system PDF viewer
+ *   drag       — pan the proof graph
+ *   scroll     — zoom the proof graph
  *   Esc        — quit
  */
 
@@ -18,10 +21,12 @@
 #include <windows.h>
 #include <windowsx.h>   /* GET_X_LPARAM, GET_Y_LPARAM          */
 #include <commdlg.h>    /* GetOpenFileName                     */
+#include <shellapi.h>   /* ShellExecute                         */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 /* ================================================================
    Constants
@@ -35,6 +40,18 @@
 #define NODE_H    40   /* node height (world pixels) */
 #define LAYER_H  110   /* vertical gap between layers */
 #define SLOT_W   170   /* horizontal gap between nodes in a layer */
+
+#define SIDEBAR_W 230
+#define BTN_H      32
+#define BTN_W     190
+#define BTN_X      18
+#define INFO_LEN  1024
+
+#define IDC_OPEN_LEAN  1001
+#define IDC_VIEW_GRAPH 1002
+#define IDC_VIEW_TEXT  1003
+#define IDC_OPEN_PDF   1004
+#define IDC_TEXT_VIEW  1005
 
 /* ================================================================
    Node kinds and their colours
@@ -84,6 +101,17 @@ static Node  nd[MAX_NODES];
 static int   nnd = 0;
 static Edge  ed[MAX_EDGES];
 static int   ned = 0;
+
+typedef enum {
+    VIEW_GRAPH = 0,
+    VIEW_TEXT,
+    VIEW_PDF
+} ViewMode;
+
+static ViewMode g_view_mode = VIEW_GRAPH;
+static char g_loaded_lean[MAX_PATH] = "";
+static char g_loaded_pdf[MAX_PATH]  = "";
+static char g_status[INFO_LEN]      = "No file loaded.";
 
 /* ================================================================
    Graph helpers
@@ -378,7 +406,7 @@ static BOOL  g_dragging = FALSE;
 
 static void w2s(int wx, int wy, int *sx, int *sy)
 {
-    *sx = (int)(wx * g_zoom) + g_pan_x;
+    *sx = SIDEBAR_W + (int)(wx * g_zoom) + g_pan_x;
     *sy = (int)(wy * g_zoom) + g_pan_y;
 }
 
@@ -484,8 +512,112 @@ static void draw_legend(HDC dc)
    ================================================================ */
 
 static HWND g_hwnd;
+static HWND g_text_hwnd;
+static HWND g_btn_open_lean;
+static HWND g_btn_view_graph;
+static HWND g_btn_view_text;
+static HWND g_btn_open_pdf;
+static HFONT g_ui_font;
+static HFONT g_mono_font;
 
-static void open_file(HWND hwnd)
+static void set_status(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(g_status, sizeof(g_status), fmt, ap);
+    va_end(ap);
+    g_status[sizeof(g_status)-1] = '\0';
+}
+
+static int has_ext(const char *path, const char *ext)
+{
+    size_t lp = strlen(path), le = strlen(ext);
+    if (lp < le) return 0;
+    return lstrcmpiA(path + lp - le, ext) == 0;
+}
+
+static int read_entire_file(const char *path, char **out, DWORD *out_len)
+{
+    HANDLE h = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return 0;
+
+    LARGE_INTEGER size;
+    if (!GetFileSizeEx(h, &size) || size.QuadPart > 50 * 1024 * 1024) {
+        CloseHandle(h);
+        return 0;
+    }
+
+    DWORD len = (DWORD)size.QuadPart;
+    char *buf = (char *)malloc(len + 1);
+    if (!buf) {
+        CloseHandle(h);
+        return 0;
+    }
+
+    DWORD got = 0;
+    BOOL ok = ReadFile(h, buf, len, &got, NULL);
+    CloseHandle(h);
+
+    if (!ok) {
+        free(buf);
+        return 0;
+    }
+
+    buf[got] = '\0';
+    *out = buf;
+    if (out_len) *out_len = got;
+    return 1;
+}
+
+static void resize_children(HWND hwnd)
+{
+    RECT cr;
+    GetClientRect(hwnd, &cr);
+    int right_x = SIDEBAR_W + 1;
+    int right_w = cr.right - right_x;
+    if (right_w < 1) right_w = 1;
+
+    MoveWindow(g_btn_open_lean,  BTN_X,  58, BTN_W, BTN_H, TRUE);
+    MoveWindow(g_btn_view_graph, BTN_X, 100, BTN_W, BTN_H, TRUE);
+    MoveWindow(g_btn_view_text,  BTN_X, 142, BTN_W, BTN_H, TRUE);
+    MoveWindow(g_btn_open_pdf,   BTN_X, 184, BTN_W, BTN_H, TRUE);
+
+    MoveWindow(g_text_hwnd, right_x, 0, right_w, cr.bottom, TRUE);
+}
+
+static void update_visible_view(HWND hwnd)
+{
+    ShowWindow(g_text_hwnd, g_view_mode == VIEW_TEXT ? SW_SHOW : SW_HIDE);
+    InvalidateRect(hwnd, NULL, TRUE);
+}
+
+static void load_lean_file(HWND hwnd, const char *path)
+{
+    parse_file(path);
+    layout();
+
+    strncpy(g_loaded_lean, path, MAX_PATH - 1);
+    g_loaded_lean[MAX_PATH - 1] = '\0';
+
+    char *contents = NULL;
+    DWORD len = 0;
+    if (read_entire_file(path, &contents, &len)) {
+        SetWindowTextA(g_text_hwnd, contents);
+        free(contents);
+    } else {
+        SetWindowTextA(g_text_hwnd, "Could not load Lean source text.");
+    }
+
+    g_zoom  = 1.0f;
+    g_pan_x = 60;
+    g_pan_y = 40;
+    g_view_mode = VIEW_GRAPH;
+    set_status("Loaded Lean file:\r\n%s\r\n\r\nNodes: %d\r\nEdges: %d", path, nnd, ned);
+    update_visible_view(hwnd);
+}
+
+static void open_lean_file(HWND hwnd)
 {
     OPENFILENAMEA ofn = {0};
     char fn[MAX_PATH]  = {0};
@@ -496,13 +628,37 @@ static void open_file(HWND hwnd)
     ofn.nMaxFile    = MAX_PATH;
     ofn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
     if (GetOpenFileNameA(&ofn)) {
-        parse_file(fn);
-        layout();
-        /* reset view */
-        g_zoom  = 1.0f;
-        g_pan_x = 60;
-        g_pan_y = 40;
-        InvalidateRect(hwnd, NULL, TRUE);
+        if (!has_ext(fn, ".lean")) {
+            MessageBoxA(hwnd, "Please choose a .lean file.", "Unsupported file", MB_ICONWARNING);
+            return;
+        }
+        load_lean_file(hwnd, fn);
+    }
+}
+
+static void open_pdf_file(HWND hwnd)
+{
+    OPENFILENAMEA ofn = {0};
+    char fn[MAX_PATH]  = {0};
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner   = hwnd;
+    ofn.lpstrFilter = "PDF Files\0*.pdf\0All Files\0*.*\0";
+    ofn.lpstrFile   = fn;
+    ofn.nMaxFile    = MAX_PATH;
+    ofn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+    if (GetOpenFileNameA(&ofn)) {
+        if (!has_ext(fn, ".pdf")) {
+            MessageBoxA(hwnd, "Please choose a .pdf file.", "Unsupported file", MB_ICONWARNING);
+            return;
+        }
+
+        strncpy(g_loaded_pdf, fn, MAX_PATH - 1);
+        g_loaded_pdf[MAX_PATH - 1] = '\0';
+        g_view_mode = VIEW_PDF;
+        set_status("Imported PDF:\r\n%s\r\n\r\nThe PDF is opened with your default PDF viewer.\r\nFor true in-window PDF rendering, add PDFium, MuPDF, Poppler, or WebView2.", fn);
+        update_visible_view(hwnd);
+
+        ShellExecuteA(hwnd, "open", fn, NULL, NULL, SW_SHOWNORMAL);
     }
 }
 
@@ -531,22 +687,58 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
             CLEARTYPE_QUALITY, DEFAULT_PITCH, "Segoe UI");
         HFONT old_font = SelectObject(mdc, font);
 
-        if (nnd > 0) {
-            draw_graph(mdc);
-        } else {
-            SetTextColor(mdc, RGB(100,100,120));
-            SetBkMode(mdc, TRANSPARENT);
-            DrawTextA(mdc, "Press  O  to open a .lean file", -1, &cr,
-                      DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-        }
+        /* sidebar */
+        RECT sr = {0, 0, SIDEBAR_W, cr.bottom};
+        HBRUSH sb = CreateSolidBrush(RGB(30, 30, 42));
+        FillRect(mdc, &sr, sb);
+        DeleteObject(sb);
+        HPEN sep = CreatePen(PS_SOLID, 1, RGB(55,55,70));
+        HPEN old_sep = SelectObject(mdc, sep);
+        MoveToEx(mdc, SIDEBAR_W, 0, NULL);
+        LineTo(mdc, SIDEBAR_W, cr.bottom);
+        SelectObject(mdc, old_sep);
+        DeleteObject(sep);
 
-        draw_legend(mdc);
-
-        /* hint */
-        SetTextColor(mdc, RGB(70,70,90));
+        SetTextColor(mdc, RGB(235,235,245));
         SetBkMode(mdc, TRANSPARENT);
-        RECT hr = {cr.right-240, cr.bottom-16, cr.right-4, cr.bottom};
-        DrawTextA(mdc, "O=open   scroll=zoom   drag=pan", -1, &hr, DT_LEFT);
+        RECT title = {BTN_X, 18, SIDEBAR_W - 12, 44};
+        DrawTextA(mdc, "ProofViz", -1, &title, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+
+        SetTextColor(mdc, RGB(180,180,200));
+        RECT ir = {BTN_X, 235, SIDEBAR_W - 14, cr.bottom - 12};
+        DrawTextA(mdc, g_status, -1, &ir, DT_LEFT | DT_WORDBREAK);
+
+        RECT vr = {SIDEBAR_W + 1, 0, cr.right, cr.bottom};
+
+        if (g_view_mode == VIEW_GRAPH) {
+            HRGN clip = CreateRectRgn(vr.left, vr.top, vr.right, vr.bottom);
+            SelectClipRgn(mdc, clip);
+
+            if (nnd > 0) {
+                draw_graph(mdc);
+            } else {
+                SetTextColor(mdc, RGB(100,100,120));
+                SetBkMode(mdc, TRANSPARENT);
+                DrawTextA(mdc, "Open a .lean file to view its proof tree", -1, &vr,
+                          DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+            }
+
+            draw_legend(mdc);
+            SelectClipRgn(mdc, NULL);
+            DeleteObject(clip);
+
+            SetTextColor(mdc, RGB(70,70,90));
+            SetBkMode(mdc, TRANSPARENT);
+            RECT hr = {cr.right-290, cr.bottom-18, cr.right-4, cr.bottom};
+            DrawTextA(mdc, "O=open Lean   T=text   G=graph   P=PDF", -1, &hr, DT_LEFT);
+        } else if (g_view_mode == VIEW_PDF) {
+            SetTextColor(mdc, RGB(170,170,190));
+            SetBkMode(mdc, TRANSPARENT);
+            const char *msg = g_loaded_pdf[0]
+                ? "PDF imported. It has been opened in your default PDF viewer."
+                : "Open a PDF from the sidebar.";
+            DrawTextA(mdc, msg, -1, &vr, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        }
 
         SelectObject(mdc, old_font);
         DeleteObject(font);
@@ -559,15 +751,48 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         return 0;
     }
 
+    case WM_COMMAND:
+        switch (LOWORD(wp)) {
+        case IDC_OPEN_LEAN:
+            open_lean_file(hwnd);
+            return 0;
+        case IDC_VIEW_GRAPH:
+            g_view_mode = VIEW_GRAPH;
+            update_visible_view(hwnd);
+            return 0;
+        case IDC_VIEW_TEXT:
+            if (g_loaded_lean[0]) {
+                g_view_mode = VIEW_TEXT;
+                update_visible_view(hwnd);
+            } else {
+                MessageBoxA(hwnd, "Open a .lean file first.", "No Lean file", MB_ICONINFORMATION);
+            }
+            return 0;
+        case IDC_OPEN_PDF:
+            open_pdf_file(hwnd);
+            return 0;
+        }
+        break;
+
+    case WM_SIZE:
+        resize_children(hwnd);
+        return 0;
+
     case WM_KEYDOWN:
-        if (wp == 'O')        open_file(hwnd);
+        if (wp == 'O')        open_lean_file(hwnd);
+        if (wp == 'T' && g_loaded_lean[0]) { g_view_mode = VIEW_TEXT; update_visible_view(hwnd); }
+        if (wp == 'G')        { g_view_mode = VIEW_GRAPH; update_visible_view(hwnd); }
+        if (wp == 'P')        open_pdf_file(hwnd);
         if (wp == VK_ESCAPE)  PostQuitMessage(0);
         return 0;
 
     case WM_MOUSEWHEEL: {
         /* zoom toward the cursor */
+        if (g_view_mode != VIEW_GRAPH) return 0;
         POINT pt = { GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
         ScreenToClient(hwnd, &pt);
+        if (pt.x < SIDEBAR_W) return 0;
+        pt.x -= SIDEBAR_W;
         float delta = (float)GET_WHEEL_DELTA_WPARAM(wp) / WHEEL_DELTA;
         float old   = g_zoom;
         g_zoom *= (delta > 0) ? 1.12f : (1.0f/1.12f);
@@ -580,10 +805,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     }
 
     case WM_LBUTTONDOWN:
-        g_dragging = TRUE;
-        g_drag_x   = GET_X_LPARAM(lp);
-        g_drag_y   = GET_Y_LPARAM(lp);
-        SetCapture(hwnd);
+        if (g_view_mode == VIEW_GRAPH && GET_X_LPARAM(lp) >= SIDEBAR_W) {
+            g_dragging = TRUE;
+            g_drag_x   = GET_X_LPARAM(lp);
+            g_drag_y   = GET_Y_LPARAM(lp);
+            SetCapture(hwnd);
+        }
         return 0;
 
     case WM_MOUSEMOVE:
@@ -603,6 +830,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         return 0;
 
     case WM_DESTROY:
+        if (g_ui_font) DeleteObject(g_ui_font);
+        if (g_mono_font) DeleteObject(g_mono_font);
         PostQuitMessage(0);
         return 0;
     }
@@ -632,19 +861,64 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
         CW_USEDEFAULT, CW_USEDEFAULT, 1280, 800,
         NULL, NULL, hi, NULL);
 
+    g_ui_font = CreateFontA(
+        16, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        CLEARTYPE_QUALITY, DEFAULT_PITCH, "Segoe UI");
+    g_mono_font = CreateFontA(
+        16, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        CLEARTYPE_QUALITY, FIXED_PITCH, "Consolas");
+
+    g_btn_open_lean = CreateWindowA("BUTTON", "Open Lean file",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        0, 0, 0, 0, g_hwnd, (HMENU)IDC_OPEN_LEAN, hi, NULL);
+    g_btn_view_graph = CreateWindowA("BUTTON", "Proof tree view",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        0, 0, 0, 0, g_hwnd, (HMENU)IDC_VIEW_GRAPH, hi, NULL);
+    g_btn_view_text = CreateWindowA("BUTTON", "Lean text view",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        0, 0, 0, 0, g_hwnd, (HMENU)IDC_VIEW_TEXT, hi, NULL);
+    g_btn_open_pdf = CreateWindowA("BUTTON", "Open PDF",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        0, 0, 0, 0, g_hwnd, (HMENU)IDC_OPEN_PDF, hi, NULL);
+
+    g_text_hwnd = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
+        WS_CHILD | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY |
+        ES_AUTOHSCROLL | ES_AUTOVSCROLL,
+        SIDEBAR_W + 1, 0, 800, 600,
+        g_hwnd, (HMENU)IDC_TEXT_VIEW, hi, NULL);
+
+    SendMessageA(g_btn_open_lean,  WM_SETFONT, (WPARAM)g_ui_font, TRUE);
+    SendMessageA(g_btn_view_graph, WM_SETFONT, (WPARAM)g_ui_font, TRUE);
+    SendMessageA(g_btn_view_text,  WM_SETFONT, (WPARAM)g_ui_font, TRUE);
+    SendMessageA(g_btn_open_pdf,   WM_SETFONT, (WPARAM)g_ui_font, TRUE);
+    SendMessageA(g_text_hwnd,      WM_SETFONT, (WPARAM)g_mono_font, TRUE);
+
+    resize_children(g_hwnd);
+    update_visible_view(g_hwnd);
+
     /* Optional: load file passed on the command line */
     if (cmdline && *cmdline) {
         char path[MAX_PATH];
         strncpy(path, cmdline, MAX_PATH - 1);
+        path[MAX_PATH - 1] = '\0';
         /* strip surrounding quotes if present */
         if (path[0] == '"') {
             memmove(path, path + 1, strlen(path));
             char *end = strchr(path, '"');
             if (end) *end = '\0';
         }
-        parse_file(path);
-        layout();
-        InvalidateRect(g_hwnd, NULL, TRUE);
+        if (has_ext(path, ".lean")) {
+            load_lean_file(g_hwnd, path);
+        } else if (has_ext(path, ".pdf")) {
+            strncpy(g_loaded_pdf, path, MAX_PATH - 1);
+            g_loaded_pdf[MAX_PATH - 1] = '\0';
+            g_view_mode = VIEW_PDF;
+            set_status("Imported PDF:\r\n%s", path);
+            update_visible_view(g_hwnd);
+            ShellExecuteA(g_hwnd, "open", path, NULL, NULL, SW_SHOWNORMAL);
+        }
     }
 
     MSG msg;
