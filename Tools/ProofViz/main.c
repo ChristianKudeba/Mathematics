@@ -1180,7 +1180,7 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
 
     g_hwnd = CreateWindowA(
         "LeanProofViz", "Lean Proof Visualizer",
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+        WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 1280, 800,
         NULL, NULL, hi, NULL);
 
@@ -1228,6 +1228,10 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
 
     resize_children(g_hwnd);
     update_visible_view(g_hwnd);
+
+    /* Open maximized on first launch. */
+    ShowWindow(g_hwnd, SW_MAXIMIZE);
+    UpdateWindow(g_hwnd);
 
     /* Optional: load file passed on the command line */
     if (cmdline && *cmdline) {
