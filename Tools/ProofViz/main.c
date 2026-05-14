@@ -14,6 +14,7 @@
  *   T          — show the loaded .lean file as text
  *   G          — show the proof graph
  *   P          — import and render a PDF inside the window using PDFium
+ *   Convert Paper button — run convert_paper.py on the loaded PDF
  *   drag       — pan the proof graph
  *   scroll     — zoom the proof graph
  *   Esc        — quit
@@ -55,6 +56,7 @@
 #define IDC_TEXT_VIEW  1005
 #define IDC_PDF_PREV   1006
 #define IDC_PDF_NEXT   1007
+#define IDC_CONVERT_PAPER 1008
 
 /* ================================================================
    Node kinds and their colours
@@ -747,7 +749,7 @@ static void draw_graph(HDC dc)
         draw_node(dc, i);
 }
 
-static void draw_legend(HDC dc)
+static void draw_legend(HDC dc, int left, int top)
 {
     struct { const char *label; COLORREF col; } entries[] = {
         {"axiom",        KIND_COL[NK_AXIOM]},
@@ -760,7 +762,7 @@ static void draw_legend(HDC dc)
     int n = sizeof(entries) / sizeof(entries[0]);
 
     for (int i = 0; i < n; i++) {
-        int x = 10, y = 10 + i * 20;
+        int x = left, y = top + i * 20;
         HBRUSH b = CreateSolidBrush(entries[i].col);
         HPEN   p = CreatePen(PS_SOLID, 1, RGB(200,200,200));
         SelectObject(dc, b); SelectObject(dc, p);
@@ -784,6 +786,7 @@ static HWND g_btn_view_text;
 static HWND g_btn_open_pdf;
 static HWND g_btn_pdf_prev;
 static HWND g_btn_pdf_next;
+static HWND g_btn_convert_paper;
 static HFONT g_ui_font;
 static HFONT g_mono_font;
 
@@ -851,6 +854,7 @@ static void resize_children(HWND hwnd)
     MoveWindow(g_btn_open_pdf,   BTN_X, 184, BTN_W, BTN_H, TRUE);
     MoveWindow(g_btn_pdf_prev,   BTN_X, 226, 90, BTN_H, TRUE);
     MoveWindow(g_btn_pdf_next,   BTN_X + 100, 226, 90, BTN_H, TRUE);
+    MoveWindow(g_btn_convert_paper, BTN_X, 268, BTN_W, BTN_H, TRUE);
 
     MoveWindow(g_text_hwnd, right_x, 0, right_w, cr.bottom, TRUE);
 }
@@ -953,6 +957,128 @@ static void open_pdf_file(HWND hwnd)
     }
 }
 
+
+static void make_converted_lean_path(const char *pdf_path, char *out_path, size_t out_size)
+{
+    strncpy(out_path, pdf_path, out_size - 1);
+    out_path[out_size - 1] = '\0';
+
+    char *slash1 = strrchr(out_path, '\\');
+    char *slash2 = strrchr(out_path, '/');
+    char *slash = slash1 > slash2 ? slash1 : slash2;
+    char *dot = strrchr(out_path, '.');
+    if (!dot || (slash && dot < slash)) {
+        strncat(out_path, "_converted.lean", out_size - strlen(out_path) - 1);
+    } else {
+        *dot = '\0';
+        strncat(out_path, "_converted.lean", out_size - strlen(out_path) - 1);
+    }
+}
+
+static void get_exe_directory(char *dir, size_t dir_size)
+{
+    DWORD n = GetModuleFileNameA(NULL, dir, (DWORD)dir_size);
+    if (n == 0 || n >= dir_size) {
+        strncpy(dir, ".", dir_size - 1);
+        dir[dir_size - 1] = '\0';
+        return;
+    }
+
+    char *slash1 = strrchr(dir, '\\');
+    char *slash2 = strrchr(dir, '/');
+    char *slash = slash1 > slash2 ? slash1 : slash2;
+    if (slash) *slash = '\0';
+}
+
+static int run_command_wait(HWND hwnd, const char *cmdline, DWORD *exit_code)
+{
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    char mutable_cmd[4096];
+
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+    si.cb = sizeof(si);
+
+    strncpy(mutable_cmd, cmdline, sizeof(mutable_cmd) - 1);
+    mutable_cmd[sizeof(mutable_cmd) - 1] = '\0';
+
+    if (!CreateProcessA(NULL, mutable_cmd, NULL, NULL, FALSE,
+                        CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+        char msg[512];
+        snprintf(msg, sizeof(msg),
+                 "Could not start the conversion script.\n\nCommand:\n%s\n\nWindows error: %lu",
+                 cmdline, GetLastError());
+        MessageBoxA(hwnd, msg, "Convert Paper", MB_ICONERROR);
+        return 0;
+    }
+
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    if (exit_code) GetExitCodeProcess(pi.hProcess, exit_code);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 1;
+}
+
+static void convert_current_pdf(HWND hwnd)
+{
+    if (!g_loaded_pdf[0]) {
+        MessageBoxA(hwnd, "Open a PDF first, then click Convert Paper.",
+                    "No PDF loaded", MB_ICONINFORMATION);
+        return;
+    }
+
+    char exe_dir[MAX_PATH];
+    char script[MAX_PATH];
+    char out_lean[MAX_PATH];
+    char cmd[4096];
+    DWORD exit_code = 1;
+
+    get_exe_directory(exe_dir, sizeof(exe_dir));
+    snprintf(script, sizeof(script), "%s\\convert_paper.py", exe_dir);
+    make_converted_lean_path(g_loaded_pdf, out_lean, sizeof(out_lean));
+
+    DWORD attrs = GetFileAttributesA(script);
+    if (attrs == INVALID_FILE_ATTRIBUTES || (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+        char msg[1024];
+        snprintf(msg, sizeof(msg),
+                 "Could not find the conversion script:\n\n%s\n\n"
+                 "Put convert_paper.py in the same folder as proof_viz.exe.", script);
+        MessageBoxA(hwnd, msg, "Convert Paper", MB_ICONERROR);
+        return;
+    }
+
+    snprintf(cmd, sizeof(cmd),
+             "cmd.exe /C py -3 \"%s\" \"%s\" \"%s\" || python \"%s\" \"%s\" \"%s\"",
+             script, g_loaded_pdf, out_lean,
+             script, g_loaded_pdf, out_lean);
+
+    set_status("Converting PDF to Lean...\r\n%s\r\n\r\nOutput:\r\n%s", g_loaded_pdf, out_lean);
+    InvalidateRect(hwnd, NULL, TRUE);
+
+    if (!run_command_wait(hwnd, cmd, &exit_code)) return;
+
+    if (exit_code != 0) {
+        char msg[512];
+        snprintf(msg, sizeof(msg),
+                 "The conversion script exited with code %lu.\n\nCheck the script window for details.",
+                 exit_code);
+        MessageBoxA(hwnd, msg, "Convert Paper failed", MB_ICONERROR);
+        return;
+    }
+
+    if (GetFileAttributesA(out_lean) == INVALID_FILE_ATTRIBUTES) {
+        MessageBoxA(hwnd,
+                    "The conversion script finished, but the expected .lean output file was not created.",
+                    "Convert Paper", MB_ICONERROR);
+        return;
+    }
+
+    load_lean_file(hwnd, out_lean);
+    MessageBoxA(hwnd, "Conversion complete. The generated .lean file has been loaded.",
+                "Convert Paper", MB_ICONINFORMATION);
+}
+
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch (msg) {
@@ -996,7 +1122,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         DrawTextA(mdc, "ProofViz", -1, &title, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 
         SetTextColor(mdc, RGB(180,180,200));
-        RECT ir = {BTN_X, 275, SIDEBAR_W - 14, cr.bottom - 12};
+        RECT ir = {BTN_X, 315, SIDEBAR_W - 14, cr.bottom - 12};
         DrawTextA(mdc, g_status, -1, &ir, DT_LEFT | DT_WORDBREAK);
 
         RECT vr = {SIDEBAR_W + 1, 0, cr.right, cr.bottom};
@@ -1014,7 +1140,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
                           DT_CENTER | DT_VCENTER | DT_SINGLELINE);
             }
 
-            draw_legend(mdc);
+            draw_legend(mdc, vr.left + 18, vr.top + 18);
             SelectClipRgn(mdc, NULL);
             DeleteObject(clip);
 
@@ -1066,6 +1192,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
             return 0;
         case IDC_PDF_NEXT:
             if (g_view_mode == VIEW_PDF) pdf_change_page(hwnd, 1);
+            return 0;
+        case IDC_CONVERT_PAPER:
+            convert_current_pdf(hwnd);
             return 0;
         }
         break;
@@ -1211,6 +1340,9 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
     g_btn_pdf_next = CreateWindowA("BUTTON", "Next",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
         0, 0, 0, 0, g_hwnd, (HMENU)IDC_PDF_NEXT, hi, NULL);
+    g_btn_convert_paper = CreateWindowA("BUTTON", "Convert Paper",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        0, 0, 0, 0, g_hwnd, (HMENU)IDC_CONVERT_PAPER, hi, NULL);
 
     g_text_hwnd = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
         WS_CHILD | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY |
@@ -1224,6 +1356,7 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
     SendMessageA(g_btn_open_pdf,   WM_SETFONT, (WPARAM)g_ui_font, TRUE);
     SendMessageA(g_btn_pdf_prev,   WM_SETFONT, (WPARAM)g_ui_font, TRUE);
     SendMessageA(g_btn_pdf_next,   WM_SETFONT, (WPARAM)g_ui_font, TRUE);
+    SendMessageA(g_btn_convert_paper, WM_SETFONT, (WPARAM)g_ui_font, TRUE);
     SendMessageA(g_text_hwnd,      WM_SETFONT, (WPARAM)g_mono_font, TRUE);
 
     resize_children(g_hwnd);
