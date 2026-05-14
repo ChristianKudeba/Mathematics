@@ -29,7 +29,12 @@
       "PowerShell(Get-Command *)",
       "Bash(start proof_viz.exe \"..\\\\..\\\\Mathematics\\\\ShakovDivisors.lean\")",
       "Bash(start proof_viz.exe \"..\\\\..\\\\Mathematics\\\\Basic.lean\")",
-      "Bash(start proof_viz.exe)"
+      "Bash(start proof_viz.exe)",
+      "Bash(cmd *)",
+      "PowerShell($f = Get-Item \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Tools\\\\ProofViz\\\\proof_viz.exe\"; Write-Host \"Size: $\\($f.Length\\) bytes, Modified: $\\($f.LastWriteTime\\)\")",
+      "Bash(Start-Process *)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Tools\\\\ProofViz\\\\proof_viz.exe\")",
+      "Bash(Test-Path *)"
     ]
   }
 }
