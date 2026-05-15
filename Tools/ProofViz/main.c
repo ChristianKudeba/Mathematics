@@ -67,6 +67,9 @@
 #define CV_LINE_H   18    /* pixels per line in code view */
 #define CV_LINENO_W 52    /* width of line-number gutter  */
 
+#define NODE_PANEL_W 380  /* width of the node source panel */
+#define NP_HEADER_H   40  /* height of node panel header bar */
+
 /* Dynamic sidebar width */
 #define SW() (g_sidebar_collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_W)
 
@@ -102,6 +105,7 @@ typedef struct {
     NodeKind kind;
     int      has_sorry;
     int      layer, slot, wx, wy;
+    int      line_start;  /* 1-based source line; 0 = unknown (synthetic node) */
 } Node;
 
 typedef struct { int u, v; } Edge;
@@ -180,6 +184,16 @@ static BOOL g_hover_text    = FALSE;
 /* Sidebar collapse state */
 static BOOL g_sidebar_collapsed  = FALSE;
 static RECT g_sidebar_toggle_btn = {0};
+
+/* Node source panel */
+static HWND     g_np_hwnd        = NULL;
+static WCHAR  **g_np_lines       = NULL;
+static int      g_np_nlines      = 0;
+static int      g_np_scroll      = 0;
+static int      g_sel_node       = -1;
+static char     g_np_name[NAME_LEN] = {0};
+static NodeKind g_np_kind        = NK_DEF;
+static RECT     g_np_close_rect  = {0};
 
 /* ================================================================
    PDFium dynamic loader
@@ -457,17 +471,23 @@ static void parse_file(LeanDoc *doc, const char *path)
     for(int i=0;i<N_CORE_AXIOMS;i++) node_add(doc,CORE_AXIOMS[i],NK_AXIOM);
     FILE *f=fopen(path,"r"); if(!f) return;
     char line[4096];
-    int in_block=0;
+    int in_block=0, line_num=0;
     while(fgets(line,sizeof(line),f)){
+        line_num++;
         rtrim(line); ltrim(line);
         if(in_block){if(strstr(line,"-/"))in_block=0;continue;}
         if(line[0]=='/'&&line[1]=='-'){if(!strstr(line,"-/"))in_block=1;continue;}
         if(line[0]=='-'&&line[1]=='-')continue;
         if(line[0]=='/'&&line[1]=='*')continue;
-        if(strncmp(line,"import ",7)==0){char nm[NAME_LEN];lex_ident(line+7,nm,NAME_LEN);if(nm[0])node_add(doc,nm,NK_IMPORT);continue;}
+        if(strncmp(line,"import ",7)==0){
+            char nm[NAME_LEN];lex_ident(line+7,nm,NAME_LEN);
+            if(nm[0]){node_add(doc,nm,NK_IMPORT);int idx=node_find(doc,nm);if(idx>=0)doc->nd[idx].line_start=line_num;}
+            continue;
+        }
         const char *p=skip_modifiers(line);NodeKind k;int kl=decl_keyword(p,&k);
         if(!kl)continue;
-        char nm[NAME_LEN];lex_ident(p+kl,nm,NAME_LEN);if(nm[0])node_add(doc,nm,k);
+        char nm[NAME_LEN];lex_ident(p+kl,nm,NAME_LEN);
+        if(nm[0]){node_add(doc,nm,k);int idx=node_find(doc,nm);if(idx>=0)doc->nd[idx].line_start=line_num;}
     }
     rewind(f);int cur=-1;in_block=0;
     while(fgets(line,sizeof(line),f)){
@@ -531,6 +551,58 @@ static void w2s(LeanDoc *doc, int wx, int wy, int *sx, int *sy)
     *sy=(int)(wy*doc->zoom)+doc->pan_y;
 }
 
+static char *extract_node_source(LeanDoc *doc, int node_idx)
+{
+    if(!doc->text||node_idx<0||node_idx>=doc->nnd) return NULL;
+    int target=doc->nd[node_idx].line_start;
+    if(target<=0) return NULL;
+    const char *p=doc->text;
+    for(int l=1;l<target&&*p;p++) if(*p=='\n') l++;
+    const char *src_start=p;
+    const char *src_end=p;
+    const char *q=p;
+    int first=1;
+    while(*q){
+        const char *ls=q;
+        while(*q&&*q!='\n') q++;
+        if(*q=='\n') q++;
+        if(!first&&*ls!=' '&&*ls!='\t'&&*ls!='\0'&&*ls!='\n'){
+            char tmp[512];int ll=(int)(q-ls);if(ll>511)ll=511;
+            memcpy(tmp,ls,ll);tmp[ll]='\0';
+            char *nl2=strchr(tmp,'\n');if(nl2)*nl2='\0';
+            char *cr2=strchr(tmp,'\r');if(cr2)*cr2='\0';
+            const char *sp=skip_modifiers(tmp);
+            NodeKind kk;
+            if(decl_keyword(sp,&kk)){src_end=ls;break;}
+            if(strncmp(tmp,"namespace ",10)==0||strncmp(tmp,"section ",8)==0||
+               strncmp(tmp,"end ",4)==0||strcmp(tmp,"end")==0){src_end=ls;break;}
+        }
+        src_end=q;
+        first=0;
+    }
+    int len=(int)(src_end-src_start);
+    while(len>0&&(src_start[len-1]=='\n'||src_start[len-1]=='\r'||
+                  src_start[len-1]==' '||src_start[len-1]=='\t')) len--;
+    if(len<=0){
+        const char fb[]="(source not available)";
+        char *r2=(char*)malloc(sizeof(fb));memcpy(r2,fb,sizeof(fb));return r2;
+    }
+    char *r=(char*)malloc(len+1);
+    memcpy(r,src_start,len);r[len]='\0';
+    return r;
+}
+
+static int node_hit_test(LeanDoc *doc, int sx, int sy)
+{
+    for(int i=0;i<doc->nnd;i++){
+        int x1,y1,x2,y2;
+        w2s(doc,doc->nd[i].wx,        doc->nd[i].wy,        &x1,&y1);
+        w2s(doc,doc->nd[i].wx+NODE_W, doc->nd[i].wy+NODE_H, &x2,&y2);
+        if(sx>=x1&&sx<x2&&sy>=y1&&sy<y2) return i;
+    }
+    return -1;
+}
+
 static void draw_arrow(HDC dc,int x1,int y1,int x2,int y2,COLORREF col)
 {
     HPEN pen=CreatePen(PS_SOLID,1,col),old=(HPEN)SelectObject(dc,pen);
@@ -565,6 +637,15 @@ static void draw_graph(HDC dc, LeanDoc *doc)
         draw_arrow(dc,tx,ty,hx,hy,RGB(120,120,140));
     }
     for(int i=0;i<doc->nnd;i++) draw_node(dc,doc,i);
+    if(g_sel_node>=0&&g_sel_node<doc->nnd){
+        int sx2,sy2;w2s(doc,doc->nd[g_sel_node].wx,doc->nd[g_sel_node].wy,&sx2,&sy2);
+        int nw=(int)(NODE_W*doc->zoom),nh=(int)(NODE_H*doc->zoom);
+        HPEN hlp=CreatePen(PS_SOLID,2,RGB(255,255,255));
+        HPEN ohlp=(HPEN)SelectObject(dc,hlp);
+        SelectObject(dc,GetStockObject(NULL_BRUSH));
+        RoundRect(dc,sx2-2,sy2-2,sx2+nw+2,sy2+nh+2,12,12);
+        SelectObject(dc,ohlp);DeleteObject(hlp);
+    }
 }
 
 static void draw_legend(HDC dc, int left, int top)
@@ -1106,6 +1187,179 @@ static LRESULT CALLBACK CodeViewWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
     return DefWindowProcW(hwnd,msg,wp,lp);
 }
 
+static void np_free(void)
+{
+    if(!g_np_lines) return;
+    for(int i=0;i<g_np_nlines;i++) free(g_np_lines[i]);
+    free(g_np_lines);
+    g_np_lines=NULL; g_np_nlines=0;
+}
+
+static void np_load(const char *utf8)
+{
+    np_free();
+    if(!utf8||!*utf8) return;
+    int wlen=MultiByteToWideChar(CP_UTF8,0,utf8,-1,NULL,0);
+    WCHAR *wide=(WCHAR*)malloc(wlen*sizeof(WCHAR));
+    MultiByteToWideChar(CP_UTF8,0,utf8,-1,wide,wlen);
+    int n=1;
+    for(WCHAR *q=wide;*q;q++) if(*q==L'\n') n++;
+    g_np_lines=(WCHAR**)malloc(n*sizeof(WCHAR*));
+    g_np_nlines=0;
+    WCHAR *start=wide;
+    for(WCHAR *q=wide;;q++){
+        if(*q==L'\n'||*q==L'\0'){
+            int len=(int)(q-start);
+            if(len>0&&start[len-1]==L'\r') len--;
+            WCHAR *line=(WCHAR*)malloc((len+1)*sizeof(WCHAR));
+            if(len) wcsncpy(line,start,len);
+            line[len]=L'\0';
+            g_np_lines[g_np_nlines++]=line;
+            if(*q==L'\0') break;
+            start=q+1;
+        }
+    }
+    free(wide);
+    g_np_scroll=0;
+    if(g_np_hwnd){
+        RECT cr2;GetClientRect(g_np_hwnd,&cr2);
+        int code_h=cr2.bottom-NP_HEADER_H;if(code_h<1)code_h=1;
+        int vis=code_h/CV_LINE_H;
+        SCROLLINFO si={sizeof(si),SIF_RANGE|SIF_PAGE|SIF_POS,0,
+                       g_np_nlines>0?g_np_nlines-1:0,(UINT)vis,0,0};
+        SetScrollInfo(g_np_hwnd,SB_VERT,&si,TRUE);
+        InvalidateRect(g_np_hwnd,NULL,TRUE);
+    }
+}
+
+static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
+{
+    switch(msg){
+    case WM_PAINT:{
+        PAINTSTRUCT ps;HDC hdc=BeginPaint(hwnd,&ps);
+        RECT cr;GetClientRect(hwnd,&cr);
+        HDC mdc=CreateCompatibleDC(hdc);
+        HBITMAP bmp=CreateCompatibleBitmap(hdc,cr.right,cr.bottom);
+        SelectObject(mdc,bmp);
+        /* Header */
+        RECT hdr={0,0,cr.right,NP_HEADER_H};
+        HBRUSH hbr=CreateSolidBrush(RGB(32,34,50));FillRect(mdc,&hdr,hbr);DeleteObject(hbr);
+        HPEN lp2=CreatePen(PS_SOLID,1,RGB(55,60,90));
+        HPEN olp=(HPEN)SelectObject(mdc,lp2);
+        MoveToEx(mdc,0,NP_HEADER_H-1,NULL);LineTo(mdc,cr.right,NP_HEADER_H-1);
+        SelectObject(mdc,olp);DeleteObject(lp2);
+        /* Kind badge */
+        int bx=12,by=(NP_HEADER_H-10)/2;
+        HBRUSH kb=CreateSolidBrush(KIND_COL[g_np_kind]);
+        HPEN   kp=CreatePen(PS_SOLID,0,KIND_COL[g_np_kind]);
+        SelectObject(mdc,kb);SelectObject(mdc,kp);
+        RoundRect(mdc,bx,by,bx+10,by+10,3,3);
+        DeleteObject(kb);DeleteObject(kp);
+        /* Node name */
+        HFONT nfont=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,
+                                OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+                                CLEARTYPE_QUALITY,DEFAULT_PITCH,"Segoe UI");
+        HFONT onf=(HFONT)SelectObject(mdc,nfont);
+        SetTextColor(mdc,RGB(230,230,240));SetBkMode(mdc,TRANSPARENT);
+        RECT tnr={bx+16,0,cr.right-30,NP_HEADER_H};
+        DrawTextA(mdc,g_np_name,-1,&tnr,DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_END_ELLIPSIS);
+        /* Close × */
+        int cx2=cr.right-24,cy2=4;
+        g_np_close_rect=(RECT){cx2,cy2,cx2+20,cy2+20};
+        SetTextColor(mdc,RGB(160,165,195));
+        RECT xr={cx2,cy2,cx2+20,cy2+20};
+        DrawTextA(mdc,"x",-1,&xr,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+        SelectObject(mdc,onf);DeleteObject(nfont);
+        /* Code area */
+        RECT code_rc={0,NP_HEADER_H,cr.right,cr.bottom};
+        HBRUSH cbr=CreateSolidBrush(RGB(30,30,30));FillRect(mdc,&code_rc,cbr);DeleteObject(cbr);
+        RECT gutter={0,NP_HEADER_H,CV_LINENO_W,cr.bottom};
+        HBRUSH gb=CreateSolidBrush(RGB(24,24,24));FillRect(mdc,&gutter,gb);DeleteObject(gb);
+        HPEN gsep=CreatePen(PS_SOLID,1,RGB(50,50,50));
+        HPEN ogsep=(HPEN)SelectObject(mdc,gsep);
+        MoveToEx(mdc,CV_LINENO_W,NP_HEADER_H,NULL);LineTo(mdc,CV_LINENO_W,cr.bottom);
+        SelectObject(mdc,ogsep);DeleteObject(gsep);
+        HFONT cfont=CreateFontA(15,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,
+                                OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+                                CLEARTYPE_QUALITY,FIXED_PITCH,"Consolas");
+        HFONT ocf=(HFONT)SelectObject(mdc,cfont);
+        SetBkMode(mdc,TRANSPARENT);
+        int code_h=cr.bottom-NP_HEADER_H;
+        int vis2=code_h/CV_LINE_H+2;
+        int end=g_np_scroll+vis2;
+        if(end>g_np_nlines) end=g_np_nlines;
+        char lnbuf[12];
+        for(int i=g_np_scroll;i<end;i++){
+            int y=NP_HEADER_H+(i-g_np_scroll)*CV_LINE_H+1;
+            sprintf(lnbuf,"%d",i+1);
+            SetTextColor(mdc,RGB(90,90,90));
+            RECT lnr={2,y,CV_LINENO_W-6,y+CV_LINE_H};
+            DrawTextA(mdc,lnbuf,-1,&lnr,DT_RIGHT|DT_TOP|DT_SINGLELINE);
+            if(g_np_lines&&i<g_np_nlines){
+                SetTextColor(mdc,RGB(212,212,212));
+                TextOutW(mdc,CV_LINENO_W+6,y,g_np_lines[i],(int)wcslen(g_np_lines[i]));
+            }
+        }
+        SelectObject(mdc,ocf);DeleteObject(cfont);
+        BitBlt(hdc,0,0,cr.right,cr.bottom,mdc,0,0,SRCCOPY);
+        DeleteObject(bmp);DeleteDC(mdc);
+        EndPaint(hwnd,&ps);
+        return 0;
+    }
+    case WM_LBUTTONDOWN:{
+        int mx2=GET_X_LPARAM(lp),my2=GET_Y_LPARAM(lp);
+        if(mx2>=g_np_close_rect.left&&mx2<g_np_close_rect.right&&
+           my2>=g_np_close_rect.top&&my2<g_np_close_rect.bottom){
+            g_sel_node=-1;
+            ShowWindow(hwnd,SW_HIDE);
+            InvalidateRect(GetParent(hwnd),NULL,TRUE);
+        }
+        return 0;
+    }
+    case WM_SIZE:{
+        RECT cr;GetClientRect(hwnd,&cr);
+        int code_h=cr.bottom-NP_HEADER_H;if(code_h<1)code_h=1;
+        int vis=code_h/CV_LINE_H;
+        SCROLLINFO si={sizeof(si),SIF_RANGE|SIF_PAGE,0,
+                       g_np_nlines>0?g_np_nlines-1:0,(UINT)vis,0,0};
+        SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
+        return 0;
+    }
+    case WM_VSCROLL:{
+        SCROLLINFO si={sizeof(si),SIF_ALL};
+        GetScrollInfo(hwnd,SB_VERT,&si);
+        int pos=si.nPos;
+        switch(LOWORD(wp)){
+        case SB_TOP:        pos=0;break;
+        case SB_BOTTOM:     pos=si.nMax;break;
+        case SB_LINEUP:     pos--;break;
+        case SB_LINEDOWN:   pos++;break;
+        case SB_PAGEUP:     pos-=(int)si.nPage;break;
+        case SB_PAGEDOWN:   pos+=(int)si.nPage;break;
+        case SB_THUMBTRACK: pos=si.nTrackPos;break;
+        }
+        if(pos<0)pos=0;if(pos>si.nMax)pos=si.nMax;
+        g_np_scroll=pos;
+        si.fMask=SIF_POS;si.nPos=pos;
+        SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
+        InvalidateRect(hwnd,NULL,FALSE);
+        return 0;
+    }
+    case WM_MOUSEWHEEL:{
+        int lines=(GET_WHEEL_DELTA_WPARAM(wp)>0)?-3:3;
+        g_np_scroll+=lines;
+        if(g_np_scroll<0)g_np_scroll=0;
+        int maxs=g_np_nlines-1;if(maxs<0)maxs=0;
+        if(g_np_scroll>maxs)g_np_scroll=maxs;
+        SCROLLINFO si={sizeof(si),SIF_POS,0,0,0,g_np_scroll,0};
+        SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
+        InvalidateRect(hwnd,NULL,FALSE);
+        return 0;
+    }
+    }
+    return DefWindowProcW(hwnd,msg,wp,lp);
+}
+
 /* ================================================================
    Close file helpers
    ================================================================ */
@@ -1121,7 +1375,11 @@ static void close_lean(HWND hwnd, int idx)
         else if(g_pdf[j].lean_idx>idx)   g_pdf[j].lean_idx--;
     }
     if(g_sel_kind==SEL_LEAN){
-        if(g_sel_idx==idx){g_sel_kind=SEL_NONE;g_sel_idx=-1;ShowWindow(g_cv_hwnd,SW_HIDE);}
+        if(g_sel_idx==idx){
+            g_sel_kind=SEL_NONE;g_sel_idx=-1;
+            ShowWindow(g_cv_hwnd,SW_HIDE);
+            if(g_sel_node>=0){g_sel_node=-1;if(g_np_hwnd)ShowWindow(g_np_hwnd,SW_HIDE);}
+        }
         else if(g_sel_idx>idx) g_sel_idx--;
     }
     InvalidateRect(hwnd,NULL,TRUE);
@@ -1140,12 +1398,39 @@ static void close_pdf(HWND hwnd, int idx)
     InvalidateRect(hwnd,NULL,TRUE);
 }
 
+static void close_node_panel(HWND hwnd)
+{
+    g_sel_node=-1;
+    if(g_np_hwnd) ShowWindow(g_np_hwnd,SW_HIDE);
+    InvalidateRect(hwnd,NULL,TRUE);
+}
+
+static void open_node_panel(HWND hwnd, LeanDoc *doc, int node_idx)
+{
+    g_sel_node=node_idx;
+    strncpy(g_np_name,doc->nd[node_idx].name,NAME_LEN-1);
+    g_np_kind=doc->nd[node_idx].kind;
+    char *src=extract_node_source(doc,node_idx);
+    np_load(src?src:"(source not available)");
+    free(src);
+    if(!g_np_hwnd) return;
+    RECT cr;GetClientRect(hwnd,&cr);
+    int pw=NODE_PANEL_W;
+    int max_pw=cr.right-SW()-40;if(pw>max_pw)pw=max_pw;
+    if(pw<100)pw=100;
+    MoveWindow(g_np_hwnd,cr.right-pw,0,pw,cr.bottom,TRUE);
+    ShowWindow(g_np_hwnd,SW_SHOW);
+    InvalidateRect(g_np_hwnd,NULL,TRUE);
+    InvalidateRect(hwnd,NULL,FALSE);
+}
+
 /* ================================================================
    Selection
    ================================================================ */
 
 static void select_lean(HWND hwnd, int idx)
 {
+    if(g_sel_node>=0) close_node_panel(hwnd);
     g_sel_kind=SEL_LEAN;g_sel_idx=idx;
     LeanDoc *doc=&g_lean[idx];
     if(doc->view_mode==VIEW_TEXT){
@@ -1159,6 +1444,7 @@ static void select_lean(HWND hwnd, int idx)
 
 static void select_pdf(HWND hwnd, int idx)
 {
+    if(g_sel_node>=0) close_node_panel(hwnd);
     g_sel_kind=SEL_PDF;g_sel_idx=idx;
     ShowWindow(g_cv_hwnd,SW_HIDE);
     InvalidateRect(hwnd,NULL,TRUE);
@@ -1279,6 +1565,12 @@ static void resize_children(HWND hwnd)
     ShowWindow(g_btn_open_lean,vis);
     ShowWindow(g_btn_open_pdf, vis);
     MoveWindow(g_cv_hwnd,rx,TEXT_TOP_OFFSET,rw,cr.bottom-TEXT_TOP_OFFSET,TRUE);
+    if(g_np_hwnd&&IsWindowVisible(g_np_hwnd)){
+        int pw=NODE_PANEL_W;
+        int max_pw=cr.right-rx-20;if(pw>max_pw)pw=max_pw;
+        if(pw<100)pw=100;
+        MoveWindow(g_np_hwnd,cr.right-pw,0,pw,cr.bottom,TRUE);
+    }
 }
 
 /* ================================================================
@@ -1422,6 +1714,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         if(wp=='O') open_lean_file(hwnd);
         if(wp=='P') open_pdf_file(hwnd);
         if(wp=='T'&&g_sel_kind==SEL_LEAN&&g_sel_idx>=0){
+            if(g_sel_node>=0) close_node_panel(hwnd);
             LeanDoc *doc=&g_lean[g_sel_idx];
             doc->view_mode=VIEW_TEXT;
             code_view_load(doc->text?doc->text:"");
@@ -1494,6 +1787,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
                     ShowWindow(g_cv_hwnd,SW_HIDE);
                     InvalidateRect(hwnd,NULL,TRUE);return 0;}
                 if(pt_in_rect(mx,my,g_ovl_text)){
+                    if(g_sel_node>=0) close_node_panel(hwnd);
                     doc->view_mode=VIEW_TEXT;
                     code_view_load(doc->text?doc->text:"");
                     ShowWindow(g_cv_hwnd,SW_SHOW);
@@ -1539,6 +1833,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
         /* ---- Main view drag (graph or PDF pan) ---- */
         if(g_sel_kind==SEL_LEAN&&g_sel_idx>=0&&g_lean[g_sel_idx].view_mode==VIEW_GRAPH){
+            LeanDoc *gdoc=&g_lean[g_sel_idx];
+            int hit=node_hit_test(gdoc,mx,my);
+            if(hit>=0){open_node_panel(hwnd,gdoc,hit);return 0;}
+            if(g_sel_node>=0) close_node_panel(hwnd);
             g_graph_dragging=TRUE;g_graph_drag_x=mx;g_graph_drag_y=my;SetCapture(hwnd);}
         else if(g_sel_kind==SEL_PDF&&g_sel_idx>=0&&g_pdf[g_sel_idx].pixels){
             PdfDoc *pdf=&g_pdf[g_sel_idx];
@@ -1623,6 +1921,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
     case WM_DESTROY:
         code_view_free();
+        np_free();
         for(int i=0;i<g_npdf;i++) pdf_close(&g_pdf[i]);
         for(int i=0;i<g_nlean;i++) free(g_lean[i].text);
         if(g_pdfium.initialized&&g_pdfium.DestroyLibrary) g_pdfium.DestroyLibrary();
@@ -1649,6 +1948,14 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
     cv_wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);
     cv_wc.lpszClassName=L"ProofVizCode";
     RegisterClassW(&cv_wc);
+
+    WNDCLASSW np_wc={0};
+    np_wc.style=CS_HREDRAW|CS_VREDRAW;
+    np_wc.lpfnWndProc=NodePanelWndProc;
+    np_wc.hInstance=hi;
+    np_wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);
+    np_wc.lpszClassName=L"ProofVizNodePanel";
+    RegisterClassW(&np_wc);
 
     WNDCLASSA wc={0};
     wc.style=CS_HREDRAW|CS_VREDRAW;wc.lpfnWndProc=WndProc;
@@ -1678,6 +1985,10 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hpi, LPSTR cmdline, int show)
         WS_CHILD|WS_VSCROLL,
         SIDEBAR_W+1,TEXT_TOP_OFFSET,800,600,
         g_hwnd,(HMENU)IDC_TEXT_VIEW,hi,NULL);
+    g_np_hwnd=CreateWindowExW(0,L"ProofVizNodePanel",L"",
+        WS_CHILD|WS_VSCROLL,
+        0,0,NODE_PANEL_W,600,
+        g_hwnd,NULL,hi,NULL);
 
     SendMessageA(g_btn_open_lean,WM_SETFONT,(WPARAM)g_ui_font,TRUE);
     SendMessageA(g_btn_open_pdf, WM_SETFONT,(WPARAM)g_ui_font,TRUE);
