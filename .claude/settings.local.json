@@ -34,7 +34,8 @@
       "PowerShell($f = Get-Item \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Tools\\\\ProofViz\\\\proof_viz.exe\"; Write-Host \"Size: $\\($f.Length\\) bytes, Modified: $\\($f.LastWriteTime\\)\")",
       "Bash(Start-Process *)",
       "PowerShell(Start-Process \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Tools\\\\ProofViz\\\\proof_viz.exe\")",
-      "Bash(Test-Path *)"
+      "Bash(Test-Path *)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Tools\\\\ProofViz\\\\proof_viz.exe\" -ArgumentList '\"C:\\\\Users\\\\Christian\\\\source\\\\repos\\\\Mathematics\\\\Miscellaneous\\\\ShakovPaper.pdf\"')"
     ]
   }
 }

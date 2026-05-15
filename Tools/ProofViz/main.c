@@ -535,8 +535,11 @@ static void parse_file(const char *path)
     char line[4096];
 
     /* ---- Pass 1: collect all declaration names ---- */
+    int in_block = 0;
     while (fgets(line, sizeof(line), f)) {
         rtrim(line); ltrim(line);
+        if (in_block) { if (strstr(line, "-/")) in_block = 0; continue; }
+        if (line[0]=='/' && line[1]=='-') { if (!strstr(line, "-/")) in_block = 1; continue; }
         if (line[0]=='-' && line[1]=='-') continue;   /* line comment */
         if (line[0]=='/' && line[1]=='*') continue;   /* block comment start */
 
@@ -561,9 +564,12 @@ static void parse_file(const char *path)
     /* ---- Pass 2: find dependencies by scanning bodies ---- */
     rewind(f);
     int cur = -1;
+    in_block = 0;
 
     while (fgets(line, sizeof(line), f)) {
         rtrim(line); ltrim(line);
+        if (in_block) { if (strstr(line, "-/")) in_block = 0; continue; }
+        if (line[0]=='/' && line[1]=='-') { if (!strstr(line, "-/")) in_block = 1; continue; }
         if (line[0]=='-' && line[1]=='-') continue;
 
         /* Detect the start of a new declaration */

@@ -21,6 +21,8 @@ where `s : ℕ → ℤ` is the 2-regular sequence A383066 satisfying:
 with s(1) = 0, s(2) = 1, s(3) = 1.
 -/
 
+set_option linter.style.nativeDecide false
+
 open BigOperators Nat
 
 namespace Shakov
@@ -58,9 +60,9 @@ decreasing_by all_goals simp_wf; omega
 /-! ### Initial values -/
 
 -- Well-founded defs don't reduce in the kernel, so rfl fails; use native_decide.
-@[simp] theorem s_zero  : s 0 = 0 := by native_decide
-@[simp] theorem s_one   : s 1 = 0 := by native_decide
-@[simp] theorem s_two   : s 2 = 1 := by native_decide
+@[simp] theorem s_zero : s 0 = 0 := by native_decide
+@[simp] theorem s_one : s 1 = 0 := by native_decide
+@[simp] theorem s_two : s 2 = 1 := by native_decide
 @[simp] theorem s_three : s 3 = 1 := by native_decide
 
 /-- The sequence begins: 0, 1, 1, 2, 3, 3, 2, 3, ... -/
@@ -108,7 +110,23 @@ def treeInvolution (d m : ℕ) : ℕ × ℕ := ((m ^ 2 + 1) / d, m)
 /-- R equals ι applied to L(ι(d,m)). [Proof of Theorem 4] -/
 theorem R_eq_inv_L_inv (d m : ℕ) (h : d ∣ m ^ 2 + 1) :
     let ι := fun p : ℕ × ℕ => treeInvolution p.1 p.2
-    R d m = ι (L (ι (d, m)).1 (ι (d, m)).2) := by sorry
+    R d m = ι (L (ι (d, m)).1 (ι (d, m)).2) := by
+  obtain ⟨q, hq⟩ := h
+  have hd_pos : 0 < d := by nlinarith [Nat.zero_le m]
+  have hq_pos : 0 < q := by nlinarith [Nat.zero_le m]
+  have hq_eq : (m ^ 2 + 1) / d = q := by rw [hq]; exact Nat.mul_div_cancel_left q hd_pos
+  have hR_first : ((m + d) ^ 2 + 1) / d = q + 2 * m + d := by
+    have : (m + d) ^ 2 + 1 = d * (q + 2 * m + d) := by nlinarith [hq]
+    rw [this]; exact Nat.mul_div_cancel_left _ hd_pos
+  have hS_first : ((m + q) ^ 2 + 1) / q = q + 2 * m + d := by
+    have : (m + q) ^ 2 + 1 = q * (q + 2 * m + d) := by nlinarith [hq]
+    rw [this]; exact Nat.mul_div_cancel_left _ hq_pos
+  simp only [treeInvolution, L, R]
+  apply Prod.ext
+  · -- first components: ((m+d)²+1)/d = ((m+q)²+1)/q
+    rw [hq_eq, hR_first, hS_first]
+  · -- second components: m + (m²+1)/d = m + (m²+1)/d  (trivially equal)
+    rfl
 
 /-- A pair (d, m) is **valid** if d ≥ 1 and d | m² + 1. -/
 def ValidPair (d m : ℕ) : Prop := 1 ≤ d ∧ d ∣ m ^ 2 + 1
@@ -119,10 +137,32 @@ def ValidPair (d m : ℕ) : Prop := 1 ≤ d ∧ d ∣ m ^ 2 + 1
 [Lemma 5] -/
 theorem tree_pairs_valid (d m : ℕ) (h : ValidPair d m) :
     ValidPair (L d m).1 (L d m).2 ∧ ValidPair (R d m).1 (R d m).2 := by
-  -- L(d,m) = (d, m+d): need d ≥ 1 (given) and d | (m+d)² + 1.
-  -- Key: (m+d)² + 1 = (m²+1) + 2md + d², and d divides each summand.
-  -- R validity follows from ι ∘ L ∘ ι preservation.
-  sorry
+  obtain ⟨hd, hdiv⟩ := h
+  -- L(d,m) = (d, m+d): d | (m+d)²+1 because (m+d)²+1 = (m²+1) + d*(2m+d)
+  have hL_div : d ∣ (m + d) ^ 2 + 1 := by
+    have : (m + d) ^ 2 + 1 = (m ^ 2 + 1) + d * (2 * m + d) := by ring
+    rw [this]; exact hdiv.add (dvd_mul_right d _)
+  -- R validity: key identity — if m²+1 = d*q then
+  --   ((m+d)²+1)/d = q + 2m + d  and  (m + q)² + 1 = (q + 2m + d) * q
+  obtain ⟨q, hq⟩ := hdiv
+  have hR_div : ((m + d) ^ 2 + 1) / d ∣ (m + (m ^ 2 + 1) / d) ^ 2 + 1 := by
+    have hd_pos : 0 < d := by omega
+    have hq_eq : (m ^ 2 + 1) / d = q := by
+      rw [hq]; exact Nat.mul_div_cancel_left q hd_pos
+    have hR_num : (m + d) ^ 2 + 1 = d * (q + 2 * m + d) := by nlinarith [hq]
+    have hR_first : ((m + d) ^ 2 + 1) / d = q + 2 * m + d := by
+      rw [hR_num]; exact Nat.mul_div_cancel_left _ hd_pos
+    rw [hq_eq, hR_first]
+    -- (m + q)² + 1 = (q + 2m + d) * q  [since m²+1 = dq]
+    exact ⟨q, by nlinarith [hq]⟩
+  refine ⟨⟨hd, hL_div⟩, ?_⟩
+  simp only [R]
+  refine ⟨?_, hR_div⟩
+  -- ((m+d)²+1)/d ≥ 1
+  have hd_pos : 0 < d := by omega
+  have hR_num : (m + d) ^ 2 + 1 = d * (q + 2 * m + d) := by nlinarith [hq]
+  rw [hR_num, Nat.mul_div_cancel_left _ hd_pos]
+  omega
 
 /-! ## Lemma 6: Each valid pair appears exactly once -/
 
@@ -170,7 +210,7 @@ def rowSum (n : ℕ) : ℤ :=
   ∑ t ∈ Finset.Ico (2 ^ n) (2 ^ (n + 1)), s t
 
 @[simp] theorem rowSum_zero : rowSum 0 = 0 := by native_decide
-@[simp] theorem rowSum_one  : rowSum 1 = 2 := by native_decide
+@[simp] theorem rowSum_one : rowSum 1 = 2 := by native_decide
 
 /-- Row sums satisfy the recurrence rₙ = 5·rₙ₋₁ - 2·rₙ₋₂, r₀ = 0, r₁ = 2. [Proposition 7] -/
 theorem rowSum_recurrence (n : ℕ) (hn : 2 ≤ n) :
