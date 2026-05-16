@@ -11,6 +11,7 @@
 - decide which axioms, definitions, lemmas, theorems to show
 - make the graph prettier
 - Have agents do research
+- better theorem names
 
 To learn:
 - Lean

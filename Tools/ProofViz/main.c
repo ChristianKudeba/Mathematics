@@ -67,8 +67,10 @@
 #define CV_LINE_H   18    /* pixels per line in code view */
 #define CV_LINENO_W 52    /* width of line-number gutter  */
 
-#define NODE_PANEL_W 380  /* width of the node source panel */
-#define NP_HEADER_H   40  /* height of node panel header bar */
+#define NODE_PANEL_W  380  /* width of the node source panel */
+#define NP_HEADER_H    40  /* height of node panel header bar */
+#define NP_DIV_H       24  /* divider bar between Lean and LaTeX sections */
+#define IDT_CONV_POLL 2001 /* WM_TIMER id for polling conversion process */
 
 /* Dynamic sidebar width */
 #define SW() (g_sidebar_collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_W)
@@ -195,6 +197,30 @@ static char     g_np_name[NAME_LEN] = {0};
 static NodeKind g_np_kind        = NK_DEF;
 static RECT     g_np_close_rect  = {0};
 
+/* LaTeX section of node panel */
+static WCHAR  **g_np_tex_lines   = NULL;
+static int      g_np_tex_nlines  = 0;
+static int      g_np_tex_scroll  = 0;
+static int      g_np_tex_state   = 0;  /* 0=idle 1=pending 2=done 3=error */
+static HANDLE   g_np_conv_proc   = INVALID_HANDLE_VALUE;
+static char     g_np_tex_path[MAX_PATH]  = {0};
+static char     g_np_lean_path[MAX_PATH] = {0};
+static char     g_np_pdf_path[MAX_PATH]  = {0};
+
+/* Rendered bitmap for LaTeX section (pdflatex + PDFium) */
+static unsigned char *g_np_tex_pixels  = NULL;
+static int      g_np_tex_pw     = 0;
+static int      g_np_tex_ph     = 0;
+static int      g_np_tex_stride = 0;
+static int      g_np_tex_pan_y  = 0;
+
+/* Node panel resize */
+static int  g_np_panel_w        = NODE_PANEL_W;
+static BOOL g_np_resizing       = FALSE;
+static int  g_np_resize_start_x = 0;
+static int  g_np_resize_start_w = 0;
+static int  g_np_char_w         = 9;  /* updated at first paint */
+
 /* ================================================================
    PDFium dynamic loader
    ================================================================ */
@@ -258,10 +284,11 @@ static int pdfium_load(HWND hwnd)
     g_pdfium.dll = LoadLibraryA("pdfium.dll");
     if (!g_pdfium.dll) g_pdfium.dll = LoadLibraryA("fpdf.dll");
     if (!g_pdfium.dll) {
-        MessageBoxA(hwnd,
-            "Could not load PDFium.\n\n"
-            "Download a Windows PDFium build and copy pdfium.dll next to proof_viz.exe.",
-            "PDFium not found", MB_ICONERROR);
+        if (hwnd)
+            MessageBoxA(hwnd,
+                "Could not load PDFium.\n\n"
+                "Download a Windows PDFium build and copy pdfium.dll next to proof_viz.exe.",
+                "PDFium not found", MB_ICONERROR);
         return 0;
     }
     g_pdfium.InitLibrary      = (PFN_FPDF_InitLibrary)     pdfium_proc("FPDF_InitLibrary");
@@ -285,7 +312,7 @@ static int pdfium_load(HWND hwnd)
         !g_pdfium.GetPageWidth || !g_pdfium.GetPageHeight || !g_pdfium.Bitmap_Create ||
         !g_pdfium.Bitmap_Destroy || !g_pdfium.Bitmap_GetBuffer ||
         !g_pdfium.Bitmap_GetStride || !g_pdfium.Bitmap_FillRect || !g_pdfium.RenderPageBitmap) {
-        MessageBoxA(hwnd, "Your pdfium.dll is missing a required function.", "PDFium error", MB_ICONERROR);
+        if (hwnd) MessageBoxA(hwnd, "Your pdfium.dll is missing a required function.", "PDFium error", MB_ICONERROR);
         FreeLibrary(g_pdfium.dll);
         memset(&g_pdfium, 0, sizeof(g_pdfium));
         return 0;
@@ -1232,6 +1259,105 @@ static void np_load(const char *utf8)
     }
 }
 
+static void np_tex_free(void)
+{
+    if(g_np_tex_lines){
+        for(int i=0;i<g_np_tex_nlines;i++) free(g_np_tex_lines[i]);
+        free(g_np_tex_lines);
+        g_np_tex_lines=NULL; g_np_tex_nlines=0;
+    }
+    free(g_np_tex_pixels); g_np_tex_pixels=NULL;
+    g_np_tex_pw=g_np_tex_ph=g_np_tex_stride=0;
+    g_np_tex_pan_y=0;
+}
+
+static void np_tex_load(const char *utf8)
+{
+    np_tex_free();
+    if(!utf8||!*utf8) return;
+    int wlen=MultiByteToWideChar(CP_UTF8,0,utf8,-1,NULL,0);
+    WCHAR *wide=(WCHAR*)malloc(wlen*sizeof(WCHAR));
+    MultiByteToWideChar(CP_UTF8,0,utf8,-1,wide,wlen);
+    int n=1;
+    for(WCHAR *q=wide;*q;q++) if(*q==L'\n') n++;
+    g_np_tex_lines=(WCHAR**)malloc(n*sizeof(WCHAR*));
+    g_np_tex_nlines=0;
+    WCHAR *start=wide;
+    for(WCHAR *q=wide;;q++){
+        if(*q==L'\n'||*q==L'\0'){
+            int len=(int)(q-start);
+            if(len>0&&start[len-1]==L'\r') len--;
+            WCHAR *line=(WCHAR*)malloc((len+1)*sizeof(WCHAR));
+            if(len) wcsncpy(line,start,len);
+            line[len]=L'\0';
+            g_np_tex_lines[g_np_tex_nlines++]=line;
+            if(*q==L'\0') break;
+            start=q+1;
+        }
+    }
+    free(wide);
+    g_np_tex_scroll=0;
+}
+
+static int np_tex_load_pdf(void)
+{
+    if(!g_np_pdf_path[0]||!g_pdfium.initialized) return 0;
+    FPDF_DOCUMENT doc=g_pdfium.LoadDocument(g_np_pdf_path,NULL);
+    if(!doc) return 0;
+    if(g_pdfium.GetPageCount(doc)<1){g_pdfium.CloseDocument(doc);return 0;}
+    FPDF_PAGE page=g_pdfium.LoadPage(doc,0);
+    if(!page){g_pdfium.CloseDocument(doc);return 0;}
+    double scale=1.33; /* 96 dpi — fixed font size regardless of panel width */
+    int w=(int)(g_pdfium.GetPageWidth(page)*scale+0.5); if(w<1)w=1;
+    int h=(int)(g_pdfium.GetPageHeight(page)*scale+0.5); if(h<1)h=1;
+    FPDF_BITMAP bm=g_pdfium.Bitmap_Create(w,h,0);
+    if(!bm){g_pdfium.ClosePage(page);g_pdfium.CloseDocument(doc);return 0;}
+    g_pdfium.Bitmap_FillRect(bm,0,0,w,h,0xFFFFFFFF);
+    g_pdfium.RenderPageBitmap(bm,page,0,0,w,h,0,FPDF_ANNOT);
+    int ss=g_pdfium.Bitmap_GetStride(bm);
+    void *src=g_pdfium.Bitmap_GetBuffer(bm);
+    if(!src||ss<=0){g_pdfium.Bitmap_Destroy(bm);g_pdfium.ClosePage(page);g_pdfium.CloseDocument(doc);return 0;}
+    int tight=w*4;
+    free(g_np_tex_pixels);
+    g_np_tex_pixels=(unsigned char*)malloc((size_t)tight*h);
+    if(!g_np_tex_pixels){g_pdfium.Bitmap_Destroy(bm);g_pdfium.ClosePage(page);g_pdfium.CloseDocument(doc);return 0;}
+    /* Invert RGB so white pdflatex output becomes dark-themed */
+    for(int row=0;row<h;row++){
+        unsigned char *s=(unsigned char*)src+(size_t)row*ss;
+        unsigned char *d=g_np_tex_pixels+(size_t)row*tight;
+        for(int x=0;x<w;x++){
+            d[x*4+0]=(unsigned char)(255-s[x*4+0]);
+            d[x*4+1]=(unsigned char)(255-s[x*4+1]);
+            d[x*4+2]=(unsigned char)(255-s[x*4+2]);
+            d[x*4+3]=0xFF;
+        }
+    }
+    g_np_tex_pw=w; g_np_tex_ph=h; g_np_tex_stride=tight; g_np_tex_pan_y=0;
+    g_pdfium.Bitmap_Destroy(bm); g_pdfium.ClosePage(page); g_pdfium.CloseDocument(doc);
+    return 1;
+}
+
+/* Count visual rows when lines wrap at mc chars per row */
+static int np_vis_rows(WCHAR **lines,int n,int mc)
+{
+    if(mc<1)mc=1; int t=0;
+    for(int i=0;i<n;i++){int l=(int)wcslen(lines[i]);t+=l==0?1:(l+mc-1)/mc;}
+    return t;
+}
+
+/* Map visual row vr -> original line index *ol and char offset *os */
+static void np_vis_to_src(WCHAR **lines,int n,int mc,int vr,int *ol,int *os)
+{
+    if(mc<1)mc=1; int row=0;
+    for(int i=0;i<n;i++){
+        int l=(int)wcslen(lines[i]);
+        int chunks=l==0?1:(l+mc-1)/mc;
+        if(vr<row+chunks){*ol=i;*os=(vr-row)*mc;return;}
+        row+=chunks;
+    }
+    *ol=n>0?n-1:0;*os=0;
+}
+
 static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg){
@@ -1241,7 +1367,14 @@ static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
         HDC mdc=CreateCompatibleDC(hdc);
         HBITMAP bmp=CreateCompatibleBitmap(hdc,cr.right,cr.bottom);
         SelectObject(mdc,bmp);
-        /* Header */
+
+        /* Compute split geometry */
+        int code_h=cr.bottom-NP_HEADER_H;
+        int lean_h=(code_h-NP_DIV_H)/2;
+        int div_y =NP_HEADER_H+lean_h;
+        int tex_y =div_y+NP_DIV_H;
+
+        /* ---- Header ---- */
         RECT hdr={0,0,cr.right,NP_HEADER_H};
         HBRUSH hbr=CreateSolidBrush(RGB(32,34,50));FillRect(mdc,&hdr,hbr);DeleteObject(hbr);
         HPEN lp2=CreatePen(PS_SOLID,1,RGB(55,60,90));
@@ -1255,7 +1388,6 @@ static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
         SelectObject(mdc,kb);SelectObject(mdc,kp);
         RoundRect(mdc,bx,by,bx+10,by+10,3,3);
         DeleteObject(kb);DeleteObject(kp);
-        /* Node name */
         HFONT nfont=CreateFontA(13,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,
                                 OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
                                 CLEARTYPE_QUALITY,DEFAULT_PITCH,"Segoe UI");
@@ -1263,51 +1395,169 @@ static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
         SetTextColor(mdc,RGB(230,230,240));SetBkMode(mdc,TRANSPARENT);
         RECT tnr={bx+16,0,cr.right-30,NP_HEADER_H};
         DrawTextA(mdc,g_np_name,-1,&tnr,DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_END_ELLIPSIS);
-        /* Close × */
         int cx2=cr.right-24,cy2=4;
         g_np_close_rect=(RECT){cx2,cy2,cx2+20,cy2+20};
         SetTextColor(mdc,RGB(160,165,195));
         RECT xr={cx2,cy2,cx2+20,cy2+20};
         DrawTextA(mdc,"x",-1,&xr,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
         SelectObject(mdc,onf);DeleteObject(nfont);
-        /* Code area */
-        RECT code_rc={0,NP_HEADER_H,cr.right,cr.bottom};
-        HBRUSH cbr=CreateSolidBrush(RGB(30,30,30));FillRect(mdc,&code_rc,cbr);DeleteObject(cbr);
-        RECT gutter={0,NP_HEADER_H,CV_LINENO_W,cr.bottom};
-        HBRUSH gb=CreateSolidBrush(RGB(24,24,24));FillRect(mdc,&gutter,gb);DeleteObject(gb);
-        HPEN gsep=CreatePen(PS_SOLID,1,RGB(50,50,50));
-        HPEN ogsep=(HPEN)SelectObject(mdc,gsep);
-        MoveToEx(mdc,CV_LINENO_W,NP_HEADER_H,NULL);LineTo(mdc,CV_LINENO_W,cr.bottom);
-        SelectObject(mdc,ogsep);DeleteObject(gsep);
+
+        /* Helper macro: draw a code section (gutter + numbered lines) */
+        /* We use inline code for each section to avoid nested function issues */
         HFONT cfont=CreateFontA(15,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,
                                 OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
                                 CLEARTYPE_QUALITY,FIXED_PITCH,"Consolas");
         HFONT ocf=(HFONT)SelectObject(mdc,cfont);
         SetBkMode(mdc,TRANSPARENT);
-        int code_h=cr.bottom-NP_HEADER_H;
-        int vis2=code_h/CV_LINE_H+2;
-        int end=g_np_scroll+vis2;
-        if(end>g_np_nlines) end=g_np_nlines;
-        char lnbuf[12];
-        for(int i=g_np_scroll;i<end;i++){
-            int y=NP_HEADER_H+(i-g_np_scroll)*CV_LINE_H+1;
-            sprintf(lnbuf,"%d",i+1);
-            SetTextColor(mdc,RGB(90,90,90));
-            RECT lnr={2,y,CV_LINENO_W-6,y+CV_LINE_H};
-            DrawTextA(mdc,lnbuf,-1,&lnr,DT_RIGHT|DT_TOP|DT_SINGLELINE);
-            if(g_np_lines&&i<g_np_nlines){
-                SetTextColor(mdc,RGB(212,212,212));
-                TextOutW(mdc,CV_LINENO_W+6,y,g_np_lines[i],(int)wcslen(g_np_lines[i]));
+
+        /* ---- Lean source section (NP_HEADER_H .. div_y) ---- */
+        {
+            RECT sec={0,NP_HEADER_H,cr.right,div_y};
+            HBRUSH sb2=CreateSolidBrush(RGB(30,30,30));FillRect(mdc,&sec,sb2);DeleteObject(sb2);
+            RECT gut={0,NP_HEADER_H,CV_LINENO_W,div_y};
+            HBRUSH gb2=CreateSolidBrush(RGB(24,24,24));FillRect(mdc,&gut,gb2);DeleteObject(gb2);
+            HPEN gs=CreatePen(PS_SOLID,1,RGB(50,50,50));
+            HPEN ogs=(HPEN)SelectObject(mdc,gs);
+            MoveToEx(mdc,CV_LINENO_W,NP_HEADER_H,NULL);LineTo(mdc,CV_LINENO_W,div_y);
+            SelectObject(mdc,ogs);DeleteObject(gs);
+            IntersectClipRect(mdc,0,NP_HEADER_H,cr.right,div_y);
+            /* Compute wrapping */
+            SIZE csz;GetTextExtentPoint32A(mdc,"W",1,&csz);
+            int cw=csz.cx;if(cw<1)cw=1;g_np_char_w=cw;
+            int avail=cr.right-CV_LINENO_W-12;if(avail<cw)avail=cw;
+            int mc=avail/cw;
+            int tot_vis=g_np_lines?np_vis_rows(g_np_lines,g_np_nlines,mc):0;
+            int vis_cnt=lean_h/CV_LINE_H+2;
+            char lnbuf[12];
+            for(int vr=g_np_scroll;vr<g_np_scroll+vis_cnt&&vr<tot_vis;vr++){
+                int src_l=0,src_s=0;
+                if(g_np_lines) np_vis_to_src(g_np_lines,g_np_nlines,mc,vr,&src_l,&src_s);
+                int y=NP_HEADER_H+(vr-g_np_scroll)*CV_LINE_H+1;
+                if(y>=div_y)break;
+                if(src_s==0){
+                    sprintf(lnbuf,"%d",src_l+1);
+                    SetTextColor(mdc,RGB(90,90,90));
+                    RECT lnr={2,y,CV_LINENO_W-6,y+CV_LINE_H};
+                    DrawTextA(mdc,lnbuf,-1,&lnr,DT_RIGHT|DT_TOP|DT_SINGLELINE);
+                }
+                if(g_np_lines&&src_l<g_np_nlines){
+                    int src_len=(int)wcslen(g_np_lines[src_l]);
+                    int chunk=src_len-src_s;if(chunk>mc)chunk=mc;
+                    if(chunk>0){
+                        SetTextColor(mdc,RGB(212,212,212));
+                        TextOutW(mdc,CV_LINENO_W+6,y,g_np_lines[src_l]+src_s,chunk);
+                    }
+                }
             }
+            SelectClipRgn(mdc,NULL);
         }
+
+        /* ---- Divider bar (div_y .. tex_y) ---- */
+        {
+            RECT div_rc={0,div_y,cr.right,tex_y};
+            HBRUSH db=CreateSolidBrush(RGB(28,30,46));FillRect(mdc,&div_rc,db);DeleteObject(db);
+            HPEN dp=CreatePen(PS_SOLID,1,RGB(50,54,80));
+            HPEN odp=(HPEN)SelectObject(mdc,dp);
+            MoveToEx(mdc,0,div_y,NULL);LineTo(mdc,cr.right,div_y);
+            MoveToEx(mdc,0,tex_y-1,NULL);LineTo(mdc,cr.right,tex_y-1);
+            SelectObject(mdc,odp);DeleteObject(dp);
+            HFONT df=CreateFontA(11,0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,
+                                 OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+                                 CLEARTYPE_QUALITY,DEFAULT_PITCH,"Segoe UI");
+            HFONT odf=(HFONT)SelectObject(mdc,df);
+            SetTextColor(mdc,RGB(100,105,135));SetBkMode(mdc,TRANSPARENT);
+            RECT dl={8,div_y,cr.right-8,tex_y};
+            DrawTextA(mdc,"Mathematical Form",-1,&dl,DT_LEFT|DT_VCENTER|DT_SINGLELINE);
+            SelectObject(mdc,odf);DeleteObject(df);
+        }
+
+        /* ---- LaTeX section (tex_y .. cr.bottom) ---- */
+        {
+            RECT sec={0,tex_y,cr.right,cr.bottom};
+            HBRUSH sb3=CreateSolidBrush(RGB(30,30,30));FillRect(mdc,&sec,sb3);DeleteObject(sb3);
+            IntersectClipRect(mdc,0,tex_y,cr.right,cr.bottom);
+            if(g_np_tex_state==1){
+                /* Converting... */
+                SetTextColor(mdc,RGB(100,105,135));SetBkMode(mdc,TRANSPARENT);
+                RECT ml={CV_LINENO_W+6,tex_y,cr.right,cr.bottom};
+                DrawTextA(mdc,"Converting...",-1,&ml,DT_LEFT|DT_TOP|DT_SINGLELINE);
+            } else if(g_np_tex_state==3){
+                SetTextColor(mdc,RGB(160,80,80));SetBkMode(mdc,TRANSPARENT);
+                RECT ml={CV_LINENO_W+6,tex_y,cr.right,cr.bottom};
+                DrawTextA(mdc,"Conversion failed",-1,&ml,DT_LEFT|DT_TOP|DT_SINGLELINE);
+            } else if(g_np_tex_state==2){
+                if(g_np_tex_pixels&&g_np_tex_pw>0){
+                    /* Rendered PDF bitmap: 1:1 native pixels, pan vertically */
+                    BITMAPINFO bi2; ZeroMemory(&bi2,sizeof(bi2));
+                    bi2.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
+                    bi2.bmiHeader.biWidth=g_np_tex_pw;
+                    bi2.bmiHeader.biHeight=-g_np_tex_ph;
+                    bi2.bmiHeader.biPlanes=1;
+                    bi2.bmiHeader.biBitCount=32;
+                    bi2.bmiHeader.biCompression=BI_RGB;
+                    StretchDIBits(mdc,0,tex_y-g_np_tex_pan_y,g_np_tex_pw,g_np_tex_ph,
+                                  0,0,g_np_tex_pw,g_np_tex_ph,
+                                  g_np_tex_pixels,&bi2,DIB_RGB_COLORS,SRCCOPY);
+                } else if(g_np_tex_lines){
+                    RECT gut={0,tex_y,CV_LINENO_W,cr.bottom};
+                    HBRUSH gb3=CreateSolidBrush(RGB(24,24,24));FillRect(mdc,&gut,gb3);DeleteObject(gb3);
+                    HPEN gs2=CreatePen(PS_SOLID,1,RGB(50,50,50));
+                    HPEN ogs2=(HPEN)SelectObject(mdc,gs2);
+                    MoveToEx(mdc,CV_LINENO_W,tex_y,NULL);LineTo(mdc,CV_LINENO_W,cr.bottom);
+                    SelectObject(mdc,ogs2);DeleteObject(gs2);
+                    int avail2=cr.right-CV_LINENO_W-12;if(avail2<g_np_char_w)avail2=g_np_char_w;
+                    int mc2=g_np_char_w>0?avail2/g_np_char_w:40;if(mc2<1)mc2=1;
+                    int tot2=np_vis_rows(g_np_tex_lines,g_np_tex_nlines,mc2);
+                    int tex_h2=cr.bottom-tex_y;
+                    int vis2=tex_h2/CV_LINE_H+2;
+                    char lnbuf2[12];
+                    for(int vr=g_np_tex_scroll;vr<g_np_tex_scroll+vis2&&vr<tot2;vr++){
+                        int tl=0,ts=0;
+                        np_vis_to_src(g_np_tex_lines,g_np_tex_nlines,mc2,vr,&tl,&ts);
+                        int y=tex_y+(vr-g_np_tex_scroll)*CV_LINE_H+1;
+                        if(y>=cr.bottom)break;
+                        if(ts==0){
+                            sprintf(lnbuf2,"%d",tl+1);
+                            SetTextColor(mdc,RGB(90,90,90));
+                            RECT lnr2={2,y,CV_LINENO_W-6,y+CV_LINE_H};
+                            DrawTextA(mdc,lnbuf2,-1,&lnr2,DT_RIGHT|DT_TOP|DT_SINGLELINE);
+                        }
+                        int tlen=(int)wcslen(g_np_tex_lines[tl]);
+                        int chunk2=tlen-ts;if(chunk2>mc2)chunk2=mc2;
+                        if(chunk2>0){
+                            SetTextColor(mdc,RGB(200,212,180));
+                            TextOutW(mdc,CV_LINENO_W+6,y,g_np_tex_lines[tl]+ts,chunk2);
+                        }
+                    }
+                }
+            }
+            SelectClipRgn(mdc,NULL);
+        }
+
         SelectObject(mdc,ocf);DeleteObject(cfont);
+        /* Resize grip: 4px strip on the left edge */
+        RECT rh={0,0,4,cr.bottom};
+        HBRUSH rhb=CreateSolidBrush(RGB(55,60,100));FillRect(mdc,&rh,rhb);DeleteObject(rhb);
         BitBlt(hdc,0,0,cr.right,cr.bottom,mdc,0,0,SRCCOPY);
         DeleteObject(bmp);DeleteDC(mdc);
         EndPaint(hwnd,&ps);
         return 0;
     }
+    case WM_SETCURSOR:{
+        POINT cur;GetCursorPos(&cur);ScreenToClient(hwnd,&cur);
+        if(cur.x>=0&&cur.x<6){SetCursor(LoadCursor(NULL,IDC_SIZEWE));return TRUE;}
+        break;
+    }
     case WM_LBUTTONDOWN:{
         int mx2=GET_X_LPARAM(lp),my2=GET_Y_LPARAM(lp);
+        if(mx2<6){
+            RECT wr;GetWindowRect(hwnd,&wr);
+            g_np_resize_start_w=wr.right-wr.left;
+            POINT sp={mx2,my2};ClientToScreen(hwnd,&sp);
+            g_np_resize_start_x=sp.x;
+            g_np_resizing=TRUE;SetCapture(hwnd);
+            return 0;
+        }
         if(mx2>=g_np_close_rect.left&&mx2<g_np_close_rect.right&&
            my2>=g_np_close_rect.top&&my2<g_np_close_rect.bottom){
             g_sel_node=-1;
@@ -1316,12 +1566,30 @@ static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
         }
         return 0;
     }
+    case WM_MOUSEMOVE:{
+        if(g_np_resizing){
+            POINT sp={GET_X_LPARAM(lp),0};ClientToScreen(hwnd,&sp);
+            int new_w=g_np_resize_start_w+(g_np_resize_start_x-sp.x);
+            if(new_w<150)new_w=150;if(new_w>1400)new_w=1400;
+            g_np_panel_w=new_w;
+            HWND par=GetParent(hwnd);RECT pcr;GetClientRect(par,&pcr);
+            MoveWindow(hwnd,pcr.right-new_w,0,new_w,pcr.bottom,TRUE);
+        }
+        return 0;
+    }
+    case WM_LBUTTONUP:
+        if(g_np_resizing){g_np_resizing=FALSE;ReleaseCapture();}
+        return 0;
     case WM_SIZE:{
         RECT cr;GetClientRect(hwnd,&cr);
-        int code_h=cr.bottom-NP_HEADER_H;if(code_h<1)code_h=1;
-        int vis=code_h/CV_LINE_H;
+        int code_h2=cr.bottom-NP_HEADER_H;if(code_h2<1)code_h2=1;
+        int lean_h2=(code_h2-NP_DIV_H)/2;if(lean_h2<1)lean_h2=1;
+        int vis=lean_h2/CV_LINE_H;
+        int avail_s=cr.right-CV_LINENO_W-12;if(avail_s<g_np_char_w)avail_s=g_np_char_w;
+        int mc_s=g_np_char_w>0?avail_s/g_np_char_w:999;if(mc_s<1)mc_s=1;
+        int tot_s=g_np_lines?np_vis_rows(g_np_lines,g_np_nlines,mc_s):0;
         SCROLLINFO si={sizeof(si),SIF_RANGE|SIF_PAGE,0,
-                       g_np_nlines>0?g_np_nlines-1:0,(UINT)vis,0,0};
+                       tot_s>0?tot_s-1:0,(UINT)vis,0,0};
         SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
         return 0;
     }
@@ -1346,13 +1614,40 @@ static LRESULT CALLBACK NodePanelWndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
         return 0;
     }
     case WM_MOUSEWHEEL:{
+        POINT pt3={GET_X_LPARAM(lp),GET_Y_LPARAM(lp)};
+        ScreenToClient(hwnd,&pt3);
+        RECT cr3;GetClientRect(hwnd,&cr3);
+        int code_h3=cr3.bottom-NP_HEADER_H;
+        int lean_h3=(code_h3-NP_DIV_H)/2;
+        int div_y3=NP_HEADER_H+lean_h3;
         int lines=(GET_WHEEL_DELTA_WPARAM(wp)>0)?-3:3;
-        g_np_scroll+=lines;
-        if(g_np_scroll<0)g_np_scroll=0;
-        int maxs=g_np_nlines-1;if(maxs<0)maxs=0;
-        if(g_np_scroll>maxs)g_np_scroll=maxs;
-        SCROLLINFO si={sizeof(si),SIF_POS,0,0,0,g_np_scroll,0};
-        SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
+        if(pt3.y<div_y3){
+            g_np_scroll+=lines;
+            if(g_np_scroll<0)g_np_scroll=0;
+            {int avail_w3=cr3.right-CV_LINENO_W-12;if(avail_w3<g_np_char_w)avail_w3=g_np_char_w;
+             int mc3=g_np_char_w>0?avail_w3/g_np_char_w:999;if(mc3<1)mc3=1;
+             int tot3=g_np_lines?np_vis_rows(g_np_lines,g_np_nlines,mc3):0;
+             int maxs=tot3-1;if(maxs<0)maxs=0;
+             if(g_np_scroll>maxs)g_np_scroll=maxs;}
+            SCROLLINFO si={sizeof(si),SIF_POS,0,0,0,g_np_scroll,0};
+            SetScrollInfo(hwnd,SB_VERT,&si,TRUE);
+        } else {
+            if(g_np_tex_pixels&&g_np_tex_pw>0){
+                int sec_w=cr3.right;
+                int disp_h=(int)((double)g_np_tex_ph*sec_w/g_np_tex_pw+0.5);
+                int sec_h=cr3.bottom-(div_y3+NP_DIV_H);
+                int delta=(GET_WHEEL_DELTA_WPARAM(wp)>0)?-60:60;
+                g_np_tex_pan_y+=delta;
+                if(g_np_tex_pan_y<0)g_np_tex_pan_y=0;
+                int max_pan=disp_h-sec_h;if(max_pan<0)max_pan=0;
+                if(g_np_tex_pan_y>max_pan)g_np_tex_pan_y=max_pan;
+            } else {
+                g_np_tex_scroll+=lines;
+                if(g_np_tex_scroll<0)g_np_tex_scroll=0;
+                int maxs=g_np_tex_nlines-1;if(maxs<0)maxs=0;
+                if(g_np_tex_scroll>maxs)g_np_tex_scroll=maxs;
+            }
+        }
         InvalidateRect(hwnd,NULL,FALSE);
         return 0;
     }
@@ -1400,22 +1695,69 @@ static void close_pdf(HWND hwnd, int idx)
 
 static void close_node_panel(HWND hwnd)
 {
+    if(g_np_conv_proc!=INVALID_HANDLE_VALUE){
+        TerminateProcess(g_np_conv_proc,1);CloseHandle(g_np_conv_proc);
+        g_np_conv_proc=INVALID_HANDLE_VALUE;
+    }
+    KillTimer(hwnd,IDT_CONV_POLL);
+    np_tex_free(); g_np_tex_state=0;
     g_sel_node=-1;
     if(g_np_hwnd) ShowWindow(g_np_hwnd,SW_HIDE);
     InvalidateRect(hwnd,NULL,TRUE);
 }
 
+static void get_exe_directory(char *dir, size_t dir_size); /* forward decl */
+
 static void open_node_panel(HWND hwnd, LeanDoc *doc, int node_idx)
 {
+    /* Cancel any running conversion */
+    if(g_np_conv_proc!=INVALID_HANDLE_VALUE){
+        TerminateProcess(g_np_conv_proc,1);CloseHandle(g_np_conv_proc);
+        g_np_conv_proc=INVALID_HANDLE_VALUE;
+    }
+    KillTimer(hwnd,IDT_CONV_POLL);
+    np_tex_free(); g_np_tex_scroll=0; g_np_tex_state=0;
+
     g_sel_node=node_idx;
     strncpy(g_np_name,doc->nd[node_idx].name,NAME_LEN-1);
     g_np_kind=doc->nd[node_idx].kind;
     char *src=extract_node_source(doc,node_idx);
-    np_load(src?src:"(source not available)");
+    const char *lean_src=src?src:"(source not available)";
+    np_load(lean_src);
+
+    /* Write lean snippet to temp file */
+    char tmp_dir[MAX_PATH];
+    GetTempPathA(MAX_PATH,tmp_dir);
+    snprintf(g_np_lean_path,MAX_PATH,"%spv_lean_in.txt",tmp_dir);
+    snprintf(g_np_tex_path, MAX_PATH,"%spv_lean_out.tex",tmp_dir);
+    snprintf(g_np_pdf_path, MAX_PATH,"%spv_lean_out.pdf",tmp_dir);
+    FILE *tf=fopen(g_np_lean_path,"w");
+    if(tf){fputs(lean_src,tf);fclose(tf);}
     free(src);
+
+    /* Locate script and launch */
+    char exe_dir[MAX_PATH],script[MAX_PATH],cmd[4096];
+    get_exe_directory(exe_dir,sizeof(exe_dir));
+    snprintf(script,sizeof(script),"%s\\lean_to_latex.py",exe_dir);
+    if(GetFileAttributesA(script)!=INVALID_FILE_ATTRIBUTES){
+        snprintf(cmd,sizeof(cmd),
+            "cmd.exe /C py -3 \"%s\" \"%s\" \"%s\" || python \"%s\" \"%s\" \"%s\"",
+            script,g_np_lean_path,g_np_tex_path,
+            script,g_np_lean_path,g_np_tex_path);
+        STARTUPINFOA si2={0};si2.cb=sizeof(si2);
+        PROCESS_INFORMATION pi2={0};
+        if(CreateProcessA(NULL,cmd,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si2,&pi2)){
+            g_np_conv_proc=pi2.hProcess;CloseHandle(pi2.hThread);
+            g_np_tex_state=1;
+            SetTimer(hwnd,IDT_CONV_POLL,500,NULL);
+        } else {
+            g_np_tex_state=3;
+        }
+    }
+
     if(!g_np_hwnd) return;
     RECT cr;GetClientRect(hwnd,&cr);
-    int pw=NODE_PANEL_W;
+    int pw=g_np_panel_w;
     int max_pw=cr.right-SW()-40;if(pw>max_pw)pw=max_pw;
     if(pw<100)pw=100;
     MoveWindow(g_np_hwnd,cr.right-pw,0,pw,cr.bottom,TRUE);
@@ -1919,9 +2261,37 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         return 0;
     }
 
+    case WM_TIMER:
+        if(wp==IDT_CONV_POLL&&g_np_conv_proc!=INVALID_HANDLE_VALUE){
+            DWORD ec=STILL_ACTIVE;
+            GetExitCodeProcess(g_np_conv_proc,&ec);
+            if(ec!=STILL_ACTIVE){
+                CloseHandle(g_np_conv_proc);g_np_conv_proc=INVALID_HANDLE_VALUE;
+                KillTimer(hwnd,IDT_CONV_POLL);
+                if(ec==0){
+                    int pdf_ok=0;
+                    if(g_pdfium.initialized||pdfium_load(NULL))
+                        pdf_ok=np_tex_load_pdf();
+                    if(!pdf_ok){
+                        char *tex2=NULL;DWORD tlen2=0;
+                        if(read_entire_file(g_np_tex_path,&tex2,&tlen2)){
+                            np_tex_load(tex2);free(tex2);g_np_tex_state=2;
+                        } else {g_np_tex_state=3;}
+                    } else {g_np_tex_state=2;}
+                } else {g_np_tex_state=3;}
+                if(g_np_hwnd&&IsWindowVisible(g_np_hwnd))
+                    InvalidateRect(g_np_hwnd,NULL,TRUE);
+            }
+        }
+        return 0;
+
     case WM_DESTROY:
         code_view_free();
         np_free();
+        np_tex_free();
+        if(g_np_conv_proc!=INVALID_HANDLE_VALUE){
+            TerminateProcess(g_np_conv_proc,1);CloseHandle(g_np_conv_proc);
+        }
         for(int i=0;i<g_npdf;i++) pdf_close(&g_pdf[i]);
         for(int i=0;i<g_nlean;i++) free(g_lean[i].text);
         if(g_pdfium.initialized&&g_pdfium.DestroyLibrary) g_pdfium.DestroyLibrary();
