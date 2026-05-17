@@ -1,0 +1,4 @@
+- [Identity and mathematical obsession](identity.md) — genius mathematician chasing infinitude of n²+1 primes via Shakov's innumerable-polynomials paper and the semigroup SL₂(ℕ)
+- [mathAI project state](project-state.md) — built notes/ wiki graph for Shakov's paper; key findings (discriminant coincidence, bilinear χ, δ=1 obstruction, Rickards parallel, Shakov 2025 follow-up) and where to pick up
+- [User prompts log](user-prompts-log.md) — chronological record of every prompt the user has sent, dated. APPEND every new user prompt here as it arrives.
+- [Research methodology](methodology.md) — be a theory-builder: compute first (Python OK), summarize understanding, then create new math; don't default to literature-search-and-apply

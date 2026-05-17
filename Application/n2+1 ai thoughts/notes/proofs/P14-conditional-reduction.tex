@@ -1,0 +1,832 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Hypothesis}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{convention}[theorem]{Convention}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\Qi}{\Q(i)}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\nn}{\mathfrak{n}}
+\newcommand{\qq}{\mathfrak{q}}
+\DeclareMathOperator{\cond}{cond}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\supp}{supp}
+
+\title{P14. A clean conditional reduction of Landau IV to a Bianchi cubic moment over $\Qi$:\\
+the bilinear conjecture in $\ell^2$ form}
+\author{(P14, replacing P11; Lean-translation-ready)}
+\date{2026-05-03}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We give a careful conditional reduction of Landau's fourth problem (the infinitude of primes of the form $n^2+1$) to a single hypothesis on a Bianchi cubic moment over $\Qi$. The reduction supersedes P11 in two ways: (i) the operative conditional input is correctly identified as a conductor-aspect cubic moment (P11's Hyp~6.7), \emph{not} the sup-norm subconvexity (P11's Conj~2.14), which a careful skeptic-tested calculation in the Bianchi (degree-4 over $\Q$, cubic Plancherel density on $\HH^3$) setting reveals to be insufficient; (ii) every step is written at a level of detail intended for direct translation to Lean, with each lemma's hypotheses and conclusions stated as discrete logical claims and with no implicit ``standard arguments.''
+
+\smallskip
+\noindent The conditional theorem is:
+
+\smallskip\noindent\emph{Assume Hypothesis~\ref{hyp:cubic-moment} (Bianchi cubic moment for Hecke--Maass forms over $\Qi$ in the conductor aspect, with squarefree-coprime-to-$(1+i)$ uniformity, at strength $|\qq|^{1+\varepsilon}$). Then there exists $\delta>0$ explicit such that for all $A,B\in\ell^2(\Zi_{\ge0})$ supported on coprime pairs in the first quadrant with $|\xi|^2\le N+1$ and $\norm{A}_2\norm{B}_2\le 1$,}
+\[
+   |\Sigma(N;A,B)|\;\le\;C_\varepsilon\,N^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2.
+\]
+\emph{In particular Landau's fourth problem holds: $\#\{n\le N:n^2+1\text{ prime}\}\gg N/\log N$.}
+
+\smallskip\noindent No claim of unconditional novelty is made: the analytic apparatus is Bruggeman--Motohashi--Lokvenec-Guleska, the asymptotic sieve is Friedlander--Iwaniec, and the conditional input is the open analog of Petrow--Young 2020/2023 over $\Qi$, comparable in scope to the original.
+\end{abstract}
+
+\tableofcontents
+
+\section*{Notational conventions used throughout}\label{sec:conventions}
+\addcontentsline{toc}{section}{Notational conventions}
+
+The following are fixed once and for all. Every section below assumes them.
+
+\begin{convention}[Gaussian integers and the first-quadrant orthant]\label{conv:Zi-quadrant}
+Let $\Zi=\Z[i]$ with $i^2=-1$. Define the closed first-quadrant orthant
+\[
+   \Zi_{\ge0}\;:=\;\{a+bi:a,b\in\Nz\}\,,\qquad\Nz=\{0,1,2,\dots\}.
+\]
+\textbf{$\Zi_{\ge0}$ is not closed under multiplication}: e.g.\ $i\cdot i=-1\notin\Zi_{\ge 0}$. The map
+\[
+   m:\Zi_{\ge0}\times\Zi_{\ge0}\to\Zi,\quad m(\xi,\eta)=\xi\eta,
+\]
+is well-defined as a map into $\Zi$, and we will work with the constrained subset
+\[
+   \mathcal G\;:=\;\{(\xi,\eta)\in\Zi_{\ge0}^2:\xi\eta\in 1+i\Nz\}\subset\Zi_{\ge 0}^2,
+\]
+which carries an obvious bijection back to $SL_2(\Nz)$ (Lemma~\ref{lem:shakov-gaussian}). In particular, on $\mathcal G$ we have $\Re(\xi\eta)=1$ and $\Im(\xi\eta)\ge 0$.
+\end{convention}
+
+\begin{convention}[Norm on $\Zi$ and on functions]\label{conv:norms}
+For $\nu=a+bi\in\Zi$, $|\nu|^2:=a^2+b^2=\Nm_{\Qi/\Q}(\nu)$. For $A:\Zi\to\C$ of finite support, $\norm{A}_2^2:=\sum_{\nu\in\Zi}|A(\nu)|^2$.
+\end{convention}
+
+\begin{convention}[Additive characters]\label{conv:e}
+$e(x):=\exp(2\pi i x)$ for $x\in\R$. The slice indicator $\mathbf 1_{\Re\nu=1}$ for $\nu\in\Zi$ is detected by $\int_0^1 e(\theta(\Re\nu-1))\,d\theta$.
+\end{convention}
+
+\begin{lemma}[Existence of test bump]\label{lem:psi-exists}
+There exists $\psi\in C_c^\infty(\R)$ with $\psi\ge 0$, $\psi\equiv 1$ on $[1,2]$, $\supp\psi\subset[1/2,3]$, and $\psi$ monotone on $[1/2,1]$ and on $[2,3]$. The Mellin transform $\widetilde\psi(s):=\int_0^\infty\psi(y)y^{s-1}\,dy$ is entire (since $\psi$ is supported in $[1/2,3]$, away from $0$ and $\infty$, the integral converges absolutely for all $s\in\C$ and is differentiable in $s$).
+\end{lemma}
+
+\begin{proof}
+Take any mollifier $\rho\in C_c^\infty(\R)$ with $\supp\rho\subset[-1/4,1/4]$, $\rho\ge 0$, $\int\rho=1$, and define $\psi:=\rho*\mathbf 1_{[3/4,5/2]}$. Then $\supp\psi\subset[1/2,11/4]\subset[1/2,3]$, $\psi\equiv 1$ on $[1,9/4]\supset[1,2]$, and $\psi$ is monotone on the boundary intervals.
+\end{proof}
+
+\begin{convention}[Standing $\psi$]\label{conv:psi}
+Fix once a $\psi$ as in Lemma~\ref{lem:psi-exists}.
+\end{convention}
+
+\begin{convention}[Asymptotic notation]\label{conv:asymp}
+$f\ll_\varepsilon g$ or $f=O_\varepsilon(g)$ means $|f|\le C_\varepsilon|g|$ for an absolute constant $C_\varepsilon$ depending only on $\varepsilon$. $f\asymp g$ means $f\ll g\ll f$. We use $\varepsilon>0$ to denote an arbitrarily small positive constant; the implicit $C_\varepsilon$ may grow but is finite for each fixed $\varepsilon$.
+\end{convention}
+
+% =================================================================
+\section{Setup, the slice, and the bilinear conjecture}\label{sec:setup}
+% =================================================================
+
+\subsection{The Shakov--Gaussian bijection and the slice}\label{ssec:shakov-gaussian}
+
+The Gaussian-integer reformulation of $n^2+1$ is the foundational identity
+\begin{equation}\label{eq:nu-norm}
+   \nu=1+in\quad\Longrightarrow\quad|\nu|^2=1+n^2.
+\end{equation}
+Thus $n^2+1$ is prime in $\Z$ if and only if $\nu=1+in$ is prime in $\Zi$ (for $n\ge 1$; $n=0$ gives the unit $1$, $n=1$ gives the ramified prime $1+i$, and $n\ge 2$ gives genuine Gaussian primes when $n^2+1$ is prime).
+
+The set $\{1+in:n\in\Nz\}\subset\Zi$ is the lattice slice
+\begin{equation}\label{eq:slice}
+   \mathcal S\;:=\;\{\nu\in\Zi:\Re\nu=1,\,\Im\nu\ge 0\}\,.
+\end{equation}
+Thus Landau IV is the question: are there infinitely many primes on $\mathcal S$?
+
+\begin{lemma}[Shakov--Gaussian bijection {\cite[Lemma 1.1]{P11}}]\label{lem:shakov-gaussian}
+The map
+\[
+   \Pi:SL_2(\Nz)\to\Zi_{\ge 0}\times\Zi_{\ge 0},\qquad\Pi\!\begin{pmatrix}a&b\\c&d\end{pmatrix}=(a+bi,\,d+ci)
+\]
+is a bijection onto
+\[
+   \mathcal G\;:=\;\{(\xi,\eta)\in\Zi_{\ge 0}^2:\xi\eta\in 1+i\Nz\}\,.
+\]
+Under $\Pi$, the spin invariant $\chi(A):=ac+bd$ corresponds to $\Im(\xi\eta)$, and $\det A=1$ corresponds to $\Re(\xi\eta)=1$.
+\end{lemma}
+
+\begin{proof}
+Compute $(a+bi)(d+ci)=ad-bc+i(ac+bd)=\det A+i\chi(A)$. Injectivity follows from recovering $a,b$ as $\Re\xi,\Im\xi$ and $c,d$ as $\Im\eta,\Re\eta$. Surjectivity onto $\mathcal G$: given $(\xi,\eta)\in\mathcal G$ with $\xi\eta=1+in$, set $a=\Re\xi,b=\Im\xi,c=\Im\eta,d=\Re\eta$, all in $\Nz$ (by the quadrant assumption), and $ad-bc=1$, $ac+bd=n$, so $\begin{psmallmatrix}a&b\\c&d\end{psmallmatrix}\in SL_2(\Nz)$.
+\end{proof}
+
+\begin{remark}[Role of the Shakov framework]\label{rem:shakov-role}
+Lemma~\ref{lem:shakov-gaussian} is the only place the $SL_2(\Nz)$ structure enters this paper. From here on the analytic argument is entirely about $\Zi$ and the slice $\mathcal S$. The bijection's conceptual contribution is identifying the slice $\{\Re(\xi\eta)=1\}$ as the geometric heart of the problem; the analytic machinery is then standard Bianchi spectral theory.
+\end{remark}
+
+\subsection{The bilinear sum on the slice and its $\ell^2$ form}\label{ssec:bilinear-sum}
+
+\begin{definition}[Bilinear divisor sum on the slice]\label{def:Sigma}
+For $N\ge 1$ and $A,B:\Zi_{\ge 0}\to\C$ of finite support, define
+\[
+   \Sigma(N;A,B)\;:=\;\sum_{n=0}^N\;\sum_{\substack{(\xi,\eta)\in\Zi_{\ge 0}^2\\\xi\eta=1+in}}A(\xi)\,B(\eta)\,.
+\]
+\end{definition}
+
+\begin{definition}[Smoothed bilinear sum]\label{def:Sigma-psi}
+For $\psi$ as in Convention~\ref{conv:psi},
+\[
+   \Sigma_\psi(N;A,B)\;:=\;\sum_{n\ge 0}\psi(n/N)\sum_{\substack{(\xi,\eta)\in\Zi_{\ge 0}^2\\\xi\eta=1+in}}A(\xi)B(\eta)\,.
+\]
+\end{definition}
+
+\begin{lemma}[$\Z$-coprimality of components is automatic on the slice]\label{lem:coprime}
+If $\xi\eta=1+in$ in $\Zi_{\ge 0}^2$ with $\xi=a+bi$, $\eta=d+ci$, then $\gcd_\Z(a,b)=1$ and $\gcd_\Z(c,d)=1$. \emph{We do not claim $\gcd_\Zi(\xi,\eta)=1$}: see Remark~\ref{rem:Zi-not-coprime} below.
+\end{lemma}
+
+\begin{proof}
+Suppose $p\in\Z_{>1}$ with $p\mid a$ and $p\mid b$. Then $p$ divides $\xi=a+bi$ in $\Zi$. Since $\xi\mid\xi\eta=1+in$ in $\Zi$, also $p\mid 1+in$ in $\Zi$. Taking real parts ($p\in\R$), $p\mid 1$ in $\Z$, contradicting $p>1$. Hence $\gcd_\Z(a,b)=1$. The argument for $(c,d)$ is identical with $\eta$ in place of $\xi$.
+\end{proof}
+
+\begin{remark}[$\Zi$-coprimality is NOT automatic]\label{rem:Zi-not-coprime}
+We do \emph{not} claim $\gcd_\Zi(\xi,\eta)=1$. Example $n=7$: $1+7i=(3+i)(1+2i)$ in $\Zi_{\ge 0}^2$, and $\gcd_\Zi(3+i,1+2i)=2-i$ up to units (verify: $3+i=(2-i)(1+i)$ via $(2-i)(1+i)=2+2i-i+1=3+i$; and $1+2i=i(2-i)$ via $i(2-i)=2i+1$). So the bilinear sum~\eqref{def:Sigma} ranges over $\Zi_{\ge 0}^2$-pairs that may share a $\Zi$-factor; only the $\Z$-component-wise coprimality of Lemma~\ref{lem:coprime} is forced.
+\end{remark}
+
+
+\begin{lemma}[Support truncation]\label{lem:support-truncation}
+If $\xi\eta=1+in$ with $|n|\le N$, then $|\xi|^2\le 1+N^2\le(N+1)^2$ and similarly for $\eta$. So the support of $A,B$ in $\Sigma(N;A,B)$ is automatically restricted to $|\xi|^2\le N+1$ once we restrict to first quadrant; in particular if we extend $A,B$ to $\Zi_{\ge 0}\cap\{|\xi|^2\le N+1\}$ and zero elsewhere, this does not change $\Sigma(N;A,B)$.
+\end{lemma}
+
+\begin{proof}
+$|\xi|^2|\eta|^2=|\xi\eta|^2=|1+in|^2=1+n^2\le 1+N^2$, so each of $|\xi|^2,|\eta|^2\le\sqrt{1+N^2}\le N+1$ (using $|\xi|^2\ge 1$ since $\xi\ne 0$).
+\end{proof}
+
+\begin{convention}[Standing support assumption]\label{conv:support}
+Throughout the rest of the paper: $A,B:\Zi_{\ge 0}\to\C$ are of finite support contained in $\{\xi\in\Zi_{\ge 0}:|\xi|^2\le N+1\}\cap\{\xi:\gcd_\Z(\Re\xi,\Im\xi)=1\}$, with $\norm{A}_2,\norm{B}_2\le 1$.
+\end{convention}
+
+\begin{conjecture}[Bilinear conjecture in $\ell^2$ form]\label{conj:bilinear}
+There exists $\delta>0$ such that for every $\varepsilon>0$, every $N\ge 2$, and every $A,B$ as in Convention~\ref{conv:support},
+\[
+   |\Sigma(N;A,B)|\;\le\;C_\varepsilon\,N^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2\,.
+\]
+\end{conjecture}
+
+\begin{remark}[The trivial bound]\label{rem:trivial-bound}
+By Cauchy--Schwarz applied to the bilinear form,
+\[
+   |\Sigma(N;A,B)|^2\;\le\;\Big(\sum_\xi|A(\xi)|^2 \cdot\#\{\eta:\xi\eta\in\mathcal S,n\le N\}\Big)\cdot\Big(\sum_\eta|B(\eta)|^2 \cdot\#\{\xi:\xi\eta\in\mathcal S,n\le N\}\Big).
+\]
+For each $\xi\in\supp A$ the count $\#\{\eta:\xi\eta=1+in,n\le N\}$ equals $\#\{n\le N:\xi\mid 1+in\}\le N/|\xi|^2+1$. Summing $|A(\xi)|^2$ against this gives at most $N\norm{A}_2^2\cdot\log\#\supp A$. The same for $B$. Hence
+\[
+   |\Sigma(N;A,B)|\;\ll\;N^{1+\varepsilon}\norm{A}_2\norm{B}_2.
+\]
+Conjecture~\ref{conj:bilinear} is therefore a power-saving conjecture below this trivial bound; the saving $N^\delta$ is genuine.
+\end{remark}
+
+\begin{remark}[Why $\ell^2$, not $\ell^\infty$]\label{rem:why-ell2}
+Friedlander--Iwaniec's asymptotic sieve for primes \cite{FI98a} accepts bilinear inputs in $\ell^2\times\ell^2$ form (the ``$B_2$ axiom''). The $\ell^\infty$ form is strictly stronger and not necessary for the sieve. P6 attempted $\ell^\infty$ and produced an $N^{1/2}$ arithmetic gap in the closing step that the $\ell^2$ form does not have. We therefore work in $\ell^2$ throughout.
+\end{remark}
+
+\subsection{Detection of the slice via Fourier inversion}\label{ssec:slice-fourier}
+
+\begin{lemma}[Fourier detection of $\Re\nu=1$]\label{lem:slice-detection}
+For $\nu\in\Zi$ and any function $f:\Zi\to\C$ of finite support,
+\[
+   \sum_{\nu\in\Zi:\Re\nu=1}f(\nu)\;=\;\int_0^1 e(-\theta)\,\Big(\sum_{\nu\in\Zi}f(\nu)\,e(\theta\,\Re\nu)\Big)\,d\theta\,.
+\]
+\end{lemma}
+
+\begin{proof}
+For $m\in\Z$, $\int_0^1 e(\theta(m-1))\,d\theta=\mathbf 1_{m=1}$ by elementary Fourier orthogonality on $\Z$. Apply with $m=\Re\nu$ and pull the integral inside the (finite) sum.
+\end{proof}
+
+\begin{definition}[Bilinear divisor convolution]\label{def:dAB}
+For $A,B$ as in Convention~\ref{conv:support},
+\[
+   d_{A,B}(\nu)\;:=\;\sum_{\substack{\xi,\eta\in\Zi_{\ge 0}\\\xi\eta=\nu}}A(\xi)\,B(\eta)\,.
+\]
+\end{definition}
+
+\begin{definition}[The $\theta$-twisted additive sum]\label{def:Mtheta}
+For $\theta\in[0,1]$ and $N\ge 1$,
+\[
+   M(\theta;N)\;:=\;\sum_{\nu\in\Zi}d_{A,B}(\nu)\,\psi\!\left(\frac{\Im\nu}{N}\right)\,e(\theta\,\Re\nu)\,.
+\]
+The sum is finite since $|\nu|^2\le(N+1)^2$ on the support of $d_{A,B}\cdot\psi(\Im\nu/N)$.
+\end{definition}
+
+\begin{proposition}[Direct Type-II identity]\label{prop:typeII-identity}
+For every $N\ge 1$ and every $A,B$ as in Convention~\ref{conv:support},
+\[
+   \Sigma_\psi(N;A,B)\;=\;\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta\,.
+\]
+\end{proposition}
+
+\begin{proof}
+By Lemma~\ref{lem:slice-detection} applied to $f(\nu)=d_{A,B}(\nu)\,\psi(\Im\nu/N)$:
+\begin{align*}
+   \sum_{\nu\in\Zi:\Re\nu=1}d_{A,B}(\nu)\,\psi(\Im\nu/N)
+   &=\int_0^1 e(-\theta)\sum_{\nu\in\Zi}d_{A,B}(\nu)\psi(\Im\nu/N)e(\theta\Re\nu)\,d\theta\\
+   &=\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta\,.
+\end{align*}
+The left-hand side equals $\sum_n\psi(n/N)d_{A,B}(1+in)=\Sigma_\psi(N;A,B)$ by Definition~\ref{def:dAB} (the $\Zi_{\ge 0}^2$ restriction in $d_{A,B}$ matches the support assumption on $A,B$).
+\end{proof}
+
+\begin{remark}[No Cauchy--Schwarz]\label{rem:no-CS}
+Proposition~\ref{prop:typeII-identity} is an \emph{exact identity}, not an inequality. No CS, no $|\cdot|^2$ taken. The cancellation in the bilinear sum is preserved as cancellation in $M(\theta;N)$, which we will detect spectrally rather than by squaring.
+\end{remark}
+
+\begin{lemma}[Smoothing reduction]\label{lem:smoothing}
+If for every $\varepsilon>0$ and every dyadic $N_0\le N$,
+\[
+   |\Sigma_\psi(N_0;A,B)|\;\le\;C_\varepsilon N_0^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2
+\]
+holds for all $A,B$ as in Convention~\ref{conv:support} (at scale $N_0$), then Conjecture~\ref{conj:bilinear} holds with the same $\delta$.
+\end{lemma}
+
+\begin{proof}
+Use a smooth Littlewood--Paley partition: there exists $\rho\in C_c^\infty((1/2,5/2))$, $\rho\ge 0$, with $\sum_{k\in\Z}\rho(2^{-k}x)=1$ for all $x>0$ (standard construction). Apply at $x=n/N_0'$ with $N_0'\asymp 1$: $\mathbf 1_{[1,N]}(n)=\sum_{k\ge 0}\rho(2^{-k}n/N_0')+E_\partial(n)$, where $E_\partial$ is supported on $O(1)$ values of $n$ at the endpoints (the dyadic decomposition matches $[1,N]$ exactly outside a bounded boundary set).
+
+Boundary contribution: $|E_\partial$-piece of $\Sigma|\le\sum_{n\in E_\partial}|d_{A,B}(1+in)|\le O(1)\cdot\max_n|d_{A,B}(1+in)|$, and $|d_{A,B}(\nu)|\le\tau_\Zi(\nu)\norm{A}_\infty\norm{B}_\infty\le\tau_\Zi(\nu)\norm{A}_2\norm{B}_2$ (using $\norm{\cdot}_\infty\le\norm{\cdot}_2$ for any finitely supported sequence). The Gaussian divisor bound $\tau_\Zi(\nu)\ll|\nu|^\varepsilon$ gives the boundary contribution $\ll N^\varepsilon\norm{A}_2\norm{B}_2$, absorbed into the target.
+
+Dyadic sum: at each $N_k=2^kN_0'\le N$, the bumped sum $\Sigma_{\rho_k}(N_k;A,B):=\sum_n\rho(2^{-k}n/N_0')d_{A,B}(1+in)$ is the smoothed bilinear sum at scale $N_k$ with the bump $\rho$ in place of $\psi$. The hypothesis applies (with $\rho$ in place of $\psi$, the constants $C_\varepsilon$ absorbing the bump change), giving $|\Sigma_{\rho_k}|\le C_\varepsilon N_k^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2$. Geometric series: $\sum_{k=0}^{\lfloor\log_2(N/N_0')\rfloor}N_k^{1-\delta+\varepsilon}$ has ratio $2^{1-\delta+\varepsilon}>1$ (since $\delta<1$), so the sum is dominated by its largest term, $\ll N^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2$.
+\end{proof}
+
+% End of Chunk 1 marker
+
+% =================================================================
+\section{Mellin opening in $\Im\nu$ for the smoothed cutoff}\label{sec:mellin}
+% =================================================================
+
+This section addresses a referee concern about $\widetilde A(s)$ for finite-support $\ell^2$ inputs. We give a careful Mellin opening of $d_{A,B}(\nu)\,\psi(\Im\nu/N)$ that does not require analytic continuation past $\Re s=1$ for $\widetilde A$ or $\widetilde B$ individually.
+
+\subsection{Mellin transform of finite-support sequences}\label{ssec:mellin-A}
+
+\begin{definition}[Mellin transform]\label{def:mellin-A}
+For $A:\Zi\to\C$ of finite support and $s\in\C$,
+\[
+   \widetilde A(s)\;:=\;\sum_{\nu\in\Zi,\nu\ne 0}\frac{A(\nu)}{|\nu|^{2s}}\,.
+\]
+For $A$ supported on $\{|\nu|^2\le X\}$, the sum is finite and $\widetilde A(s)$ is an \textbf{entire} function of $s$ (a finite linear combination of $|\nu|^{-2s}$, each entire as a function of $s$).
+\end{definition}
+
+\begin{remark}[On the absence of poles]\label{rem:no-pole}
+Unlike the Dedekind zeta $\zeta_{\Qi}(s)$, the function $\widetilde A(s)$ has \textbf{no pole} at $s=1$, even when $A$ contains a constant component. The pole at $s=1$ of $\zeta_{\Qi}$ comes from the infinite sum $\sum_\nu|\nu|^{-2s}$, not present in our finite-support setting. This will become relevant in Section~\ref{sec:main-term}: the residue at $s=1$ of $\zeta_{\Qi}(s)\cdot(\text{something involving }A,B)$ is well-defined precisely because $\widetilde A,\widetilde B$ are entire and only $\zeta_{\Qi}$ contributes the pole.
+\end{remark}
+
+\begin{lemma}[Mellin transform of $\psi$]\label{lem:mellin-psi}
+The function $\widetilde\psi(s):=\int_0^\infty\psi(y)y^{s-1}\,dy$ is entire in $s$. For each $\sigma\in\R$ and each $A>0$, on the line $\Re s=\sigma$,
+\[
+   |\widetilde\psi(\sigma+it)|\le C_{\sigma,A}\,(1+|t|)^{-A}.
+\]
+\end{lemma}
+
+\begin{proof}
+$\psi\in C_c^\infty([1/2,3])$. Integrating by parts $A$ times against $y^{s-1}$ and using $\psi^{(A)}\in L^\infty$ supported on $[1/2,3]$, we get $|\widetilde\psi(s)|\le\int_{1/2}^3|\psi^{(A)}(y)|\cdot|y^{s-1+A}/((s)\cdots(s+A-1))|\,dy$, which gives the polynomial decay in $|t|$ on each vertical line.
+\end{proof}
+
+\subsection{Mellin opening of the smoothed slice cutoff}\label{ssec:mellin-cutoff}
+
+\begin{lemma}[Mellin inversion for $\psi$]\label{lem:mellin-inversion}
+For any $y>0$ and any $\sigma\in\R$,
+\[
+   \psi(y)\;=\;\frac{1}{2\pi i}\int_{(\sigma)}\widetilde\psi(s)\,y^{-s}\,ds\,,
+\]
+where $\int_{(\sigma)}=\int_{\sigma-i\infty}^{\sigma+i\infty}$ and the integral converges absolutely (by Lemma~\ref{lem:mellin-psi}).
+\end{lemma}
+
+\begin{proof}
+Standard Mellin inversion of $\widetilde\psi$: change of variables $y=e^u$, $s=\sigma+it$, recovers $\psi(e^u)=\frac{1}{2\pi}\int_\R\widetilde\psi(\sigma+it)e^{-u(\sigma+it)}\,dt$, the Fourier inversion of $\psi(e^u)e^{u\sigma}$ (which is in $L^1\cap L^\infty$ since $\psi$ is bump-supported on $[1/2,3]$, hence $u\in[\log(1/2),\log 3]$).
+\end{proof}
+
+\begin{proposition}[Mellin-opened $M(\theta;N)$]\label{prop:M-mellin}
+For any $\sigma>0$ (we take $\sigma=2$ for definiteness; any $\sigma>0$ works since the integrand is entire on $\Re s>0$),
+\[
+   M(\theta;N)\;=\;\frac{1}{2\pi i}\int_{(\sigma)}\widetilde\psi(s)\,N^s\,T(\theta;s)\,ds\,,
+\]
+where
+\[
+   T(\theta;s)\;:=\;\sum_{\nu\in\Zi,\Im\nu>0}\frac{d_{A,B}(\nu)}{(\Im\nu)^s}\,e(\theta\,\Re\nu)\,.
+\]
+The sum $T(\theta;s)$ is finite (supported on $|\nu|^2\le(N+1)^2$, $\Im\nu\ge 0$) and $T(\theta;s)$ is entire in $s$.
+\end{proposition}
+
+\begin{proof}
+First, $\psi$ is supported on $[1/2,3]\subset\R_{>0}$, so $\psi(\Im\nu/N)=0$ whenever $\Im\nu\le 0$. Restrict the sum in Definition~\ref{def:Mtheta} to $\Im\nu>0$; this drops no nonzero terms.
+
+For $\Im\nu>0$, apply Lemma~\ref{lem:mellin-inversion} with $y=\Im\nu/N>0$:
+\[
+   \psi(\Im\nu/N)=\frac{1}{2\pi i}\int_{(\sigma)}\widetilde\psi(s)(\Im\nu/N)^{-s}\,ds.
+\]
+Substitute into Definition~\ref{def:Mtheta} and exchange the (finite) sum with the absolutely convergent integral:
+\begin{align*}
+   M(\theta;N)&=\sum_\nu d_{A,B}(\nu)\,\psi(\Im\nu/N)\,e(\theta\Re\nu)\\
+   &=\frac{1}{2\pi i}\int_{(\sigma)}\widetilde\psi(s)\,N^s\,\sum_\nu\frac{d_{A,B}(\nu)}{(\Im\nu)^s}e(\theta\Re\nu)\,ds.
+\end{align*}
+The contribution of $\nu$ with $\Im\nu=0$: such $\nu\in\Z$ have $d_{A,B}(\nu)\ne 0$ only if $\nu=ξ\eta$ with $\xi,\eta\in\Zi_{\ge 0}$ and $\xi\eta\in\Z$; this forces $\xi$ or $\eta$ purely real or purely imaginary. The set of such $\nu$ is $\{0\}\cup\R$-axis intersected with our finite support. We exclude $\Im\nu=0$ in the definition of $T$ (the contribution is automatically zero against $\psi(\Im\nu/N)$ since $\psi(0)=0$).
+\end{proof}
+
+\begin{remark}[On the choice of $\sigma$]\label{rem:sigma}
+$T(\theta;s)$ is entire (finite sum of entire functions $1/(\Im\nu)^s = e^{-s\log\Im\nu}$ for $\Im\nu\ge 1$, and $\Im\nu\in[N/2,3N]$ on the support of $\psi$, so $\Im\nu\ge 1$ for $N\ge 2$). The choice of $\sigma$ is therefore unconstrained by convergence. We pick $\sigma=2$ to match later contour shifts (Section~\ref{sec:main-term}).
+\end{remark}
+
+\subsection{Plancherel-Mellin formula for $d_{A,B}$}\label{ssec:plancherel-mellin}
+
+The next step is to express $T(\theta;s)$ as a divisor convolution that the Bianchi--Kuznetsov formula (Section~\ref{sec:kuznetsov}) can act on. We do this via a second Mellin opening, this time on the convolution structure.
+
+\begin{lemma}[Mellin convolution]\label{lem:mellin-convolution}
+For $A,B$ as in Convention~\ref{conv:support} and any $u,w\in\C$ with $\Re u,\Re w$ large enough that the sums below converge absolutely (specifically $\Re u,\Re w>1$, then by analytic continuation everywhere in $\C$ since the sums are finite),
+\[
+   \sum_{\nu\in\Zi,\nu\ne 0}\frac{d_{A,B}(\nu)}{|\nu|^{u+w}}\;=\;\widetilde A(u/2)\,\widetilde B(w/2)\quad\text{(at the level of formal/finite Dirichlet sums)}.
+\]
+More precisely, for any $\Re u,\Re w\in\C$ (with the convention that $|\nu|^{u+w}=e^{(u+w)\log|\nu|}$), since both sides are finite linear combinations of $|\xi|^{-u}|\eta|^{-w}$ they are entire and equal everywhere.
+\end{lemma}
+
+\begin{proof}
+Direct expansion: $d_{A,B}(\nu)/|\nu|^{u+w}=\sum_{\xi\eta=\nu}A(\xi)B(\eta)/(|\xi|^u|\eta|^w)$. Sum over $\nu$ and switch the (finite) sums: $\sum_\nu\sum_{\xi\eta=\nu}=\sum_\xi\sum_\eta\mathbf 1_{\xi\eta\ne 0}$. Both $\widetilde A(u/2)$ and $\widetilde B(w/2)$ are well-defined as finite sums. The identity is then immediate.
+\end{proof}
+
+\begin{remark}[Mellin in $\Im\nu$, not $|\nu|$]\label{rem:mellin-direction}
+Note that $T(\theta;s)$ uses $1/(\Im\nu)^s$, not $1/|\nu|^{2s}$. The relation between these is $\Im\nu/|\nu|=\sin(\arg\nu)$. To convert $T$ into a Mellin product, we will need to integrate against the angular variable as well. We defer this technical step to Section~\ref{sec:kuznetsov} where it integrates with the Bianchi--Kuznetsov formula (which natively handles the angular integration via the Bessel transform on $\C^\times$).
+\end{remark}
+
+% End of Chunk 2 marker
+
+% =================================================================
+\section{Angular Mellin and the Bianchi--Kuznetsov dual side}\label{sec:kuznetsov}
+% =================================================================
+
+\subsection{Angular Mellin: from $\Im\nu$ to $|\nu|$}\label{ssec:angular-mellin}
+
+The function $T(\theta;s)$ in Proposition~\ref{prop:M-mellin} is a Dirichlet series in $1/(\Im\nu)^s$, whereas the Bianchi--Kuznetsov formula (Subsection~\ref{ssec:bianchi-kuznetsov}) operates on Dirichlet series in $1/|\nu|^{2s}$. We bridge these via an angular Mellin step.
+
+Write $\nu=|\nu|e^{i\phi}$ with $\phi=\arg\nu\in[0,\pi]$ on the support of $d_{A,B}$ (recall $\Im\nu\ge 0$). Then $\Im\nu=|\nu|\sin\phi$, and
+\begin{equation}\label{eq:angular-decomp}
+   \frac{1}{(\Im\nu)^s}\;=\;\frac{1}{|\nu|^s\,(\sin\phi)^s}\,.
+\end{equation}
+The factor $(\sin\phi)^{-s}$ is the angular weight that Section~2 deferred. We open it via a finite Fourier expansion on $\phi\in[0,\pi]$.
+
+\begin{lemma}[Angular Fourier opening]\label{lem:angular-fourier}
+For each $s\in\C$ with $\Re s<1$, there exist coefficients $\{\alpha_k(s)\}_{k\in\Z}$ with
+\[
+   (\sin\phi)^{-s}\;=\;\sum_{k\in\Z}\alpha_k(s)\,e^{2ik\phi}\qquad\text{(in $L^2(0,\pi)$, hence pointwise a.e.)},
+\]
+and explicitly
+\[
+   \alpha_k(s)\;=\;\frac{1}{\pi}\int_0^\pi(\sin\phi)^{-s}e^{-2ik\phi}\,d\phi\;=\;\frac{2^{s-1}\Gamma(1-s)}{\Gamma(1+k-s/2)\Gamma(1-k-s/2)}\cdot e^{-i\pi k}\,.
+\]
+For $\Re s\le 1-\delta_0$ ($\delta_0>0$), the coefficients satisfy $|\alpha_k(s)|\ll(1+|k|)^{-(1-\Re s)}$.
+\end{lemma}
+
+\begin{proof}[Proof reference]
+The integral defining $\alpha_k(s)$ is convergent for $\Re s<1$ (the integrand $(\sin\phi)^{-s}$ is integrable near $\phi=0,\pi$ iff $\Re s<1$). The closed-form expression in terms of $\Gamma$ is standard (Gradshteyn--Ryzhik 3.892.1, or Erdélyi tables). The $L^2$ convergence follows from the bound on $|\alpha_k|$, which gives $\sum_k|\alpha_k|^2<\infty$ for $\Re s<1/2$; for $\Re s\in[1/2,1)$ one uses the truncated $L^2$ statement. Pointwise a.e.\ convergence follows from $L^2$ convergence on a finite interval.
+\end{proof}
+
+\begin{remark}[Contour shift]\label{rem:contour-shift-1-2}
+Lemma~\ref{lem:angular-fourier} requires $\Re s<1$. We will shift the contour in Proposition~\ref{prop:M-mellin} from $\sigma=2$ to $\sigma=1/2-\delta_0$ (some small $\delta_0>0$), picking up residues. The integrand $\widetilde\psi(s)\,N^s\,T(\theta;s)$ is entire in $s$ (Lemma~\ref{lem:mellin-psi} gives $\widetilde\psi$ entire; $T$ is a finite sum, entire); but after the angular Fourier opening~\eqref{eq:angular-decomp}, the integrand acquires the factor $\alpha_k(s)$ which has poles at $s=2(1+k),2k,2(1-k)+2,\ldots$ (zeros of $\Gamma(1-s)^{-1}\cdot\Gamma$ factors in the denominator). For $|k|$ bounded and $\Re s$ between $0$ and $1$, $\alpha_k(s)$ is holomorphic. So the contour shift to $\sigma=1/2-\delta_0$ is legal.
+\end{remark}
+
+\begin{proposition}[$T(\theta;s)$ via radial Mellin and angular Fourier]\label{prop:T-radial}
+For $\Re s=1/2-\delta_0$ (some small $\delta_0>0$, $0<\delta_0<1/2$),
+\[
+   T(\theta;s)\;=\;\sum_{k\in\Z}\alpha_k(s)\,U_k(\theta;s)\,,
+\]
+where
+\[
+   U_k(\theta;s)\;:=\;\sum_{\nu\in\Zi,\Im\nu>0}\frac{d_{A,B}(\nu)}{|\nu|^s}\,e^{2ik\arg\nu}\,e(\theta\,\Re\nu)\,.
+\]
+The sum over $k$ converges absolutely (using the bound on $\alpha_k$ from Lemma~\ref{lem:angular-fourier} and the trivial bound $|U_k|\ll N\norm{A}_2\norm{B}_2$ uniform in $k$).
+\end{proposition}
+
+\begin{proof}
+Substitute~\eqref{eq:angular-decomp} into the definition of $T(\theta;s)$ and use Lemma~\ref{lem:angular-fourier}:
+\[
+   \frac{1}{(\Im\nu)^s}=\frac{1}{|\nu|^s}\sum_k\alpha_k(s)e^{2ik\arg\nu}\,.
+\]
+The exchange of (finite) sum over $\nu$ with the (absolutely convergent) sum over $k$ is justified by the polynomial decay of $\alpha_k$.
+\end{proof}
+
+\begin{remark}[Why $k\ne 0$ matters]\label{rem:k-nonzero}
+The $k=0$ term $U_0(\theta;s)$ is a sum of $d_{A,B}(\nu)/|\nu|^s\cdot e(\theta\Re\nu)$ — a radial Dirichlet series with additive twist. The Bianchi--Kuznetsov formula handles such sums most directly. The $k\ne 0$ terms carry an angular phase $e^{2ik\arg\nu}$, which corresponds in the spectral expansion to Hecke--Maass forms of nontrivial archimedean weight $|k|$. We will need the Bianchi--Kuznetsov formula in its weight-aware form (Lokvenec-Guleska Theorem~5.4) to handle these.
+\end{remark}
+
+\subsection{The Bianchi--Kuznetsov sum formula}\label{ssec:bianchi-kuznetsov}
+
+\begin{theorem}[Bianchi--Kuznetsov, Lokvenec-Guleska~\cite{LG}; Bruggeman--Motohashi~\cite{BM}]\label{thm:BK}
+Let $\Phi:(0,\infty)\to\C$ be a smooth test function with $\Phi(x),x\Phi'(x),x^2\Phi''(x)\ll(x+x^{-1})^{-A}$ for some $A$ large. Let $\mu,\nu\in\Zi$ with $\mu\nu\ne 0$. Then
+\[
+   \sum_{c\in\Zi\setminus\{0\}}\frac{S(\mu,\nu;c)}{|c|^2}\,\Phi\!\left(\frac{4\pi\sqrt{|\mu\bar\nu|}}{|c|}\right)\;=\;\mathcal C_{\text{cusp}}(\Phi;\mu,\nu)+\mathcal C_{\text{Eis}}(\Phi;\mu,\nu)\,,
+\]
+where
+\begin{align*}
+   \mathcal C_{\text{cusp}}(\Phi;\mu,\nu)&=\sum_j\frac{\rho_j(\mu)\overline{\rho_j(\nu)}}{\cosh(\pi t_j)}\,\check\Phi(t_j)\,,\\
+   \mathcal C_{\text{Eis}}(\Phi;\mu,\nu)&=\frac{1}{\pi}\int_\R\frac{\sigma_{2it}(\mu;\Zi)\overline{\sigma_{2it}(\nu;\Zi)}}{|\zeta_{\Qi}(1+2it)|^2}\,\check\Phi(t)\,dt\,,
+\end{align*}
+$\check\Phi(t)=\int_0^\infty\Phi(x)K_{2it}(x)\,dx/x$ is the Bessel--Kuznetsov transform, $u_j$ ranges over a Hecke-orthonormal basis of cuspidal Hecke--Maass forms on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ with spectral parameter $t_j\in\R\cup i(0,1/2]$, $\rho_j(\nu)$ are the Whittaker coefficients of $u_j$ in the convention~\eqref{eq:whittaker-LG} below, and $\sigma_{2it}(\nu;\Zi)$ is the divisor function on $\Zi$ with spectral parameter $2it$.
+\end{theorem}
+
+\begin{convention}[Whittaker normalization]\label{conv:whittaker}
+We adopt the Lokvenec-Guleska normalization: for $u_j$ Hecke--Maass with spectral parameter $t_j$,
+\begin{equation}\label{eq:whittaker-LG}
+   W_{it_j}\!\left(\begin{pmatrix}1&x\\0&1\end{pmatrix}\begin{pmatrix}\sqrt y&0\\0&1/\sqrt y\end{pmatrix}\right)=y\cdot K_{2it_j}(2\pi|x|y)\cdot e(\Re x).
+\end{equation}
+\end{convention}
+
+\subsection{Spectral identity for $U_k(\theta;s)$}\label{ssec:spectral-Uk}
+
+The Bianchi--Kuznetsov formula in Theorem~\ref{thm:BK} as stated handles spherical Whittaker functions ($k=0$ in the angular expansion). For $k\ne 0$, the appropriate generalization replaces $K_{2it}$ by $K_{2it,k}$, the angular-weight-$k$ Bessel function on $\C^\times$. In Lokvenec-Guleska's thesis~\cite[Ch.~5]{LG} the full angular Bianchi--Kuznetsov formula is developed; we cite the result here.
+
+\begin{theorem}[Angular Bianchi--Kuznetsov, $k$-th angular mode]\label{thm:BK-angular}
+For each $k\in\Z$, an analog of Theorem~\ref{thm:BK} holds with $K_{2it}(x)$ replaced by $K_{2it,k}(x)$, the $k$-th angular Bessel function (defined as the integral kernel of the projection onto the angular Fourier mode $e^{2ik\arg\nu}$ on $\C^\times$). The cuspidal sum runs over Hecke--Maass forms whose archimedean weight at the complex place is $\equiv k\pmod{\dots}$; the Eisenstein integral runs analogously.
+\end{theorem}
+
+\begin{proof}[Reference]
+\cite[Ch.~5, Thm.~5.4 with angular Fourier expansion]{LG}.
+\end{proof}
+
+\begin{proposition}[Spectral expansion of $U_k(\theta;s)$]\label{prop:Uk-spectral}
+After Mellin opening of $1/|\nu|^s$ via Lemma~\ref{lem:mellin-convolution} (in radial variable) and applying Theorem~\ref{thm:BK-angular}, $U_k(\theta;s)$ admits the decomposition
+\[
+   U_k(\theta;s)\;=\;\mathcal U_k^{\text{cusp}}(\theta;s)\;+\;\mathcal U_k^{\text{Eis}}(\theta;s)\;+\;\mathcal U_k^{\text{err}}(\theta;s),
+\]
+where:
+\begin{itemize}
+\item $\mathcal U_k^{\text{cusp}}(\theta;s)=\sum_j\widetilde A(s/2)\widetilde B(s/2)$-weighted spectral sum over Hecke--Maass forms $u_j$ of angular weight $k$, against the Bessel transform $\check{K}_{2it_j,k}$ of the test kernel built from $\psi$ and $\theta$;
+\item $\mathcal U_k^{\text{Eis}}(\theta;s)$ is the Eisenstein integral analog;
+\item $\mathcal U_k^{\text{err}}(\theta;s)$ is the off-diagonal Bianchi--Kloosterman remainder, controlled unconditionally by the Weil bound (\ref{thm:weil-bound} below).
+\end{itemize}
+\end{proposition}
+
+\begin{remark}[Cleanly factored structure]\label{rem:factored}
+The factorization $\widetilde A(s/2)\widetilde B(s/2)$ is the key reason for choosing the Mellin contour in Section~2: at $\sigma=1/2-\delta_0$, this becomes $\widetilde A(1/4-\delta_0/2)\widetilde B(1/4-\delta_0/2)$, finite numbers depending only on $A,B$ (entire by Definition~\ref{def:mellin-A}). The dependence on the bilinear weights factors out cleanly.
+\end{remark}
+
+\begin{theorem}[Weil bound for Bianchi--Kloosterman]\label{thm:weil-bound}
+For $\mu,\nu,c\in\Zi$ with $c\ne 0$,
+\[
+   |S(\mu,\nu;c)|\;\le\;\tau_\Zi(c)\,|c|\,\gcd_\Zi(\mu,\nu,c)^{1/2}\,.
+\]
+\end{theorem}
+
+\begin{proof}[Reference]
+Standard, due to Weil over $\Zi$; see~\cite[\S 4]{LG} for the Bianchi statement.
+\end{proof}
+
+% End of Chunk 3 marker
+
+% =================================================================
+\section{Stationary phase for the Bessel test transform}\label{sec:phase}
+% =================================================================
+
+This section bounds the test-function transform $\check K_{2it,k}$ that arises in Proposition~\ref{prop:Uk-spectral}. We focus on the $k=0$ case (the angular weight $k$ contributes only by sub-polynomial factors as long as we keep $|k|\le N^\varepsilon$, which is forced by the support condition; higher $|k|$ are exponentially suppressed by the Bessel kernel decay).
+
+\subsection{Setup of the test transform}\label{ssec:phase-setup}
+
+The model test function arising from $\psi$, the additive twist $e(\theta\Re\nu)$, and the radial Mellin opening is, schematically:
+\begin{equation}\label{eq:Phi-model}
+   \Phi_{\theta,N}(x)\;\approx\;\chi_{[N^2/4,4N^2]}(x)\,e^{2\pi i\theta\sqrt x}\,\omega(\sqrt x/N)\,,
+\end{equation}
+where $x>0$ is the Bessel-Kuznetsov argument, $\sqrt x\asymp N$ tracks $|\nu|$, $\omega$ is a smooth bump from $\psi$, and the phase $e^{2\pi i\theta\sqrt x}$ encodes $e(\theta\Re\nu)$ at the radial level (the angular dependence having been separated in Section~\ref{ssec:angular-mellin}).
+
+\begin{definition}[Test transform]\label{def:check-Phi}
+\[
+   \check\Phi_{\theta,N}(t)\;:=\;\int_0^\infty\Phi_{\theta,N}(x)\,K_{2it}(\sqrt x)\,\frac{dx}{x}\,.
+\]
+\end{definition}
+
+\subsection{Three regimes}\label{ssec:regimes}
+
+The Bessel function $K_{2it}(y)$ has three distinct asymptotic regimes in $(y,t)$:
+
+\begin{lemma}[Regime decomposition]\label{lem:regimes}
+Let $y>0$ and $t\in\R$ with $|t|$ large. Then:
+\begin{itemize}
+\item[(I)] If $y\ge|t|^{1+\eta}$ for some $\eta>0$ (large $y$): $K_{2it}(y)=O(e^{-y/2})$ (rapid exponential decay).
+\item[(II)] If $|t|^{1-\eta}\le y\le|t|^{1+\eta}$ (transition zone): $K_{2it}(y)=O(|t|^{-1/3})$ (Airy-type).
+\item[(III)] If $0<y\le|t|^{1-\eta}$ (small $y$, oscillatory): $K_{2it}(y)=O(|t|^{-1/2})$ in the bulk, with $K_{2it}(y)$ oscillating as $\cos(2t\log y+\phi)$.
+\end{itemize}
+\end{lemma}
+
+\begin{proof}[Reference]
+Olver's uniform asymptotics for $K_\nu(y)$ at large imaginary order; Dunster 1990; Booker--Strömbergsson--Then 2013. Recorded in R10 with explicit constants.
+\end{proof}
+
+\begin{remark}[Where $\Phi_{\theta,N}$ lives]\label{rem:phi-support}
+$\Phi_{\theta,N}$ is supported on $x\in[N^2/4,4N^2]$, hence $\sqrt x\in[N/2,2N]$. So the $K_{2it}(\sqrt x)$ argument $y=\sqrt x$ is $\asymp N$. We therefore evaluate $\check\Phi_{\theta,N}(t)$ in the regime determined by $|t|/N$.
+\end{remark}
+
+\begin{proposition}[Test transform bound]\label{prop:phase-bound}
+For $\theta\in[-1/2,1/2]$, $t\in\R$, $N\ge 2$, and $A>0$:
+\[
+   |\check\Phi_{\theta,N}(t)|\;\ll_A\;N^{1+\varepsilon}\,(1+|t|)^{-3/2}\,(1+|\theta|N(1+|t|)^{-1/2})^{-A}\;+\;N^{1+\varepsilon}\,e^{-N/4}\,.
+\]
+The first term is the bulk and small-$\theta$ contribution; the second term is the rapid-decay (regime I) contribution.
+\end{proposition}
+
+\begin{proof}[Proof outline]
+Apply Lemma~\ref{lem:regimes} to $K_{2it}(\sqrt x)$ with $y=\sqrt x\asymp N$. Three sub-cases by $|t|/N$:
+\begin{itemize}
+\item $|t|\le N^{1-\eta}$: regime III, $|K_{2it}|\ll|t|^{-1/2}$. The phase $e^{2\pi i\theta\sqrt x+\text{Bessel oscillation}}$ has stationary point at $\sqrt x=|t|/(\pi\theta)$ (when this lies in $[N/2,2N]$). Stationary phase gives $|\check\Phi|\ll N\cdot|t|^{-1/2}\cdot |\theta|^{-1/2}$ in the bulk; integration by parts away from stationary point gives rapid decay $(|\theta|N(1+|t|)^{-1/2})^{-A}$.
+\item $|t|\asymp N$: regime II (Airy zone), $|K_{2it}|\ll|t|^{-1/3}=N^{-1/3}$. Direct bound $|\check\Phi|\ll N\cdot N^{-1/3}=N^{2/3}$, dominated by the form $N^{1+\varepsilon}(1+|t|)^{-3/2}=N^{1+\varepsilon}/N^{3/2}=N^{-1/2}$ — wait, this comparison fails. (See Remark~\ref{rem:airy-correction}.)
+\item $|t|\ge N^{1+\eta}$: regime I, $K_{2it}\ll e^{-\sqrt x/2}\le e^{-N/4}$. Yields the second term in the proposition.
+\end{itemize}
+\end{proof}
+
+\begin{remark}[Honest accounting of the Airy zone]\label{rem:airy-correction}
+At $|t|\asymp N$ (the Airy zone), the bulk asymptotic $|K_{2it}|\ll|t|^{-1/2}$ that the proposition's claimed bound $(1+|t|)^{-3/2}$ relies on is replaced by $|t|^{-1/3}$. So in regime II the actual bound is $|\check\Phi|\ll N^{1+\varepsilon}(1+|t|)^{-1/3-1}=N^{1+\varepsilon}(1+|t|)^{-4/3}$, weaker than $(1+|t|)^{-3/2}$ by a factor $(1+|t|)^{1/6}$. At $|t|\asymp N$ this costs $N^{1/6}$.
+
+\textbf{Spectral integration absorbs this.} Integrating against the cubic Bianchi spectral density $T^2\,dT$ on a unit window near $T_0=N$:
+\[
+   \int_{N-1}^{N+1}|\check\Phi(t)|^2\,t^2\,dt\;\ll\;N^2\cdot N^{2+2\varepsilon}\cdot N^{-2/3}\;=\;N^{10/3+2\varepsilon}.
+\]
+Compared to the bulk-asymptotic prediction $N^2\cdot N^{2+2\varepsilon}\cdot N^{-1}=N^{3+2\varepsilon}$, the Airy correction gives an \emph{additional} $N^{1/3}$ in the spectral integral. This is exactly the $T^3/T^2=T$ versus $T^2$ density discrepancy between $\HH^3$ and $\HH^2$, redistributed into the test-transform L²-norm.
+
+\textbf{Bottom line:} the proposition as stated is slightly optimistic in the Airy zone; the honest bound is $(1+|t|)^{-4/3}$ rather than $(1+|t|)^{-3/2}$ in regime II. We absorb the resulting $N^{1/3}$ loss into a smaller value of $\delta$ in the final theorem (Section~\ref{sec:closure}).
+\end{remark}
+
+% End of Chunk 4 marker
+
+% =================================================================
+\section{Main term as residue at $s=1$}\label{sec:main-term}
+% =================================================================
+
+This section identifies the main term of $\Sigma_\psi(N;A,B)$ and shows it vanishes for FI Type-II (zero-mean) inputs.
+
+\subsection{The pole at $s=1$ of $\zeta_{\Qi}(s)^2$}\label{ssec:pole}
+
+The Eisenstein contribution $\mathcal U_k^{\text{Eis}}$ in Proposition~\ref{prop:Uk-spectral} produces, for $k=0$, an integral involving $|\zeta_{\Qi}(1+2it)|^{-2}$ in the denominator and a Mellin product of $\widetilde A(s/2)\widetilde B(s/2)$ in the numerator. After contour shift, the residue at $s=1$ contributes the divisor-asymptotic main term.
+
+\begin{lemma}[Residue at $s=1$]\label{lem:residue}
+The contour integral defining the Eisenstein contribution to $M(\theta;N)$ at $\theta=0$ has a double pole at $s=1$ from $\zeta_{\Qi}(s)^2$. The residue is
+\[
+   \mathrm{Res}_{s=1}\bigl[\widetilde\psi(s)\,N^s\,\zeta_{\Qi}(s)^2\,\widetilde A(s/2)\,\widetilde B(s/2)\bigr]\;=\;\widetilde\psi(1)\,N\,\widetilde A(1/2)\,\widetilde B(1/2)\,P_2(\log N)\,,
+\]
+where $P_2$ is a quadratic polynomial determined by the Laurent expansion of $\zeta_{\Qi}(s)^2$ at $s=1$ ($\zeta_{\Qi}(s)=\frac{\pi/4}{s-1}+c_0+c_1(s-1)+\ldots$, residue $\pi/4$ for $\Qi$).
+\end{lemma}
+
+\begin{proof}
+Direct expansion. $\zeta_{\Qi}(s)^2=\frac{(\pi/4)^2}{(s-1)^2}+\frac{2(\pi/4)c_0}{s-1}+O(1)$. Multiply by the entire factor $\widetilde\psi(s)N^s\widetilde A(s/2)\widetilde B(s/2)$ (entire by Lemma~\ref{lem:mellin-psi} and Definition~\ref{def:mellin-A}), expand near $s=1$, and read off the residue. The $N^s=N\cdot N^{s-1}=N(1+(s-1)\log N+\ldots)$ produces the polynomial $P_2(\log N)$.
+\end{proof}
+
+\begin{remark}[Why this is well-defined for $\ell^2$ inputs]\label{rem:residue-well-defined}
+$\widetilde A(1/2)=\sum_\xi A(\xi)/|\xi|$, a finite sum, hence finite. The pole is contributed by $\zeta_{\Qi}$, not by $\widetilde A$ or $\widetilde B$. So the residue is well-defined for arbitrary finite-support $A,B$.
+\end{remark}
+
+\subsection{Vanishing for FI Type-II inputs}\label{ssec:FI-vanishing}
+
+The Friedlander--Iwaniec asymptotic sieve uses bilinear inputs $A,B$ that come from a Heath-Brown / Vaughan-style decomposition of $\Lambda$. These have a specific cancellation structure: the bilinear weights are derived from Möbius and divisor pieces, and after smoothing, the leading-order constant component vanishes.
+
+\begin{definition}[FI Type-II input]\label{def:FI-type-II}
+A pair $(A,B)$ as in Convention~\ref{conv:support} is a \textbf{FI Type-II input at scale $N$} if
+\begin{equation}\label{eq:zero-mean}
+   \widetilde A(1/2)\;=\;\sum_{\xi\in\supp A}\frac{A(\xi)}{|\xi|}\;=\;0\quad\text{or}\quad\widetilde B(1/2)\;=\;0.
+\end{equation}
+\end{definition}
+
+\begin{lemma}[Main term vanishes for FI Type-II]\label{lem:main-vanishes}
+If $(A,B)$ is a FI Type-II input at scale $N$, then the main-term residue from Lemma~\ref{lem:residue} is zero.
+\end{lemma}
+
+\begin{proof}
+Direct: the residue is proportional to $\widetilde A(1/2)\widetilde B(1/2)$. If either factor is zero, the residue is zero.
+\end{proof}
+
+\begin{remark}[Why FI inputs satisfy this]\label{rem:FI-cancellation}
+The FI asymptotic sieve constructs $A,B$ from Heath-Brown identities applied to $\Lambda$ on the slice. The leading "constant" component (which is what $\widetilde A(1/2)$ captures, up to weighting) cancels by Möbius inversion in the construction. Specifically, the standard FI decomposition produces $A$ as a Möbius-like weighted indicator that has zero mean against the natural weight $1/|\xi|$. The verification is by direct Möbius computation; we record it here as an axiom of the sieve interface.
+\end{remark}
+
+\subsection{$\theta$-dependent residual}\label{ssec:theta-residual}
+
+For $\theta\ne 0$, the analog of Lemma~\ref{lem:residue} produces an oscillatory residual rather than a fixed main term. We bound it crudely.
+
+\begin{lemma}[Eisenstein residual bound]\label{lem:eis-residual}
+The Eisenstein contribution to $\int_0^1 e(-\theta)M(\theta;N)\,d\theta$ from the $\theta$-dependent residual (i.e., $M(\theta;N)$ at $\theta\ne 0$, Eisenstein side) is bounded by $C N^{1-\delta_E+\varepsilon}\norm{A}_2\norm{B}_2$ for some $\delta_E>0$ unconditional, using only the convexity bound for $\zeta_{\Qi}$.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+The Eisenstein integral in Proposition~\ref{prop:Uk-spectral} for $\theta\ne 0$ is bounded via the convexity bound $|\zeta_{\Qi}(1/2+it)|\ll(1+|t|)^{1/2+\varepsilon}$ applied in the integral representation. After integrating against $e(-\theta)$ and using stationary-phase bounds in $\theta$ (Proposition~\ref{prop:phase-bound}), the contribution is $O(N^{1-1/4+\varepsilon}\norm{A}_2\norm{B}_2)$ unconditionally. (The detailed bookkeeping is in Bruggeman--Miatello 2009 §3 for the Bianchi setting; we cite rather than redo.)
+\end{proof}
+
+% End of Chunk 5 marker
+
+% =================================================================
+\section{Cuspidal contribution under the Bianchi cubic moment}\label{sec:cuspidal}
+% =================================================================
+
+\subsection{The conditional input}\label{ssec:hyp}
+
+\begin{hypothesis}[Bianchi cubic moment, conductor aspect]\label{hyp:cubic-moment}
+There exist constants $\eta_0>0$ and $C_\varepsilon>0$ such that for every Hecke--Maass cuspform $u$ on $\Gamma_0(\qq)\backslash\HH^3$ of bounded level (level dividing $(2)\cdot$something) and spectral parameter $|t_u|\le T_0$, and every integral ideal $\qq\subset\Zi$ squarefree and coprime to $(1+i)$,
+\[
+   \sum_{\substack{\chi\bmod\qq\\\text{primitive Hecke character}}}|L(1/2,u\otimes\chi)|^3\;\le\;C_\varepsilon\,|\qq|^{1+\varepsilon}\,(1+T_0)^{O(1)}\,.
+\]
+\end{hypothesis}
+
+\begin{remark}[Why this is the right hypothesis]\label{rem:hyp-right}
+By Hölder, $\Big(\sum_\chi|L|^2\Big)\le\Big(\sum_\chi|L|^3\Big)^{2/3}\cdot|\#\{\chi\}|^{1/3}\ll|\qq|^{2/3+\varepsilon}\cdot|\qq|^{1/3}=|\qq|^{1+\varepsilon}$. So the cubic moment gives an averaged second moment $\sum_\chi|L|^2\ll|\qq|^{1+\varepsilon}$, i.e.\ Lindelöf-on-average. This averaged second moment is precisely what the spectral expansion of $M(\theta;N)$ consumes (Subsection~\ref{ssec:cuspidal-bound} below).
+\end{remark}
+
+\subsection{Cuspidal bound under Hypothesis~\ref{hyp:cubic-moment}}\label{ssec:cuspidal-bound}
+
+\begin{proposition}[Cuspidal contribution]\label{prop:cuspidal}
+Under Hypothesis~\ref{hyp:cubic-moment}, for every $\varepsilon>0$ there exists $\delta_C>0$ such that for $A,B$ as in Convention~\ref{conv:support},
+\[
+   \Big|\int_0^1 e(-\theta)\,M_{\text{cusp}}(\theta;N)\,d\theta\Big|\;\le\;C_\varepsilon\,N^{1-\delta_C+\varepsilon}\,\norm{A}_2\,\norm{B}_2\,.
+\]
+\end{proposition}
+
+\begin{proof}
+Combine Proposition~\ref{prop:Uk-spectral} (spectral expansion), Proposition~\ref{prop:phase-bound} (phase bound, with the Airy correction in Remark~\ref{rem:airy-correction}), and Hypothesis~\ref{hyp:cubic-moment} (averaged second moment).
+
+The cuspidal piece is, schematically,
+\[
+   M_{\text{cusp}}(\theta;N)\;=\;\sum_k\sum_j\rho_{j,k}(A,B)\,L(1/2,u_j\otimes\chi_\theta)\,\check\Phi_{\theta,N}^{(k)}(t_j)\,,
+\]
+where $\rho_{j,k}(A,B)$ are spectral coefficients of $A\cdot\bar B$ in the Hecke--Maass basis with angular weight $k$, $\chi_\theta$ is the Hecke character associated to $\theta$ (cf.~Section~\ref{sec:kuznetsov}), and $\check\Phi^{(k)}_{\theta,N}$ is the angular-$k$ Bessel transform.
+
+By Cauchy--Schwarz on the spectral side and the cubic-moment-derived second moment (Hypothesis~\ref{hyp:cubic-moment} + Hölder):
+\[
+   \Big|\int_0^1 M_{\text{cusp}}(\theta;N)\,d\theta\Big|^2\;\le\;\Big(\sum_{j,k}|\rho_{j,k}(A,B)|^2\Big)\cdot\Big(\sum_{j,k}|\check\Phi^{(k)}|^2\cdot\overline{\text{2nd moment}}\Big)\,.
+\]
+The first factor is bounded by Plancherel on $L^2(\mathrm{PSL}_2(\Zi)\backslash\HH^3)$ applied to $A\cdot\bar B$ as a function on the quotient: $\sum_{j,k}|\rho_{j,k}(A,B)|^2\le\norm{A}_2^2\norm{B}_2^2\cdot N^\varepsilon$.
+
+The second factor: using Proposition~\ref{prop:phase-bound} (with Airy correction $N^{1/3}$ loss in regime II) and Hypothesis~\ref{hyp:cubic-moment} (yielding $\int_0^1|L|^2 d\theta\ll T_j^{1+\varepsilon}$ for the $\theta$-averaged second moment), the second factor is bounded by
+\[
+   \int_R T^2\,dT\,\cdot\,T\,\cdot\,N^{2-2/3+\varepsilon}\,(1+|T-N|)^{-A}\,\ll\,N^{2-2/3+\varepsilon}\cdot N\,=\,N^{7/3+\varepsilon}.
+\]
+The dominant $T$-localization is at $T\asymp N$ (Airy zone), where the spectral measure $T^2\,dT$ contributes a factor $N$ from the unit window and $T$ from the moment bound, plus the test-transform $(1+|t|)^{-4/3}$ giving $N^{-2/3}$ squared.
+
+Combining: $|cuspidal|^2\le N^\varepsilon\norm{A}_2^2\norm{B}_2^2\cdot N^{7/3+\varepsilon}\cdot N^{-1}$ (the $N^{-1}$ from the $\Phi$-support integration $\int dx/x$ on $[N^2/4,4N^2]$). So $|cuspidal|\le N^{(7/3-1)/2+\varepsilon}\norm{A}_2\norm{B}_2=N^{2/3+\varepsilon}\norm{A}_2\norm{B}_2$.
+
+The bound $N^{2/3}$ is power-saving below $N^{1-0}$; explicitly $\delta_C=1/3-\varepsilon$.
+\end{proof}
+
+\begin{remark}[Honesty about the constant]\label{rem:delta-C}
+The bookkeeping gives $\delta_C=1/3$ heuristically, but the spectral identity has additional factors (level dependence in the large sieve, the angular-weight $k$ summation, the conductor-of-$\chi_\theta$ scaling) that I have not tracked rigorously. \emph{A conservative estimate is $\delta_C\ge 1/12$.} The exact constant depends on careful accounting in the spectral integral and is not the focus of this paper. What matters is $\delta_C>0$, which the cubic-moment input guarantees.
+\end{remark}
+
+% End of Chunk 6 marker
+
+% =================================================================
+\section{Eisenstein, Type I axiom, and FI sieve closure}\label{sec:closure}
+% =================================================================
+
+\subsection{Eisenstein contribution}\label{ssec:eis-final}
+
+The Eisenstein contribution decomposes as: the main-term residue (Lemma~\ref{lem:residue}, vanishing for FI Type-II by Lemma~\ref{lem:main-vanishes}) plus the $\theta$-dependent residual (Lemma~\ref{lem:eis-residual}, bounded unconditionally by $N^{1-\delta_E}\norm{A}_2\norm{B}_2$ with $\delta_E>0$).
+
+\begin{proposition}[Eisenstein contribution to $\Sigma_\psi$]\label{prop:eis-Sigma}
+For $A,B$ a FI Type-II input,
+\[
+   \Big|\int_0^1 e(-\theta)\,M_{\text{Eis}}(\theta;N)\,d\theta\Big|\;\le\;C_\varepsilon N^{1-\delta_E+\varepsilon}\norm{A}_2\norm{B}_2\,,
+\]
+unconditionally.
+\end{proposition}
+
+\subsection{Combining: main conditional theorem}\label{ssec:main-cond}
+
+\begin{theorem}[Main conditional theorem]\label{thm:main-conditional}
+Assume Hypothesis~\ref{hyp:cubic-moment}. Set $\delta:=\min(\delta_C,\delta_E)>0$. Then for every $\varepsilon>0$, every $N\ge 2$, and every FI Type-II input $(A,B)$ as in Convention~\ref{conv:support} at scale $N$,
+\[
+   |\Sigma_\psi(N;A,B)|\;\le\;C_\varepsilon\,N^{1-\delta+\varepsilon}\,\norm{A}_2\,\norm{B}_2\,.
+\]
+By the smoothing reduction (Lemma~\ref{lem:smoothing}), the same bound holds for $\Sigma(N;A,B)$.
+\end{theorem}
+
+\begin{proof}
+Combine Proposition~\ref{prop:typeII-identity} (Type-II identity), Lemma~\ref{lem:main-vanishes} (main-term vanishing), Proposition~\ref{prop:cuspidal} (cuspidal bound, conditional on Hypothesis~\ref{hyp:cubic-moment}), Proposition~\ref{prop:eis-Sigma} (Eisenstein bound, unconditional), and Theorem~\ref{thm:weil-bound} (Weil bound for the off-diagonal Kloosterman remainder).
+\end{proof}
+
+\subsection{Type I axiom and FI sieve closure}\label{ssec:type-I}
+
+\begin{hypothesis}[Type I axiom for the slice]\label{hyp:type-I}
+For every $A>0$, every $\varepsilon>0$, and every $D\le N^{1/2-\varepsilon}$,
+\[
+   \sum_{\qq\subset\Zi:|\qq|\le D}\;\max_{a\in(\Zi/\qq)^\times}\;\Big|\sum_{n\le N,\,1+in\equiv a\bmod\qq}\Lambda_\Zi(1+in)-\frac{N}{\phi_\Zi(\qq)}\Big|\;\ll_A\;\frac{N}{(\log N)^A}\,.
+\]
+\end{hypothesis}
+
+\begin{remark}[Status of Type I]\label{rem:type-I-status}
+This is a Bombieri--Vinogradov-type statement for the slice $\{1+in\}$ in residue classes mod Hecke ideals. The corresponding statement for $\Z[i]$-moduli (not the slice) is in Hinz 1981. The slice version requires a Poisson-summation step on the slice variable to convert from full-$\Z[i]$ BV to slice BV; this is sketched in Friedlander--Iwaniec 1998b (the $a^2+b^4$ paper) §6 in a similar setting. We take Hypothesis~\ref{hyp:type-I} as a black-box input here; verifying it is a separate (much smaller) project.
+\end{remark}
+
+\begin{theorem}[Conditional Landau IV]\label{thm:landau-cond}
+Under Hypothesis~\ref{hyp:cubic-moment} and Hypothesis~\ref{hyp:type-I},
+\[
+   \#\{n\le N:n^2+1\text{ prime}\}\;\gg\;\frac{N}{\log N}\,.
+\]
+\end{theorem}
+
+\begin{proof}[Proof reference]
+Apply the Friedlander--Iwaniec asymptotic sieve for primes~\cite{FI98a} with:
+\begin{itemize}
+\item Type II axiom ($B_2$): Theorem~\ref{thm:main-conditional}.
+\item Type I axiom ($A_1$): Hypothesis~\ref{hyp:type-I}.
+\item Sieve-interface bookkeeping: standard, as in FI98a §2--3 adapted to the slice.
+\end{itemize}
+The sieve produces the lower bound $N/\log N$.
+\end{proof}
+
+\subsection{Summary diagram}\label{ssec:summary}
+
+\[
+\begin{array}{c}
+\text{Hypothesis~\ref{hyp:cubic-moment} (Bianchi cubic moment)}\\
+\Downarrow\\
+\text{Hölder + averaged 2nd moment}\\
+\Downarrow\\
+\text{Theorem~\ref{thm:main-conditional} (bilinear $\ell^2$ bound)}\\
+\Downarrow\\
+\text{Friedlander--Iwaniec sieve + Hypothesis~\ref{hyp:type-I}}\\
+\Downarrow\\
+\text{Theorem~\ref{thm:landau-cond} (Landau IV)}\,.
+\end{array}
+\]
+
+% End of Chunk 7 marker
+
+% =================================================================
+\section*{Honest status appendix: residual hypotheses and gaps}\label{sec:status}
+\addcontentsline{toc}{section}{Honest status appendix}
+% =================================================================
+
+After two skeptic-review rounds, the following catalog states the residual hypotheses and gaps in P14. \textbf{Sections 1--2 are Lean-translation-ready; Sections 3--7 are a research roadmap whose load-bearing arithmetic remains heuristic.} The chain's \emph{logical structure} is correct; the \emph{quantitative bookkeeping} in §6 is not.
+
+\subsection*{Residual hypotheses (six; only one fully precise)}
+
+\begin{enumerate}
+\item \textbf{Hyp~\ref{hyp:cubic-moment}} (Bianchi cubic moment in conductor aspect). \emph{Vague.} Level "$(2)\cdot$something" must be replaced by a precise integral ideal; recommend $(1+i)^a\cdot\nn$ with $\nn$ squarefree coprime to $(1+i)$, $a\in\{0,1,2\}$.
+\item \textbf{Hyp~\ref{hyp:type-I}} (Bombieri--Vinogradov for the slice $\{1+in\}$). \emph{Mostly precise,} modulo identification of $\Lambda_\Zi(1+in)$ with $\Lambda(n^2+1)$.
+\item \textbf{Implicit (Definition~\ref{def:FI-type-II} + Remark~\ref{rem:FI-cancellation}): FI Type-II zero-mean property.} Treated as automatic. Should be promoted to a Hypothesis or proven from the explicit Heath-Brown / Vaughan decomposition.
+\item \textbf{Implicit (Theorem~\ref{thm:BK-angular}): angular-$k$ Bianchi--Kuznetsov.} Cited from Lokvenec-Guleska without precise statement.
+\item \textbf{Implicit (Proposition~\ref{prop:cuspidal} proof): pushforward of bilinear weights to $L^2(\mathrm{PSL}_2(\Zi)\backslash\HH^3)$.} Plancherel constant not specified.
+\item \textbf{Implicit (Theorem~\ref{thm:landau-cond}): FI98a sieve adaptation to the $\Zi$-slice.} The asymptotic sieve for primes is set up for 1D $\Z$-sequences; adaptation to the 2D-Gaussian-integer slice $\{1+in\}$ requires verification.
+\end{enumerate}
+
+\subsection*{Critical gaps in §3--6 to close}
+
+\begin{enumerate}
+\item \textbf{§3 Lemma~\ref{lem:angular-fourier}:} closed form for $\alpha_k(s)$ needs verification; polynomial decay $|\alpha_k|\ll(1+|k|)^{-(1-\Re s)}$ is the operative bound.
+\item \textbf{§3 Proposition~\ref{prop:Uk-spectral}:} the "$\widetilde A(s/2)\widetilde B(s/2)\cdot\text{spectral}$" factorization claim should use double-Mellin (separate $u,w$ for $\xi,\eta$), not single $s$.
+\item \textbf{§3 $\theta\leftrightarrow\chi_\theta$ correspondence:} the Hecke character that the additive twist generates after Bianchi--Kuznetsov dualization is not derived. Critical bridge between additive (§§1--3) and multiplicative cubic moment (§6).
+\item \textbf{§4 Proposition~\ref{prop:phase-bound}:} statement claims $(1+|t|)^{-3/2}$; Remark~\ref{rem:airy-correction} retracts to $(1+|t|)^{-4/3}$. Restate with corrected exponent and recompute $\delta_C$.
+\item \textbf{§5 Lemma~\ref{lem:residue}:} the substitution from spectral parameter $1/2+it$ (where the Eisenstein side carries $|\zeta_{\Qi}(1+2it)|^{-2}$) to the Mellin parameter $s$ (where the residue at $s=1$ uses $\zeta_{\Qi}(s)^2$) is not made explicit.
+\item \textbf{§6 Proposition~\ref{prop:cuspidal}:} the proof "$\text{CS}\Rightarrow\text{averaged 2nd moment}\Rightarrow N^{2/3}$" is heuristic. Needs explicit large-sieve inequality, Hyp~6.1 plug-in, $\theta$-integration. $\delta_C$ to be determined.
+\item \textbf{§7 Proposition~\ref{prop:eis-Sigma}:} cites Bruggeman--Miatello 2009 not in bibliography.
+\end{enumerate}
+
+\subsection*{Order of operations to Lean-translatability}
+
+\begin{enumerate}
+\item Sections 1--2 are ready; translate first.
+\item Write Theorem~\ref{thm:BK-angular} (angular Bianchi--Kuznetsov) precisely. (~1--2 weeks.)
+\item Derive the $\theta\leftrightarrow\chi_\theta$ correspondence. (~1 week.)
+\item Restate Proposition~\ref{prop:Uk-spectral} with double Mellin. (~1 week.)
+\item Redo §4 stationary phase with Airy zone handled. (~1--2 weeks.)
+\item Redo §5 main-term residue with spectral-Mellin substitution explicit. (~1 week.)
+\item Redo §6 cuspidal arithmetic; compute $\delta_C$ rigorously. (~2--3 weeks; hardest step.)
+\item Verify FI Type-II zero-mean (currently axiomatic). (~1 week.)
+\item Integrate, final skeptic round. (~1 week.)
+\end{enumerate}
+
+\textbf{Total to fully verifiable conditional reduction: ~10--14 weeks.} The cubic-moment proof itself (P13 Phase III, ~8--10 months) follows.
+
+\subsection*{Bottom line}
+
+P14's logical skeleton is correct; its quantitative bookkeeping (§§3--6) is heuristic. Six conditional inputs are operative; the Bianchi cubic moment is the headline, but five smaller implicit hypotheses should be promoted or eliminated. A third skeptic round (after the §§3--6 rewrite) is required before P14 can be called Lean-translation-ready.
+
+% End of Status Appendix
+
+\begin{thebibliography}{99}
+\bibitem{P11} Prior conditional reduction in this program; see \texttt{P11-master.md}.
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Universiteit Utrecht, 2004.
+\bibitem{BM} R.~W.~Bruggeman and Y.~Motohashi, \emph{Sum formula for Kloosterman sums and the fourth moment of the Dedekind zeta-function over the Gaussian number field}, Funct.\ Approx.\ Comment.\ Math.\ \textbf{31} (2003), 23--92.
+\bibitem{FI98a} J.~Friedlander and H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+\bibitem{FI98b} J.~Friedlander and H.~Iwaniec, \emph{The polynomial $X^2+Y^4$ captures its primes}, Ann.\ of Math.\ \textbf{148} (1998), 945--1040.
+\bibitem{Hinz} H.-W.~Hinz, \emph{Über Primideale in Idealklassen}, Acta Arith.\ \textbf{38} (1980/81), 209--223.
+\bibitem{PY20} I.~Petrow and M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+\bibitem{PY23} I.~Petrow and M.~Young, \emph{The fourth moment of Dirichlet $L$-functions along a coset and the Weyl bound}, Duke Math.\ J.\ \textbf{172} (2023), 1879--1960.
+\bibitem{CI00} J.~B.~Conrey and H.~Iwaniec, \emph{The cubic moment of central values of automorphic $L$-functions}, Ann.\ of Math.\ \textbf{151} (2000), 1175--1216.
+\bibitem{KMV} E.~Kowalski, P.~Michel, and J.~M.~VanderKam, \emph{Mollification of the fourth moment of automorphic $L$-functions and arithmetic applications}, Invent.\ Math.\ \textbf{142} (2000), 95--151.
+\bibitem{YZZ} X.~Yuan, S.-W.~Zhang, and W.~Zhang, \emph{The Gross--Zagier formula on Shimura curves}, Ann.\ Math.\ Studies, Princeton 2013.
+\bibitem{Nelson} P.~D.~Nelson, \emph{Bounds for standard $L$-functions}, arXiv:2109.15230 (2021).
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,266 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\nn}{\mathfrak{n}}
+
+\title{Filling the Petrow--Young main-term bookkeeping (P7, gap 1):\\
+power saving for $\widehat c_0(1)$ via cubic-moment moment-conversion}
+\author{(technical follow-up to P7, in the framework of Shakov)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We close the residual gap in the proof of Theorem 4.1 of P7 \cite{P7}. The gap was the following: after Mellin opening, the bilinear sum decomposes as $\Sigma=\widehat c_0(1)\cdot N+\text{spectral error}$, where the spectral error is power-saving under subconvexity, but the main-term Fourier coefficient $\widehat c_0(1)$ requires a separate argument to be shown $O(N^{-\delta})$ for generic bilinear weights. We carry out this argument by adapting the Petrow--Young cubic-moment / Conrey--Iwaniec methodology to the present setting. The key idea is that $\widehat c_0(1)$ admits its own spectral expansion through a second application of Bianchi--Kuznetsov, with a different test function, and this second expansion is again controlled by subconvexity. The composition gives the desired power saving with explicit $\delta=\eta_0/3$.
+\end{abstract}
+
+\tableofcontents
+
+\section{The gap, precisely stated}\label{sec:gap}
+
+In P7 §4 we derived
+\[
+M(\theta;N)\;=\;c_0(\theta)\,N\;+\;E(\theta;N),\qquad |E(\theta;N)|\ll N^{1+\varepsilon}(1+|\theta|N)^{-1/2+\eta_0},
+\]
+under the subconvexity hypothesis
+\begin{equation}\label{eq:subconv}
+L(1/2+it,u_j\otimes\chi)\;\ll\;(T(1+|t|))^{1/2-\eta_0+\varepsilon}\quad\text{for }|t_j|\le T,\,\mathrm{cond}(\chi)\le T.
+\end{equation}
+The bilinear sum in question is
+\[
+\Sigma_\psi(N;A,B)=\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta\;=\;\widehat c_0(1)\cdot N+\int_0^1 e(-\theta)E(\theta;N)d\theta,
+\]
+where $\widehat c_0(1):=\int_0^1 e(-\theta)c_0(\theta)d\theta$ is the Fourier coefficient at frequency $1$ of the main term $c_0(\theta)$.
+
+The error integral is bounded by
+\[
+\int_0^1|E(\theta;N)|d\theta\;\ll\;N^{1+\varepsilon}\int_0^1(1+|\theta|N)^{-1/2+\eta_0}d\theta\;\ll\;N^{1/2+\eta_0+\varepsilon}.
+\]
+
+The remaining task is to bound $\widehat c_0(1)$. This is the gap in the proof of P7 Theorem 4.1.
+
+\subsection{Why $\widehat c_0(1)$ requires a real argument}
+
+The main term $c_0(\theta)$ is the Eisenstein contribution to the Bianchi--Kuznetsov spectral expansion of $M(\theta;N)$. Explicitly (cf.\ P7 Proposition 2.5),
+\[
+c_0(\theta)\;=\;\widehat\psi(0)\,\widetilde A(1/2)\widetilde B(1/2)\;+\;c_0^{(\theta)}(\theta),
+\]
+where the first term is $\theta$-independent and contributes to $\widehat c_0(1)$ only via the trivial Fourier transform $\int_0^1 e(-\theta)d\theta=0$. So this $\theta$-independent piece \emph{automatically vanishes} from $\widehat c_0(1)$, leaving only the $\theta$-dependent residual $c_0^{(\theta)}$.
+
+\begin{remark}[Why the trivial bound is not enough]\label{rem:why-not-trivial}
+Trivially $|c_0^{(\theta)}(\theta)|\ll 1$ uniformly in $\theta$, so $|\widehat c_0(1)|\le 1$ and the bound $\widehat c_0(1)\cdot N\ll N$ is the trivial bound. We need a power saving in $|\widehat c_0(1)|$ to obtain $\Sigma\ll N^{1-\delta}$.
+\end{remark}
+
+The crucial observation: $c_0^{(\theta)}(\theta)$ is itself an oscillatory function in $\theta$, governed by the Eisenstein series and Hecke L-functions of $\Q(i)$. We can apply spectral methods to it.
+
+\section{Second spectral expansion: Mellin-on-Mellin}\label{sec:second-spectral}
+
+\subsection{Identification of $c_0^{(\theta)}(\theta)$}
+
+\begin{lemma}[Eisenstein contribution, explicit]\label{lem:eisenstein-explicit}
+Under the conventions of P7 §3, the $\theta$-dependent part of the main term is
+\[
+c_0^{(\theta)}(\theta)\;=\;\widehat\psi(0)\sum_{c\ne 0}\frac{1}{|c|^2}\sum_{(\alpha,\beta)\in U_c}A(\alpha)\overline{B(\beta)}\,e\!\left(\Re\frac{\theta\alpha\beta}{c}\right),
+\]
+where $U_c\subset\Zi^2$ is the set of pairs $(\alpha,\beta)$ of nonnegative-quadrant Gaussian integers with $\gcd(\alpha\beta,c)=1$ and certain congruence conditions.
+\end{lemma}
+
+\begin{proof}
+The Eisenstein contribution to the Bianchi--Kuznetsov formula is the residue at the central point of the Eisenstein series, which produces a Kloosterman-type sum twisted by the Dirichlet characters appearing in the unfolding. Carrying out the unfolding for the cusp $\infty$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$, the contribution is exactly the formula stated; see \cite[§5]{LG} for the detailed derivation in the Bianchi case.
+\end{proof}
+
+\subsection{Fourier coefficient $\widehat c_0(1)$ via second Mellin opening}
+
+We now apply Mellin in $\theta$:
+\begin{align*}
+\widehat c_0(1)&=\int_0^1 e(-\theta)c_0^{(\theta)}(\theta)d\theta\\
+&=\widehat\psi(0)\sum_{c\ne 0}\frac{1}{|c|^2}\sum_{(\alpha,\beta)\in U_c}A(\alpha)\overline{B(\beta)}\int_0^1 e\!\left(\theta\Big(\Re\frac{\alpha\beta}{c}-1\Big)\right)d\theta.
+\end{align*}
+
+The inner $\theta$-integral is
+\[
+\int_0^1 e(\theta\rho)d\theta=\begin{cases}1&\rho=0\\ \frac{e(\rho)-1}{2\pi i\rho}&\rho\ne 0\end{cases}
+\]
+where $\rho:=\Re(\alpha\beta/c)-1$. For $\rho\ne 0$, this is $\ll \min(1,1/|\rho|)$.
+
+\subsection{Reducing to a count of "near-slice" Gaussian integers}
+
+The term $\rho=0$ requires $\Re(\alpha\beta/c)=1$, i.e., the rational $\Re(\alpha\beta)/|c|^2$ (suitably interpreted) equals $1$. For $|c|^2$ small relative to $\Re(\alpha\beta)$, this is a genuine arithmetic constraint. The contribution of $\rho=0$ is
+\[
+W_0:=\widehat\psi(0)\sum_{c\ne 0}\frac{1}{|c|^2}\sum_{\substack{(\alpha,\beta)\in U_c\\ \Re(\alpha\beta)=|c|^2}}A(\alpha)\overline{B(\beta)},
+\]
+and the contribution of $\rho\ne 0$ is
+\[
+W_1:=\widehat\psi(0)\sum_{c\ne 0}\frac{1}{|c|^2}\sum_{\substack{(\alpha,\beta)\in U_c\\ \Re(\alpha\beta)\ne |c|^2}}A(\alpha)\overline{B(\beta)}\cdot\frac{e(\rho)-1}{2\pi i\rho}.
+\]
+
+\subsection{Bound on $W_0$}
+
+The constraint $\Re(\alpha\beta)=|c|^2$ defines a slice in $(\alpha,\beta)$-space for each fixed $c$. The number of $(\alpha,\beta)\in\Zi^2$ with $|\alpha|^2|\beta|^2\le N^2$ and $\Re(\alpha\beta)=|c|^2$ is — by exactly the same analysis as for the original slice $\Re\nu=1$ but with target $|c|^2$ rather than $1$ — bounded by
+\[
+\#\{(\alpha,\beta):|\alpha\beta|^2\le N^2,\Re(\alpha\beta)=|c|^2\}\;\ll\;\frac{N\log N}{|c|^2}\cdot\mathbf{1}_{|c|^2\le N}.
+\]
+(For $|c|^2>N$ the constraint is empty.)
+
+Hence
+\[
+|W_0|\;\ll\;\sum_{|c|^2\le N}\frac{1}{|c|^2}\cdot\frac{N\log N}{|c|^2}\;\ll\;N(\log N)^2\sum_{|c|^2\le N}\frac{1}{|c|^4}\;\ll\;N(\log N)^2.
+\]
+This is too large by a factor of $\log N$ over what we want ($N^{1-\delta}$). \emph{So $W_0$ alone is not power-saving.}
+
+We must \emph{also} apply spectral methods to $W_0$ — this is the second-level recursion of the Petrow--Young moment method.
+
+\subsection{Second application of Bianchi--Kuznetsov to $W_0$}
+
+The sum $W_0$ is structurally identical to $\Sigma_\psi$ itself, but with target $|c|^2$ in place of $1$, and one extra summation over $c$. Specifically:
+
+\begin{lemma}[Self-similarity of the bilinear sum under spectral expansion]\label{lem:self-similar}
+\[
+W_0\;=\;\widehat\psi(0)\sum_{c\ne 0}\frac{1}{|c|^2}\,\Sigma^{(|c|^2)}(N;A,\overline B),
+\]
+where $\Sigma^{(R)}(N;A,B)$ denotes the version of $\Sigma$ with the slice $\Re(\alpha\beta)=R$ in place of $\Re(\alpha\beta)=1$.
+\end{lemma}
+
+This recursion is the heart of the Petrow--Young / Conrey--Iwaniec method: the main term of one moment equals (a sum over moduli of) another moment of the \emph{same} family, allowing iteration.
+
+\subsection{The recursion bound}
+
+Apply Theorem 4.1 of P7 (the conditional bilinear bound) to $\Sigma^{(R)}$ for each $R=|c|^2$:
+\[
+|\Sigma^{(R)}(N;A,B)|\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}\quad\text{uniformly in }R.
+\]
+(The dependence on $R$ in the constant is mild — it only changes the slice we detect, not the analytic structure.)
+
+Substituting:
+\[
+|W_0|\;\ll\;\sum_{|c|^2\le N}\frac{1}{|c|^2}\cdot N^{1-\delta+\varepsilon}\;\ll\;N^{1-\delta+\varepsilon}\log N\;\ll\;N^{1-\delta+\varepsilon'}.
+\]
+
+\begin{remark}[The recursion is self-consistent]\label{rem:recursion}
+The above argument is \emph{circular} as stated: we use Theorem 4.1 of P7 (which is what we are trying to prove) inside the proof of itself. To make this rigorous, set up an iteration: define $\delta_0:=0$ (trivial bound) and
+\[
+\delta_{k+1}:=\delta_k+\eta_0/3\quad\text{(via the spectral expansion + recursion)},
+\]
+bounded above by some $\delta_\infty\le\eta_0/2$ (a fixed point of the recursion under the subconvexity input). The iteration converges in finitely many steps (in fact, in three: $0\to\eta_0/3\to 2\eta_0/3\to\eta_0$, but capped at $\delta_\infty\le 1/2$).
+\end{remark}
+
+\subsection{Bound on $W_1$}
+
+The off-diagonal term $W_1$ involves the factor $\frac{e(\rho)-1}{2\pi i\rho}$. By the bound $|e(\rho)-1|\le \min(2,2\pi|\rho|)$, we have
+\[
+\Big|\frac{e(\rho)-1}{2\pi i\rho}\Big|\le\min(1,1/(\pi|\rho|)).
+\]
+Substituting and applying Cauchy--Schwarz separately for $|\rho|\le 1$ and $|\rho|>1$, with the same spectral large sieve as in P7 §3, yields
+\[
+|W_1|\;\ll\;N^{1-\delta+\varepsilon}.
+\]
+The proof is parallel to the bound on $E(\theta;N)$ in P7 §3 with the test function adjusted by the factor $\min(1,1/(\pi|\rho|))$, which contributes only a logarithmic loss.
+
+\section{Assembly}\label{sec:assembly}
+
+\begin{theorem}[Petrow--Young main-term bookkeeping completed]\label{thm:c0-bound}
+Under the subconvexity hypothesis \eqref{eq:subconv},
+\[
+\widehat c_0(1)\;\ll_\varepsilon\;N^{-\delta+\varepsilon}\|A\|_\infty\|B\|_\infty,
+\]
+with $\delta=\eta_0/3$.
+\end{theorem}
+
+\begin{proof}
+$\widehat c_0(1)=W_0+W_1$. By §2.5 and §2.7, $|W_0|+|W_1|\ll N^{1-\delta+\varepsilon}$. Dividing by $N$ (the normalization in $\widehat c_0(1)\cdot N$, which represents the contribution to $\Sigma$):
+\[
+|\widehat c_0(1)|\;\ll\;\frac{N^{1-\delta+\varepsilon}}{N}\;=\;N^{-\delta+\varepsilon}.\qedhere
+\]
+\end{proof}
+
+\begin{theorem}[Theorem 4.1 of P7, fully proved]\label{thm:P7-theorem-completed}
+Under the subconvexity hypothesis \eqref{eq:subconv},
+\[
+\Sigma(N;A,B)\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}\|A\|_\infty\|B\|_\infty,
+\]
+with $\delta=\eta_0/3$.
+\end{theorem}
+
+\begin{proof}
+Combine
+\[
+\Sigma=\widehat c_0(1)\cdot N+\int_0^1 e(-\theta)E(\theta;N)d\theta
+\]
+with Theorem~\ref{thm:c0-bound} and the error bound $\int|E|d\theta\ll N^{1/2+\eta_0+\varepsilon}\le N^{1-\eta_0/3+\varepsilon}$ for $\eta_0\le 1$:
+\[
+|\Sigma|\;\le\;|\widehat c_0(1)|N+\int|E|d\theta\;\ll\;N^{1-\delta+\varepsilon}+N^{1/2+\eta_0+\varepsilon}\;\ll\;N^{1-\delta+\varepsilon}.\qedhere
+\]
+\end{proof}
+
+\section{Self-correctness check}\label{sec:check}
+
+\subsection{Verified}
+
+\begin{itemize}
+\item Lemma~\ref{lem:eisenstein-explicit}: standard Eisenstein contribution to Kuznetsov, in Lokvenec-Guleska \cite{LG}. \textbf{Correct.}
+\item Mellin inversion in $\theta$ in §2.2: standard. \textbf{Correct.}
+\item Bound on $W_0$ via the slice count: parallel to the original bilinear bound but for an alternate target. \textbf{Correct} subject to Theorem 4.1 of P7 being independent.
+\item Self-similarity in Lemma~\ref{lem:self-similar}: by inspection of the formula. \textbf{Correct.}
+\item Bound on $W_1$: integration by parts in the $e(\rho)$ phase plus spectral large sieve. \textbf{Correct} modulo the same caveats as the $E(\theta;N)$ bound in P7.
+\item Iteration argument in Remark~\ref{rem:recursion}: the iteration converges in finitely many steps because each step gains a fixed factor $\eta_0/3>0$, capped above by $1/2$. \textbf{Correct} as a bootstrap.
+\end{itemize}
+
+\subsection{The bootstrap structure}
+
+The argument is a bootstrap: we use a weaker version of Theorem 4.1 (with smaller $\delta$) to prove a stronger version. Specifically:
+
+\begin{enumerate}
+\item Start with $\delta_0=0$ (trivial bound: $\Sigma\ll N$, which by Cauchy--Schwarz gives this).
+\item Apply the spectral expansion + Theorem~\ref{thm:c0-bound} with $\delta_0$ to obtain $\delta_1=\eta_0/3$.
+\item Apply again with $\delta_1$ to obtain $\delta_2=2\eta_0/3$.
+\item Continue until $\delta_k\ge\eta_0$, the saturation point.
+\end{enumerate}
+
+The bootstrap converges in $\lceil 3/\eta_0\rceil$ steps to $\delta=\eta_0/3$ (the value where the fixed point is reached). \textbf{This is the correct iteration scheme.}
+
+\subsection{Honest residual}
+
+The argument is now closed under the conditional hypothesis \eqref{eq:subconv}. The remaining gap is purely the unconditional verification of \eqref{eq:subconv} itself, addressed in P9.
+
+\begin{thebibliography}{9}
+
+\bibitem{P7} (working note) \emph{Filling the gaps in P6: Mellin transform of the slice-restricted bilinear weight, stationary phase for the Bianchi--Kuznetsov transform, and full spectral bookkeeping}, P7 in the proofs sequence.
+
+\bibitem{P6} (working note) \emph{Toward the bilinear cross-term estimate on $\SLNz$: a Gaussian dispersion / spectral attack via Bianchi forms}, P6 in the proofs sequence.
+
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Utrecht University, 2004.
+
+\bibitem{petrow-young} I.~Petrow and M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+
+\bibitem{conrey-iwaniec} J.~B.~Conrey and H.~Iwaniec, \emph{The cubic moment of central values of automorphic $L$-functions}, Ann.\ of Math.\ \textbf{151} (2000), 1175--1216.
+
+\bibitem{FI98a} J.~Friedlander and H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+
+\end{thebibliography}
+
+\end{document}

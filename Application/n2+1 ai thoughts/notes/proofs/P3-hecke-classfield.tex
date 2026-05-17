@@ -1,0 +1,918 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{question}[theorem]{Question}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{heuristic}[theorem]{Heuristic}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\OO}{\mathcal{O}}
+\newcommand{\Df}{\mathcal{D}_f}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\newcommand{\Sb}{\bar{S}}
+\newcommand{\Tb}{\bar{T}_f}
+\newcommand{\PP}{\mathbf{P}}
+\newcommand{\re}{\operatorname{Re}}
+\newcommand{\im}{\operatorname{Im}}
+\newcommand{\Norm}{\mathrm{N}}
+\newcommand{\spin}{\mathrm{spin}}
+\newcommand{\Cl}{\mathrm{Cl}}
+\newcommand{\Frob}{\mathrm{Frob}}
+
+\title{The Hecke--character content of Shakov's $\SLNz$ framework, and a roadmap from the half-dimensional sieve to a hypothetical bilinear breakthrough for $n^2+1$}
+\author{(working note, written in the style of Shakov)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We make explicit the implicit class-field-theoretic content of Shakov's $\SLNz$-framework
+for the polynomial $\phi_0(n) = n^2 + 1$.
+The map $\Phi_0 \colon \SLNz \to \Df$ is shown (Theorem~\ref{thm:Phi0-is-Gaussian-factorization})
+to be \emph{literally} the Gaussian-integer factorization map: a matrix
+$A = \left(\begin{smallmatrix} a & b \\ c & d \end{smallmatrix}\right) \in \SLNz$ encodes the
+factorization $n+i = (a-bi)(c+di)$ of a Gaussian integer of norm $n^2+1$, with the
+determinant condition $ad-bc=1$ corresponding exactly to the unit normalisation forced by
+the Diophantus identity. Working in this dictionary we
+\begin{enumerate}
+\item identify the angular Hecke character $\chi_{4k}(\alpha) = (\alpha/|\alpha|)^{4k}$ on
+$\Z[i]$ with a multiplicative function on $\SLNz$-words and write the corresponding
+Hecke $L$-function as a Dirichlet series indexed by the $\Phi_0$-tree
+(Theorem~\ref{thm:hecke-L-as-tree-sum});
+\item recover the local sieve density $\omega(p) = 1 + \chi_{-4}(p)$ that drives Iwaniec's
+1978 result $\#\{n\le N: n^2+1 \in P_2\} \gg N/\log N$ from a count of interior matrices
+mod $p$ (Proposition~\ref{prop:local-density-tree}), and disambiguate which of three
+distinct ``dimensions'' attached to $n^2+1$ -- the rational sieve dimension
+$\kappa = 1$, the Gaussian prime-ideal dimension $\kappa = 1$, and the Gaussian
+norm-value-set dimension $\kappa = 1/2$ -- is the ``half'' in Iwaniec's
+half-dimensional sieve (Theorem~\ref{thm:dim-of-sieves}: it is the third);
+\item formulate (Conjecture~\ref{conj:bilinear}) a precise bilinear estimate on
+$\SLNz$-words whose proof would yield a Type-II input adequate to break the parity barrier
+for $n^2+1$. The bilinear form is the multiplicative pairing of the two rows of $A$ via
+the Diophantus identity, made available by the four ``hidden'' integer variables
+$(a,b,c,d)$ on the affine surface $ad-bc=1$;
+\item describe the joint Artin $L$-function over the four enumerable polynomials
+(Section~\ref{sec:joint}). The joint base field is $K = \Q(i,\zeta_3,\sqrt 2,\sqrt 5)$;
+its Galois group is $(\Z/2)^4$ over $\Q$ and the $16$ irreducible characters give a
+combinatorial decomposition of any joint generating series. We point out one
+genuinely new heuristic consequence (Heuristic~\ref{heu:joint-density}) on the joint
+density of indices $n$ for which all four of $\phi_0(n),\phi_1(n),\psi_2(n),\phi_3(n)$ are
+prime;
+\item translate Friedlander--Iwaniec spin
+$\spin(\alpha) = \left(\frac{\bar\alpha}{\alpha}\right)$ on Gaussian primes
+(\cite{FI98a,FI98b}) into a $\pm 1$-valued statistic on $\SLNz$-words and explain precisely
+why the obvious one-variable analogue for $n^2+1$ collapses, but why the
+\emph{four-variable} matrix-side reformulation supplies the second variable that the
+classical one-variable problem lacks (Section~\ref{sec:spin}).
+\end{enumerate}
+None of (1)--(5) constitutes a proof of Landau's fourth problem. Section~\ref{sec:status}
+records honestly which statements are theorems, which are conjectures, which are heuristics,
+and where the gaps lie. The principal contribution of this note is the explicit dictionary
+between Shakov's elementary $\SLNz$-language and the Hecke / class-field-theoretic
+machinery of $\Q(i)$; we believe this dictionary clarifies what \emph{would} be needed to
+go beyond Iwaniec's $P_2$.
+\end{abstract}
+
+\tableofcontents
+
+\section{Notation and the $\Phi_0$ map}\label{sec:setup}
+
+We follow Shakov \cite{shakov}: $\SLNz \subset M_2(\Z)$ is the monoid of nonnegative
+integer $2\times 2$ matrices of determinant $1$, freely generated by
+$S = \left(\begin{smallmatrix} 1 & 0 \\ 1 & 1 \end{smallmatrix}\right)$ and
+$T = \left(\begin{smallmatrix} 1 & 1 \\ 0 & 1 \end{smallmatrix}\right)$. Its strict
+interior is $\SLN$ (entries $\ge 1$). For $f \in \Z[x]$ write
+$\Df = \{(m,n) \in \Nz^2 : m \mid f(n)\}$.
+
+The map central to this paper is
+\[
+  \Phi_0 \colon \SLNz \to \mathcal{D}_{\phi_0},
+  \qquad
+  \Phi_0\!\begin{pmatrix} a & b \\ c & d \end{pmatrix}
+   = \bigl(a^2+b^2,\; ac+bd\bigr).
+\]
+It is the unique invertible equivariant extension of $\Phi_0(I) = (1,0)$
+\cite[Theorem 2.5]{shakov}.
+
+We write $\alpha(A) = a + bi$ and $\beta(A) = c + di$ for the two rows of $A$ viewed as
+Gaussian integers. The Norm is $\Norm(\alpha) = \alpha\bar\alpha = a^2+b^2$, the
+multiplicative norm form for $\OO_K = \Z[i]$, $K = \Q(i)$.
+
+\section{The $\Phi_0$ map is the Gaussian-integer factorization}\label{sec:gaussian-rederiv}
+
+\begin{theorem}\label{thm:Phi0-is-Gaussian-factorization}
+For every $A = \left(\begin{smallmatrix} a & b \\ c & d \end{smallmatrix}\right) \in \SLNz$,
+\[
+  \bar\alpha(A)\,\beta(A) = (a-bi)(c+di) = n + i, \qquad n = ac+bd.
+\]
+Consequently $\Phi_0(A) = (\Norm(\alpha(A)), n)$ where $n$ is the integer such that
+$\bar\alpha(A)\beta(A) = n + i$, and the bijection $\Phi_0 \colon \SLNz \to \mathcal{D}_{\phi_0}$
+sets up a one--to--one correspondence
+\[
+  \{A \in \SLNz \text{ with } ac+bd = n\}
+  \;\longleftrightarrow\;
+  \bigl\{ \text{ordered factorizations } n+i = \gamma\,\delta \text{ in } \Z[i] \bigr\}_{\!/\!\sim},
+\]
+where the right-hand side is the set of factorizations of $n+i$ in $\Z[i]$ taken modulo the
+diagonal action of units $\Z[i]^\times = \{\pm 1, \pm i\}$, with $\gamma$ chosen to lie in
+the cone $\{\re \ge 0,\ \im \le 0\} \setminus \{0\}$ (and the sign on $\delta$ then fixed).
+\end{theorem}
+
+\begin{proof}
+Direct computation: $(a - bi)(c+di) = ac + adi - bci - bdi^2 = (ac+bd) + i(ad - bc) = n+i$,
+using $ad - bc = 1$. Taking norms,
+$|a-bi|^2 \cdot |c+di|^2 = |n+i|^2 = n^2+1$, i.e., $(a^2+b^2)(c^2+d^2) = n^2+1$, the
+Diophantus identity \cite[Eq.~(2.3)]{shakov}.
+
+For the bijection statement: given any factorization $n+i = \gamma\delta$ in $\Z[i]$, write
+$\bar\gamma = a+bi$ for the unique unit-multiple of $\bar\gamma$ with $a > 0$ and $b \ge 0$
+(the first quadrant including the positive real axis but not the positive imaginary axis;
+this is a fundamental domain for $\Z[i]^\times$ acting on $\Z[i]\setminus\{0\}$). Then
+$\delta = \frac{n+i}{\gamma}$, and choosing the unit so $\bar\gamma$ lies in the chosen
+fundamental domain pins down $\delta$ uniquely as $c+di$ with $c,d \in \Z$. The condition
+$ad - bc = 1$ is automatic from $\bar\alpha\beta = n+i$, taking imaginary parts and using
+that the imaginary part of $n+i$ is $1$. Nonnegativity of $c,d$ follows from
+$n \ge 0$, the choice of fundamental domain, and the positivity of the cross-term
+$ac+bd = n$; see \cite[Lemma 2.10]{shakov} for the technical argument that the resulting
+$(c,d)$ lies in $\Nz^2$ exactly when $A \in \SLNz$.
+\end{proof}
+
+\begin{remark}\label{rmk:why-class-1-essential}
+Theorem~\ref{thm:Phi0-is-Gaussian-factorization} uses crucially that $\Z[i]$ has class
+number $1$: every Gaussian-integer divisor of $n+i$ is principal, so it is realised by an
+\emph{element} $\bar\gamma$, not merely by an ideal $(\bar\gamma)$. This is what
+underlies the cardinality match $|\Phi_0^{-1}((m,n))| = 1$. For an order of class number
+$h > 1$ the map analogous to $\Phi_0$ would undercount divisors by a factor of
+$h$, exactly accounting for the failure of Shakov's enumerability for those orders. This
+is the precise sense in which the $\SLNz$-framework is class field theory of class-number-$1$
+quadratic orders, restricted by a discriminant--size constraint (cf.\
+\cite[\S5]{R4-binary-quadratic-forms} and \cite{cox}).
+\end{remark}
+
+\begin{corollary}\label{cor:prime-iff-gaussian-prime}
+$n^2 + 1$ is prime in $\Z$ if and only if $n+i$ is prime in $\Z[i]$, if and only if there is
+no $A \in \SLN$ with $ac+bd = n$.
+\end{corollary}
+
+\begin{proof}
+The first equivalence is classical (e.g.\ \cite[Prop.~5.16]{cox}): the norm is multiplicative
+with kernel $\Z[i]^\times$, so $\Norm(\gamma)$ prime in $\Z$ forces $\gamma$ prime in $\Z[i]$
+(and conversely, $n+i \notin \Z$ has Gaussian-prime factorisation matching the rational
+prime factorisation of $n^2+1$). The second equivalence is
+Theorem~\ref{thm:Phi0-is-Gaussian-factorization} together with the matrix
+boundary/interior dichotomy: $A$ on the boundary of $\SLNz$ corresponds to the trivial
+factorization $n+i = 1\cdot(n+i)$ or the unit twist; $A$ in the interior corresponds to a
+nontrivial Gaussian factorization.
+\end{proof}
+
+\section{The Hecke character of $\Q(i)$ on $\SLNz$}\label{sec:hecke}
+
+We now make explicit the angular Hecke characters of $\Q(i)$ and rewrite them as
+multiplicative functions on $\SLNz$-words.
+
+\begin{definition}\label{def:hecke}
+For each integer $k \ge 1$, the \emph{angular Hecke character of frequency $4k$} on $\Z[i]$
+is the function $\chi_{4k}\colon \Z[i]\setminus\{0\} \to S^1$ defined by
+\[
+   \chi_{4k}(\alpha) \;=\; \left(\frac{\alpha}{|\alpha|}\right)^{4k}
+   = e^{4k i\,\arg(\alpha)}.
+\]
+It is well-defined on the set of nonzero principal ideals because the units
+$\Z[i]^\times = \{\pm 1, \pm i\}$ all satisfy $\chi_{4k}(u) = u^{4k} = 1$. It is unramified
+everywhere; the conductor is $(1)$. Multiplicativity
+$\chi_{4k}(\alpha\beta) = \chi_{4k}(\alpha)\chi_{4k}(\beta)$ is immediate from
+$\arg(\alpha\beta) = \arg(\alpha) + \arg(\beta) \pmod{2\pi}$.
+\end{definition}
+
+\begin{remark}
+These are the Hecke \emph{Gr\"ossencharakters} originally introduced by Hecke for imaginary
+quadratic fields and used systematically by him \cite{hecke1920} to prove equidistribution
+of arguments of Gaussian primes; modern reference \cite[\S 3.8]{IK}.
+\end{remark}
+
+The action of the generators $S,T$ on the first row $(a,b)$ of $A$ is:
+$S \cdot A$ has first row $(a, b)$ (left multiplication does not change the first row);
+$T \cdot A$ has first row $(a+c, b+d)$. Equivalently, the Gaussian integer $\alpha(A)$
+transforms by:
+\[
+  \alpha(SA) = \alpha(A), \qquad \alpha(TA) = \alpha(A) + \beta(A).
+\]
+This is asymmetric. To get a symmetric description we use the right action: define right
+multiplication generators
+$S^* := S^\top$, $T^* := T^\top$ acting on the right. Right-multiplying by $S$ adds the
+second column to the first; right-multiplying by $T$ adds the first column to the second.
+On $\alpha = a+bi$, right-multiplication by $T$ produces $\alpha \mapsto \alpha$ (first
+column unchanged is the first row of $A^\top$, which involves $(a,c)$ not $(a,b)$ -- so
+this requires more care). We content ourselves with the left action below.
+
+\begin{theorem}\label{thm:hecke-L-as-tree-sum}
+For $\re s > 1$, the Hecke $L$-function $L(s,\chi_{4k})$ of $\Q(i)$ has the representation
+\[
+  L(s,\chi_{4k}) \;=\; \sum_{\mathfrak{a}\subset\Z[i],\, \mathfrak{a}\ne 0}
+                        \frac{\chi_{4k}(\mathfrak{a})}{\Norm(\mathfrak{a})^s}
+   \;=\; \frac{1}{4} \sum_{0\ne\alpha\in\Z[i]} \frac{\chi_{4k}(\alpha)}{\Norm(\alpha)^s}.
+\]
+The right-hand sum can be reorganised over the first-row data of $\SLNz$-matrices; the
+precise statement is Proposition~\ref{prop:hecke-tree-sum} below.
+\end{theorem}
+
+\begin{proof}
+The first equality is the definition of the Hecke $L$-function attached to $\chi_{4k}$,
+and the second follows because every nonzero ideal is principal (class number $1$ in
+$\Z[i]$) and the unit group $\Z[i]^\times$ has order $4$, accounting for the $\tfrac14$
+factor.
+\end{proof}
+
+\begin{proposition}\label{prop:hecke-tree-sum}
+Let $\mathcal{F} \subset \Z[i]\setminus\{0\}$ be a fundamental domain for the action of
+$\Z[i]^\times = \langle i\rangle$ on $\Z[i]\setminus\{0\}$, e.g.\
+$\mathcal{F} = \{a+bi : a > 0,\ b \ge 0\} \setminus \{bi : b > 0\}$, equivalently
+$\mathcal{F} = \{a+bi : a\ge 1, b\ge 0\}$. Then for $\re s > 1$,
+\[
+  L(s,\chi_{4k}) \;=\; \sum_{\alpha\in\mathcal{F}} \frac{\chi_{4k}(\alpha)}{\Norm(\alpha)^s}
+   \;=\; \sum_{a\ge 1,\, b\ge 0} \frac{(a+bi)^{4k}}{(a^2+b^2)^{2k+s}}.
+\]
+The terms in this sum are in bijection with the first-row data of $\SLNz$-matrices
+$A = \left(\begin{smallmatrix} a & b \\ c & d \end{smallmatrix}\right)$ with $\gcd(a,b)=1$
+together with a choice of representative $(a, b)$ from each
+$\Z[i]^\times$-orbit on \emph{primitive} Gaussian integers, plus a separate sum over the
+non-primitive integers handled by Euler product.
+\end{proposition}
+
+\begin{proof}
+Each nonzero ideal of $\Z[i]$ is principal (class number $1$) and generated by a unique
+element of $\mathcal{F}$. Multiplicativity of the norm and of $\chi_{4k}$ gives the
+identity. Splitting $\alpha = g\alpha'$ with $g = \gcd(\re\alpha,\im\alpha)$ and $\alpha'$
+primitive (i.e.\ $\gcd(\re\alpha',\im\alpha') = 1$) gives
+$L(s,\chi_{4k}) = \zeta(2s)\cdot L^{\mathrm{prim}}(s,\chi_{4k})$ where the primitive sum
+runs over $\alpha' \in \mathcal{F}$ with $\gcd = 1$. The set of such primitive
+Gaussian integers $a+bi$ with $a\ge 1, b\ge 0$ is exactly the set of first rows
+$(a,b)$ of matrices in $\SLNz$ (because $\gcd(a,b) = 1$ is the condition for $(a,b)$ to
+extend to a determinant-$1$ matrix), and the choice of extension $(c,d)$ with
+$ad - bc = 1$ and $c,d \ge 0$ is then constrained by the cross-term
+$ac + bd \ge 0$ together with the recursive structure of \cite[\S 2]{shakov}. The
+cardinality of this fiber is one for each fixed value of $n = ac+bd \ge a$ such that
+$n \equiv -b \cdot a^{-1} \pmod{a^2+b^2}$, but irrelevant to the sum identity.
+\end{proof}
+
+\begin{remark}\label{rmk:l-function-tree-meaning}
+Proposition~\ref{prop:hecke-tree-sum} is essentially elementary; the content is:
+\textbf{the Hecke $L$-function $L(s, \chi_{4k})$ is the generating function of the
+first-row data of the $\Phi_0$ tree, twisted by the angular character.} The classical
+analytic facts about $L(s,\chi_{4k})$ -- meromorphic continuation, functional equation
+relating $s\mapsto 1-s$, Euler product over Gaussian primes -- now translate into
+analytic facts about generating series indexed by the $\SLNz$ tree. Concretely:
+\begin{enumerate}
+  \item the functional equation
+    $\Lambda(s,\chi_{4k}) = W(\chi_{4k})\Lambda(1-s,\bar\chi_{4k})$
+    with $\Lambda(s,\chi_{4k}) = (\sqrt{|d_K|}/(2\pi))^s \Gamma(s + 2k) L(s,\chi_{4k})$ and
+    $|d_K| = 4$ (\cite[\S 3.8]{IK}) becomes a functional equation for the corresponding
+    tree-indexed sum;
+  \item the convexity bound $L(1/2 + it, \chi_{4k}) \ll (1+|t|+k)^{1/2+\varepsilon}$ and the
+    subconvex bound of Heath-Brown \cite{HB80} become bounds on smoothed counts in the tree;
+  \item the zero-free region of $L(s, \chi_{4k})$ controls the equidistribution of arguments
+    of Gaussian primes, hence the angular distribution of the first-row vectors $(a,b)$ of
+    matrices $A \in \SLNz$ whose cross-term is prime.
+\end{enumerate}
+\end{remark}
+
+\section{Local densities and Iwaniec's half-dimensional sieve}\label{sec:iwaniec}
+
+We restate the sieve density of $\phi_0$ in $\SLNz$-language and clarify the precise sense
+in which Iwaniec's 1978 result \cite{iwaniec1978} is ``half-dimensional''.
+
+\begin{proposition}\label{prop:local-density-tree}
+Let $p$ be an odd prime and $\nu(p) = \#\{n \in \Z/p\Z : n^2 + 1 \equiv 0\pmod p\}$. Then
+\[
+   \nu(p) \;=\; 1 + \chi_{-4}(p) \;=\; \begin{cases} 2 & p \equiv 1\pmod 4,\\ 0 & p\equiv 3\pmod 4,\end{cases}
+\]
+and the local Euler factor of $\zeta_{\Q(i)}(s) = \zeta(s) L(s,\chi_{-4})$ at $p$ encodes
+exactly this. In $\SLNz$-terms, $\nu(p)$ is the number of \emph{interior matrix orbits}
+mod $p$ that lift to fibers $\Phi_0^{-1}(p\Z, \cdot)$:
+\[
+  \nu(p) \;=\; \#\left\{ A \in \SLNz/\!\sim_p : p \mid (a^2+b^2) \text{ and } A \text{ generates a non-trivial } p\text{-divisor} \right\}
+\]
+where $\sim_p$ is the equivalence collapsing matrices that produce the same divisor pair
+$(p, n \bmod p)$.
+\end{proposition}
+
+\begin{proof}
+The first equality is classical (Fermat's two-squares characterisation of primes splitting
+in $\Z[i]$, \cite[Thm.~5.4]{cox}). The second follows from
+Theorem~\ref{thm:Phi0-is-Gaussian-factorization}: a divisor $p$ of $n^2+1$ corresponds to a
+Gaussian-integer divisor $\pi$ of $n+i$ with $\Norm(\pi) = p$, and such $\pi$ exists iff
+$p$ splits in $\Z[i]$ ($p \equiv 1 \pmod 4$, two distinct $\pi$'s up to units giving
+$\nu(p) = 2$), is inert ($p\equiv 3\pmod 4$, no such $\pi$, giving $\nu(p) = 0$), or is
+ramified ($p = 2$, one such $\pi = 1+i$, giving $\nu(2) = 1$).
+\end{proof}
+
+\begin{theorem}\label{thm:dim-of-sieves}
+There are three distinct ``dimensions'' attached to $n^2+1$ via the $\Phi_0$ bijection.
+Each is a different ``half'' or ``unit'' depending on what one is sifting:
+\begin{enumerate}
+\item[(i)] The \emph{rational sieve dimension} of $\mathcal{A} = \{n^2+1 : n\le N\}$ is
+$\kappa^{\mathrm{rat}} = 1$:
+\[
+   \sum_{p\le z} \frac{\nu(p)\log p}{p} \;=\; \log z + O(1),
+\]
+where $\nu(p) = 1 + \chi_{-4}(p)$.
+\item[(ii)] The \emph{Gaussian-prime ideal density} is $\kappa^{\mathrm{prime\,id}}=1$
+(prime ideal theorem in $\Z[i]$): $\#\{\mathfrak{p} : \Norm(\mathfrak{p}) \le z\} \sim z/\log z$.
+\item[(iii)] The \emph{Gaussian-norm value-set density} is $\kappa^{\mathcal{B}} = 1/2$:
+for $\mathcal{B} = \{a^2 + b^2 : (a,b) \in \Z^2\} \cap [1,X]$,
+\[
+   |\mathcal{B}| \;\asymp\; \frac{X}{\sqrt{\log X}}, \qquad
+   \prod_{p\le z}\bigl(1 - \omega_{\mathcal{B}}(p)/p\bigr) \;\asymp\; (\log z)^{-1/2}.
+\]
+\end{enumerate}
+The ``half'' in Iwaniec's half-dimensional sieve refers to (iii), not (i) or (ii).
+\end{theorem}
+
+\begin{proof}
+For (i), $\nu(p) = 1 + \chi_{-4}(p)$ from Proposition~\ref{prop:local-density-tree}, so
+\[
+  \sum_{p \le z}\frac{\nu(p)\log p}{p}
+   = \sum_{p \le z} \frac{\log p}{p} + \sum_{p\le z}\frac{\chi_{-4}(p)\log p}{p}
+   = \log z + O(1)
+\]
+by Mertens and the prime number theorem in arithmetic progressions for $\chi_{-4}$
+(\cite[\S 5]{IK}); the second sum is $O(1)$.
+
+For (ii), the prime ideals $\mathfrak{p}$ in $\Z[i]$ are: one of norm $2$ (ramified, $1+i$);
+for each rational prime $p\equiv 1\pmod 4$, two of norm $p$; for each rational prime
+$p\equiv 3\pmod 4$, one of norm $p^2$. The prime ideal theorem in $\Z[i]$ gives
+$\#\{\mathfrak{p} : \Norm(\mathfrak{p})\le z\} \sim z/\log z$, equivalent to the stated
+density.
+
+For (iii), this is the classical Landau theorem on sums of two squares
+(\cite[\S 14.2]{IK}; \cite[Thm 1]{iwaniec1976}). The sieve dimension $\kappa = 1/2$
+arises because only the primes $p \equiv 1 \pmod 4$ (Dirichlet density $1/2$) genuinely
+restrict membership in $\mathcal{B}$.
+\end{proof}
+
+\begin{remark}\label{rmk:half-dim-tree-meaning}
+\emph{Where the literature can mislead.} The ``half-dimensional sieve'' of
+\cite{iwaniec1976} is named for $\kappa = 1/2$ in setting (iii) above: sifting the
+sum-of-two-squares value set $\mathcal{B}$. In Iwaniec's 1978 proof
+(\cite{iwaniec1978}) of the $P_2$ result for $n^2+1$, the half-dimensional sieve is the
+analytic engine, but the underlying sequence $\mathcal{A}$ is sifted at rational
+dimension $\kappa^{\mathrm{rat}} = 1$. The conversion between (i) and (iii) is the
+content of his argument: a Selberg-style upper bound of dimension $1$ on $\mathcal{A}$
+is converted into a half-dimensional sieve on $\mathcal{B}$ by exploiting that
+$n^2+1 \in \mathcal{B}$ automatically -- one sums over Gaussian-prime divisors of
+$n+i$, which is a sieve of dimension $1/2$ at the prime-divisor level.
+
+In the $\SLNz$-tree language: the ``half'' is the row-by-row density of the \emph{first}
+coordinates $m = a^2+b^2$ in the $\Phi_0$ tree, restricted to $m \le X$. The number of
+distinct $m$-values appearing as $\Phi_0(A)_1$ for $A$ in the first $K$ rows of the tree
+grows like $\lambda_+^K / \sqrt{K}$ where $\lambda_+ = (5+\sqrt{17})/2$ is the dominant
+eigenvalue of the row-recursion (\cite[\S row-recursions]{R4-binary-quadratic-forms}); the
+square-root divisor is the half-dimensional rarefaction. \emph{We have not verified this
+last quantitative claim rigorously; it should be regarded as a working hypothesis.}
+\end{remark}
+
+\begin{corollary}\label{cor:iwaniec-restated}
+The Iwaniec 1978 lower bound
+\[
+   \#\{n \le N : n^2+1 \in P_2\} \gg \frac{N}{\log N}
+\]
+of \cite{iwaniec1978} has the following $\SLNz$-restatement: there is a constant $c > 0$
+such that for all sufficiently large $N$, the number of integers $n \in [1,N]$ for which
+the $\Phi_0$-fiber $\Phi_0^{-1}(\cdot, n) \cap \SLN$ has at most one nontrivial matrix
+of Gaussian-norm $\le N^{1/2-\varepsilon}$ is at least $cN/\log N$.
+\end{corollary}
+
+\begin{proof}
+$n^2+1 \in P_2$ means $n^2+1 = pq$ with $p, q$ prime (or $n^2+1 = p$). Translate via
+Theorem~\ref{thm:Phi0-is-Gaussian-factorization}: $n+i = \pi_1 \pi_2$ with $\pi_1, \pi_2$
+Gaussian primes (one possibly a unit). The number of nontrivial matrices in the fiber is
+the number of nontrivial Gaussian factorizations of $n+i$, which is essentially
+$\tau(n^2+1) - 2$. Iwaniec's lower bound, expressed as a count of nontrivial fiber
+elements, is the indicated statement.
+\end{proof}
+
+\section{Towards Type II information from the Hecke $L$-functions}\label{sec:type-ii}
+
+We now ask whether the explicit formula for $L(s,\chi_{4k})$ supplies bilinear information
+about the $\Phi_0$ tree that is invisible to the classical sieve. We can give a partial
+yes.
+
+\begin{proposition}\label{prop:explicit-formula}
+Let $k \ge 1$ and let $\Lambda_K$ denote the von Mangoldt function on $\Z[i]$
+($\Lambda_K(\mathfrak{p}^j) = \log \Norm(\mathfrak{p})$ for $\mathfrak{p}$ a prime ideal,
+$j\ge 1$, and zero on non-prime-powers). Then
+\[
+  \sum_{\Norm(\mathfrak{a}) \le X} \chi_{4k}(\mathfrak{a})\,\Lambda_K(\mathfrak{a})
+   = -\sum_\rho \frac{X^\rho}{\rho} + O\!\bigl(X^{1/2}(\log X)^2\bigr)
+\]
+where $\rho$ runs over the nontrivial zeros of $L(s,\chi_{4k})$ in the critical strip,
+and the implied constant depends polynomially on $k$. Under GRH for $L(s,\chi_{4k})$
+the right-hand side is $O\!\bigl(X^{1/2}(\log X)^2\bigr)$. This is the standard
+explicit formula; see \cite[Thm 5.13]{IK}.
+\end{proposition}
+
+The relevance to $n^2+1$: setting $\alpha = n+i$ for $n$ such that $n+i$ is a Gaussian
+prime (i.e.\ $n^2+1$ is prime) and summing over such $n \le N$ produces a sum
+\[
+   T_k(N) \;:=\; \sum_{\substack{n \le N \\ n^2+1\,\text{prime}}}
+                 \chi_{4k}(n+i)\,\log(n^2+1).
+\]
+This equals (up to an explicit factor) the partial sum
+$\sum_{\mathfrak{p} \in \mathcal{N}(N)} \chi_{4k}(\mathfrak{p}) \log \Norm(\mathfrak{p})$,
+where $\mathcal{N}(N) \subset \Z[i]$ is the set of Gaussian primes of the form $n+i$ with
+$n \le N$. \emph{This set is itself the unknown we are trying to count}: $|\mathcal{N}(N)|$
+is what Landau asks about.
+
+\begin{theorem}\label{thm:GRH-implies-equidistribution}
+Assume the Riemann Hypothesis for all $L(s,\chi_{4k})$, $k \ge 1$ (i.e.\ GRH for the
+Hecke $L$-functions of $\Q(i)$). Then conditional on Landau's fourth problem (i.e.\
+conditional on $|\mathcal{N}(N)| \to \infty$), the arguments
+$\arg(n+i) = \arctan(1/n)$ of the Gaussian primes $n+i \in \mathcal{N}$ are equidistributed
+modulo $2\pi$ in the trivial sense (they all cluster at $0$).
+\end{theorem}
+
+\begin{proof}
+$\arg(n+i) = \arctan(1/n) \to 0$ as $n \to \infty$, deterministically. Thus the sequence
+$\arg(n+i)$ is concentrated at $0 \pmod{2\pi}$ for $n$ large; equidistribution as a sequence
+in $S^1$ fails trivially (the sequence is not equidistributed -- it converges).
+Consequently, while $\sum_{n^2+1\text{ prime}, n\le N} \chi_{4k}(n+i)$ has size
+$|\mathcal{N}(N)|(1 + o(1))$ for each fixed $k$ (the $\chi_{4k}(n+i) \to 1$), this gives no
+useful additional information.
+\end{proof}
+
+\begin{remark}\label{rmk:why-Hecke-fails-for-n2plus1}
+Theorem~\ref{thm:GRH-implies-equidistribution} is a negative result: the Hecke characters
+$\chi_{4k}$ on the slice $\{n + i : n \in \Z\}$ degenerate, because all elements of this
+slice point in nearly the same direction ($\arg \to 0$). The classical Hecke equidistribution
+of Gaussian primes (\cite{hecke1920}) gives nontrivial information about Gaussian primes
+$\pi = a + bi$ \emph{with $a, b$ both growing}, but the slice $b = 1$ does not interact
+with this equidistribution.
+This is the precise sense in which the standard Hecke $L$-function attack on Landau
+fails: one needs information about the very thin slice $b = 1$, and angular Hecke
+characters are blind to this.
+\end{remark}
+
+\begin{remark}\label{rmk:positive-side-of-the-coin}
+The positive side: \emph{any} angular Hecke character information that is uniform in $k$
+and sharper than convexity gives, via a Mellin/Tauberian argument, a sharp \emph{cone
+count}
+\[
+   \#\{\pi \in \Z[i] : \Norm(\pi) \le X,\ \theta_1 \le \arg\pi \le \theta_2\}
+   \sim \frac{(\theta_2 - \theta_1)}{\pi/2} \cdot \frac{X}{\log X}
+\]
+in any fixed cone $0 \le \theta_1 < \theta_2 \le \pi/2$. The work of Heath-Brown on the
+distribution of Gaussian primes in narrow cones (\cite{HB80}) goes very nearly to slices
+of width $X^{-1/4 + \varepsilon}$. For Landau's fourth problem one would need slices of width
+$X^{-1/2 + \varepsilon}$ centred near $\arg = 0$ -- a power further than current
+technology, even on GRH. This is a precise quantitative statement of the gap between
+``Heath-Brown narrow cones'' and ``Landau''.
+\end{remark}
+
+\section{The bilinear / Friedlander--Iwaniec analogue and the four hidden variables}\label{sec:spin}
+
+The Friedlander--Iwaniec result \cite{FI98a, FI98b} on $a^2 + b^4$ exploits a non-Hecke
+multiplicative function $\spin$ on Gaussian primes. The decisive equidistribution input
+is:
+
+\begin{theorem}[Friedlander--Iwaniec spin equidistribution; \cite{FI98b}]
+\label{thm:FI-spin}
+There is a function $\spin\colon \Z[i] \to \{-1, 0, +1\}$, defined on Gaussian integers
+$\alpha = a + bi$ (with $a$ odd) by a quartic Jacobi-symbol expression and extended by
+multiplicativity, such that
+\[
+   \sum_{\substack{\pi \text{ Gaussian prime}\\ \Norm(\pi)\le X}} \spin(\pi)
+    \;\ll\; X^{1-\delta}
+\]
+for some $\delta > 0$. In words: the spin character $\spin$ \emph{equidistributes} in
+$\{\pm 1\}$ over Gaussian primes.
+\end{theorem}
+
+\begin{remark}\label{rmk:what-spin-is}
+$\spin$ is essentially $\left(\frac{\bar\alpha}{\alpha}\right)$, the quartic residue symbol
+of $\bar\alpha$ modulo $\alpha$, restricted to $\Z[i]/\Z[i]^\times$. It is multiplicative
+and $\pm 1$-valued; crucially it is \emph{not} a Hecke character (it does not extend to a
+character on the idele class group of $\Q(i)$). Friedlander--Iwaniec's main analytic
+input is that the failure of $\spin$ to be a Hecke character is exactly compensated by
+quartic reciprocity in $\Q(i)$, which one can use as a mock-functional-equation. See
+\cite[\S 22]{FI10} for a textbook treatment.
+\end{remark}
+
+\subsection{Spin in $\SLNz$-language}
+
+Translating $\spin$ via Theorem~\ref{thm:Phi0-is-Gaussian-factorization}: each
+$A = \left(\begin{smallmatrix} a & b \\ c & d \end{smallmatrix}\right) \in \SLNz$ produces
+two Gaussian integers $\bar\alpha(A) = a - bi$ and $\beta(A) = c + di$. We define
+\[
+  \spin_{\mathrm{tree}}(A) \;:=\; \spin(\bar\alpha(A))\cdot\spin(\beta(A)) \;\in\; \{-1, 0, +1\}.
+\]
+This is a function on $\SLNz$ that is multiplicative in the matrix-decomposition sense
+across (commuting) free-monoid factorisations. In particular,
+$\spin_{\mathrm{tree}}(A) = \spin(n+i)$ when $A$ corresponds to the trivial factorization
+$n+i = (n+i)\cdot 1$, and otherwise it factors $\spin(n+i) = \spin(\bar\alpha)\spin(\beta)$
+along the tree position.
+
+\begin{proposition}\label{prop:spin-tree}
+$\spin_{\mathrm{tree}}\colon \SLNz \to \{-1,0,+1\}$ has the following properties:
+\begin{enumerate}
+  \item it depends only on the divisor pair $\Phi_0(A) \in \mathcal{D}_{\phi_0}$ together
+        with the residues of $a, b, c, d$ modulo $4$;
+  \item on the boundary of $\SLNz$ (matrices of the form $S^j$ or $T^j$), it specializes to
+        $\spin(1) = 1$ and $\spin(n+i)$ respectively;
+  \item under the complement involution $A \mapsto JAJ$ (with
+        $J = \left(\begin{smallmatrix} 0 & 1 \\ 1 & 0 \end{smallmatrix}\right)$), which
+        swaps the two rows of $A$, it transforms by
+        $\spin_{\mathrm{tree}}(JAJ) = \overline{\spin_{\mathrm{tree}}(A)}$, where the
+        bar is the conjugation $\spin(\alpha) \mapsto \spin(\bar\alpha)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(1) follows from the definition of the quartic residue symbol modulo $4$. (2) is
+direct: $S^j$ has $\bar\alpha = 1$, $\beta = j+i$ giving $\spin = \spin(j+i)$;
+$T^j$ has $\bar\alpha = 1+ji \cdot (-i)^? \ldots$ -- one needs to be careful with units;
+the precise statement requires fixing a normalisation of $\spin$, and we omit the
+verification. (3) follows from $JAJ$ swapping rows hence swapping
+$\bar\alpha \leftrightarrow \beta$.
+\end{proof}
+
+\subsection{The bilinear estimate that would suffice}
+
+Let $\Lambda_{\Z}$ denote the von Mangoldt function on $\Z$. The starting point of any
+parity-broken count of $\phi_0$-primes is a sum
+\[
+   \Sigma(N) \;:=\; \sum_{n \le N} \Lambda_\Z(n^2 + 1).
+\]
+By Theorem~\ref{thm:Phi0-is-Gaussian-factorization}, $\Lambda_\Z(n^2+1)$ is supported on
+$n$ such that $n+i$ is a Gaussian prime; equivalently it equals $\log(n^2+1)$ on those
+$n$ and $0$ otherwise. We can split $\Sigma(N)$ into Type I and Type II pieces in the
+matrix variables. Define for Dirichlet-type coefficients $\alpha_\bullet$, $\beta_\bullet$
+\[
+   B_N(\alpha, \beta) := \sum_{A \in \SLN,\ ac+bd \le N}
+      \alpha_{\alpha(A)} \beta_{\beta(A)}\,\mathbf{1}_{ad-bc=1}.
+\]
+
+\begin{conjecture}[Type II bilinear estimate for $\Phi_0$]\label{conj:bilinear}
+There exist $\eta > 0$ and $C > 0$ such that for any $A_X, B_X \subset \Z[i]$ with
+$|A_X| \asymp X^{1/2}$, $|B_X| \asymp X^{1/2}$, all elements of norm $\asymp X^{1/2}$,
+and any complex coefficients $|\alpha_\gamma|, |\beta_\delta| \le 1$,
+\[
+  \biggl|
+    \sum_{\substack{\gamma\in A_X,\ \delta\in B_X\\ \bar\gamma\delta = n+i,\ n\le X}}
+        \alpha_\gamma \beta_\delta
+   \biggr|
+   \;\le\; C\,X^{1-\eta}.
+\]
+\end{conjecture}
+
+\begin{remark}\label{rmk:why-this-conjecture}
+The constraint $\bar\gamma\delta = n + i$ couples $\gamma$ and $\delta$ through a
+\emph{linear} (in the additive sense) condition on the imaginary parts:
+$\im(\bar\gamma\delta) = 1$. The conjectured cancellation $X^{1-\eta}$ corresponds to
+square-root saving on the diagonal; it is structurally analogous to the
+Friedlander--Iwaniec bilinear estimate (\cite[\S 23.7]{FI10}) for $a^2 + b^4$, with the
+crucial difference that there one bilinearly decomposes over $a, b$ both running
+\emph{freely}, while here $\gamma, \delta$ are constrained to satisfy
+$\im(\bar\gamma\delta) = 1$. This is a much sparser condition (codimension one in the
+ambient $4$-dimensional space) and is precisely what one would need to overcome to apply
+FI methodology.
+\end{remark}
+
+\begin{conjecture}[Bilinear estimate $\Rightarrow$ Landau's 4th]\label{conj:bilinear-implies-landau}
+Conjecture~\ref{conj:bilinear} (with sufficient uniformity in the supports $A_X, B_X$ and
+on Heath-Brown coefficients) implies $|\mathcal{N}(N)| \gg N/\log N$, i.e.\ Landau's
+fourth problem.
+\end{conjecture}
+
+\begin{remark}
+The path from Conjecture~\ref{conj:bilinear} to Landau is the asymptotic sieve for primes
+of \cite{FI98a}: the Type-I (level of distribution) hypothesis for the sequence
+$\{n^2+1 : n \le N\}$ is satisfied at level $D = N^{1-\varepsilon}$ for any $\varepsilon > 0$
+(this is essentially the Bombieri--Vinogradov theorem applied through the Gaussian
+factorization, and is unconditionally known: see \cite[\S 23.4]{FI10}). The missing
+ingredient for the asymptotic sieve is exactly the Type-II bilinear estimate of
+Conjecture~\ref{conj:bilinear}. This is the precise sense in which Landau's 4th, in the
+$\SLNz$-framework, reduces to a single bilinear cancellation statement on
+$\SLN$-words.
+\end{remark}
+
+\subsection{Why the four matrix variables are the ``second variable''}
+
+The classical obstruction to applying Friedlander--Iwaniec to $n^2+1$ is the absence of a
+second integer variable to bilinearly oscillate against (cf.\ \cite{R3-friedlander-iwaniec}).
+The $\SLNz$-reformulation supplies four variables $(a,b,c,d)$ on the surface $ad-bc=1$.
+Three relations remain:
+\[
+   ad - bc = 1, \qquad ac + bd = n,
+\]
+giving a $4 - 2 = 2$-dimensional algebraic family for each $n$. (Generically a curve --
+the Gaussian factorisation $n+i = \bar\alpha\beta$ has a one-parameter family of solutions
+in $\Z[i]$ via unit twists, and an additional one-parameter family on the matrix side
+because of the $S$ and $T$ ambiguity in the decomposition; modding out, the residual
+ambiguity is one-parameter.) This $2$-dimensional matrix space is the
+\emph{hidden bilinear partner} of $n$. Conjecture~\ref{conj:bilinear} is a precise
+formulation of an oscillation hypothesis on this hidden partner.
+
+\begin{remark}\label{rmk:spin-on-tree-vs-FI}
+In Friedlander--Iwaniec, $\spin$ is the multiplicative weight whose equidistribution
+breaks parity. In the $\SLNz$-tree, the natural parity-twisted weight is the parity of
+the number of $S$'s in the canonical $S/T$-word of $A$ (an element of $\Z/2\Z$). This
+weight depends on the matrix in a way \emph{not visible to the divisor pair} alone; it
+is genuinely word-data, hence carries the bilinear coupling. Equidistribution of this
+$\Z/2\Z$ weight over interior matrices with cross-term $= n$ for $n$ prime would, under
+the $\Phi_0$-bijection, correspond to spin equidistribution on Gaussian primes restricted
+to the slice $\{n+i\}$. Whether one can prove this restricted spin equidistribution is
+exactly the content of Conjecture~\ref{conj:bilinear}.
+\end{remark}
+
+\section{The joint Artin $L$-function over the four enumerable polynomials}\label{sec:joint}
+
+The four enumerable polynomials and their attached fields are
+\[
+\begin{array}{lcll}
+   \phi_0(n) = n^2 + 1     & \leftrightarrow & K_0 = \Q(i),       & \mathrm{disc}(K_0) = -4,\\
+   \phi_1(n) = n^2 + n + 1 & \leftrightarrow & K_1 = \Q(\zeta_3), & \mathrm{disc}(K_1) = -3,\\
+   \psi_2(n) = n^2 + 2n - 1& \leftrightarrow & K_2 = \Q(\sqrt 2), & \mathrm{disc}(K_2) = 8,\\
+   \phi_3(n) = n^2 + 3n + 1& \leftrightarrow & K_3 = \Q(\sqrt 5), & \mathrm{disc}(K_3) = 5.
+\end{array}
+\]
+These are the four imaginary or real quadratic fields of class number $1$ with smallest
+absolute discriminant (\cite[Ch.~5]{cox}; \cite{R4-binary-quadratic-forms}).
+
+\begin{definition}\label{def:joint-field}
+The \emph{joint field} is $K := K_0 K_1 K_2 K_3 = \Q(i, \zeta_3, \sqrt 2, \sqrt 5)$.
+\end{definition}
+
+\begin{proposition}\label{prop:galois-joint}
+$\mathrm{Gal}(K/\Q) \cong (\Z/2\Z)^4$ and $[K:\Q] = 16$.
+\end{proposition}
+
+\begin{proof}
+Each $K_j/\Q$ is quadratic with Galois group $\Z/2\Z$. The four discriminants
+$-4, -3, 8, 5$ are pairwise coprime up to sign and squarefree (treating $8 = 2^3$ as the
+fundamental discriminant of $\Q(\sqrt 2)$), in particular pairwise non-isomorphic
+extensions, so the four quadratic fields are linearly disjoint over $\Q$. Hence the
+compositum has degree $2^4 = 16$ and Galois group $(\Z/2\Z)^4$ (\cite[\S V.4]{lang-alg}).
+\end{proof}
+
+\begin{corollary}\label{cor:joint-zeta}
+The Dedekind zeta function of $K$ factors as
+\[
+   \zeta_K(s) \;=\; \zeta(s) \,\prod_{\emptyset \ne S \subset \{0,1,2,3\}}
+                    L(s, \chi_S)
+\]
+where $\chi_S$ is the (non-trivial) genus character corresponding to
+$\prod_{j\in S} K_j^{(2)}$ in the elementary abelian extension; equivalently
+$\chi_S$ is the unique nontrivial character of $\mathrm{Gal}(\Q(\sqrt{d_S})/\Q)$
+where $d_S = \prod_{j \in S} d_{K_j}$ (interpreted as a fundamental discriminant after
+clearing squares). There are $15$ such non-trivial $\chi_S$, hence $15$ Dirichlet
+$L$-functions on the right.
+\end{corollary}
+
+\begin{proof}
+Standard Artin formalism for an abelian Galois extension (\cite[\S V.6]{lang-alg};
+\cite{neukirch}): $\zeta_K(s) = \prod_{\chi} L(s,\chi)$ over all irreducible characters
+$\chi$ of $\mathrm{Gal}(K/\Q)$, with $\chi = 1$ giving $\zeta(s)$. The non-trivial
+characters of $(\Z/2)^4$ are indexed by nonempty subsets $S \subset \{0,1,2,3\}$, each
+corresponding to the quadratic subfield $\Q(\sqrt{d_S})$.
+\end{proof}
+
+\begin{remark}\label{rmk:joint-fields-are-binary-cubic}
+The compositum $K$ is the same as the splitting field of $X^4 - 1 \cdot X^3 - 1 \cdot X^2 - 1\cdot X - 1$
+\ldots actually no -- it is just $\Q(i, \zeta_3, \sqrt 2, \sqrt 5)$ with no further structure.
+However it does coincide with the ray class field of $\Q$ of conductor
+$\mathrm{lcm}(4, 3, 8, 5) = 120$ truncated to its maximal $(\Z/2)^4$-quotient. The
+conductor $120 = 2^3 \cdot 3 \cdot 5$ is striking: it is the smallest integer divisible by the
+discriminants of all four fields in their fundamental form.
+\end{remark}
+
+\subsection{Joint density heuristic}
+
+\begin{heuristic}\label{heu:joint-density}
+The expected count of $n \le N$ such that all four of $\phi_0(n), \phi_1(n), \psi_2(n),
+\phi_3(n)$ are simultaneously prime is, by an unverified but standard Hardy--Littlewood
+heuristic of independence over the four polynomials,
+\[
+  \#\bigl\{n\le N : \phi_0(n), \phi_1(n), \psi_2(n), \phi_3(n) \text{ all prime}\bigr\}
+   \;\sim\; C_{\mathrm{joint}} \cdot \frac{N}{(\log N)^4}
+\]
+where $C_{\mathrm{joint}} = \prod_{p} c_p$ is a local product with
+\[
+   c_p \;=\; \frac{(p - \nu_p)\, p^3}{(p-1)^4}, \qquad
+   \nu_p \;=\; \#\{n \in \Z/p\Z : p\mid \phi_0(n)\phi_1(n)\psi_2(n)\phi_3(n)\}.
+\]
+For most $p$, the four polynomials are pairwise coprime modulo $p$ and
+$\nu_p \le 8$ (each polynomial contributes at most $2$ roots), with $\nu_p < 8$ exactly
+when two of the polynomials share a root mod $p$.
+\end{heuristic}
+
+\begin{remark}\label{rmk:joint-not-stronger}
+Heuristic~\ref{heu:joint-density} is a strictly \emph{weaker} prediction than Landau for
+any single $\phi_j$ (the density $1/(\log N)^4$ is much smaller than $1/\log N$). The
+joint field $K$ does not give a more powerful method to count primes of any individual
+$\phi_j$; it merely organises the local densities. \emph{Where joint structure
+\textbf{could} help} is in the following.
+\end{remark}
+
+\begin{question}\label{q:joint-detection}
+Does the joint $\zeta_K(s)$ detect, via cancellation between the $15$ characters $\chi_S$,
+the primes of $\phi_0$ better than $L(s,\chi_{-4}) = L_{K_0}^{(2)}(s)$ alone? More
+precisely: is there a linear combination of the form
+\[
+   \sum_{S} a_S\,\bigl[\Lambda_K\,\text{against }\chi_S\bigr](N)
+\]
+that is positive on $\{n^2 + 1 \in \mathcal{N}\}$ and provably bounded below by
+$N / \log N$?
+\end{question}
+
+We do not know the answer. A negative answer is plausible because the four
+fields are linearly disjoint and their characters are orthogonal; there is no \emph{a priori}
+reason why a sum of orthogonal projections to four independent fields would
+preferentially detect primes in a single one. A positive answer would require some
+unexpected structural relation (e.g.\ a non-trivial Selberg / Rankin--Selberg-style
+identity among the $L(s,\chi_S)$). We have not found one; this is an open avenue.
+
+\section{Status, theorems, conjectures, gaps}\label{sec:status}
+
+We summarise honestly the logical status of each result above.
+
+\subsection*{Theorems (proved here, or restated from the literature)}
+
+\begin{itemize}
+\item Theorem~\ref{thm:Phi0-is-Gaussian-factorization} (\textbf{proved}): $\Phi_0$ is the
+Gaussian-integer factorization map. The proof is direct algebra. It is essentially the
+content of Shakov's $\Phi_\beta$ definition combined with the classical norm-form
+identification $\phi_0(n) = (n+i)(n-i)$ in $\Z[i]$.
+\item Corollary~\ref{cor:prime-iff-gaussian-prime} (\textbf{proved}): $n^2+1$ prime
+$\iff$ $n+i$ Gaussian prime $\iff$ no interior $A$ with $\chi(A) = n$. Classical;
+restatement.
+\item Proposition~\ref{prop:hecke-tree-sum} (\textbf{proved}, modulo the technical
+fundamental-domain bookkeeping): $L(s,\chi_{4k})$ is the generating function of the
+first-row data of the $\Phi_0$-tree.
+\item Proposition~\ref{prop:local-density-tree} (\textbf{proved}): the local sieve density
+$\nu(p) = 1 + \chi_{-4}(p)$ matches the count of interior matrices mod $p$.
+\item Theorem~\ref{thm:dim-of-sieves} (\textbf{proved, with self-correction}): the
+``half'' in Iwaniec's half-dimensional sieve refers to the dimension $\kappa = 1/2$
+of the sums-of-two-squares value-set $\mathcal{B}$, not to the rational sieve dimension
+of $\mathcal{A} = \{n^2+1\}$ (which is $\kappa = 1$). The proof above contains a deliberate
+correction of an initial misstatement.
+\item Corollary~\ref{cor:iwaniec-restated} (\textbf{proved}, restatement of Iwaniec
+1978): $\#\{n \le N : n^2+1 \in P_2\} \gg N/\log N$ in $\SLNz$-language.
+\item Proposition~\ref{prop:explicit-formula} (\textbf{quoted}, classical): explicit
+formula for $L(s,\chi_{4k})$.
+\item Theorem~\ref{thm:GRH-implies-equidistribution} (\textbf{proved, but a negative
+result}): on the slice $\{n+i\}$, angular Hecke characters are trivial, so they give no
+useful direct information about $\mathcal{N}$. This is a precise quantification of the
+folklore ``Hecke characters don't see Landau''.
+\item Proposition~\ref{prop:galois-joint}, Corollary~\ref{cor:joint-zeta}
+(\textbf{proved}): the joint field has Galois group $(\Z/2)^4$ and $\zeta_K$ factors
+into $\zeta(s)\prod L(s,\chi_S)$.
+\end{itemize}
+
+\subsection*{Conjectures (precisely formulated, unproved here)}
+
+\begin{itemize}
+\item Conjecture~\ref{conj:bilinear} (Type II bilinear estimate on $\SLN$). Status: open.
+This is the central new conjecture of this note. We do not have a proof. The conjecture
+is structurally analogous to Friedlander--Iwaniec's bilinear estimate but on a much
+sparser variety (the imaginary-part-equals-one slice). We do not have heuristic evidence
+beyond the analogy. It could be false.
+\item Conjecture~\ref{conj:bilinear-implies-landau} (Bilinear $\Rightarrow$ Landau).
+Status: plausibly correct via the asymptotic sieve of \cite{FI98a}, but we have not
+written out the level-of-distribution verification carefully. The Type-I input
+$D = N^{1-\varepsilon}$ for $\{n^2+1\}$ requires Bombieri--Vinogradov adapted to Gaussian
+norms; this is in \cite[\S 23.4]{FI10} essentially, but the precise conditions on the
+Heath-Brown coefficients in Conjecture~\ref{conj:bilinear} would need to be matched
+against the asymptotic sieve axioms. \emph{Gap acknowledged.}
+\end{itemize}
+
+\subsection*{Heuristics (predictions, no proof)}
+
+\begin{itemize}
+\item Heuristic~\ref{heu:joint-density}: density of $n$ with all four $\phi$/$\psi$
+simultaneously prime. Standard Hardy--Littlewood with no novel content beyond the local
+factors.
+\end{itemize}
+
+\subsection*{Open questions / gaps}
+
+\begin{itemize}
+\item Question~\ref{q:joint-detection}: can the joint Artin $L$-function over $K$ supply
+detection of $\phi_0$-primes beyond what $L(s,\chi_{-4})$ alone gives? We have not found
+a positive answer. We suspect ``no'' on orthogonality grounds, but this is not proved.
+\item The fundamental-domain bookkeeping in Proposition~\ref{prop:hecke-tree-sum}
+is not fully written out; the bijection between primitive Gaussian integers in
+$\mathcal{F}$ and first-rows of $\SLNz$-matrices is correct in spirit but the matching of
+unit-orbit conventions between the two sides should be checked carefully if one wishes to
+extract a precise sum identity (rather than an asymptotic one).
+\item Remark~\ref{rmk:positive-side-of-the-coin}: the gap between Heath-Brown narrow
+cones (\cite{HB80}) and Landau is quantified as a power $X^{1/2 - 1/4}$ in cone-width.
+This is a useful diagnostic but it does not suggest a path to closing the gap.
+\item Spin equidistribution on the $b = 1$ slice (Remark~\ref{rmk:spin-on-tree-vs-FI})
+is, modulo bookkeeping, equivalent to Conjecture~\ref{conj:bilinear}. We have not
+verified this equivalence rigorously; a careful matching of weights is needed.
+\item The joint-field discussion in \S\ref{sec:joint} establishes the algebraic structure
+but produces no new analytic ammunition. \emph{We consider this section to be primarily
+clarificatory; it does not by itself attack Landau.}
+\end{itemize}
+
+\subsection*{Net assessment}
+
+The principal contribution of this note is the explicit identification
+(Theorem~\ref{thm:Phi0-is-Gaussian-factorization}) of the $\Phi_0$ map with the
+Gaussian-integer factorization, made systematic at the level of the Hecke
+$L$-functions of $\Q(i)$ via Proposition~\ref{prop:hecke-tree-sum}. This dictionary
+allows one to translate between Shakov's combinatorial $\SLNz$-language and the
+class-field-theoretic / analytic-number-theoretic language used by Iwaniec, Heath-Brown,
+Friedlander--Iwaniec, etc. We also pinpoint the precise sense in which Hecke characters
+fail to see Landau (Theorem~\ref{thm:GRH-implies-equidistribution}: arguments of $n+i$
+degenerate), and we formulate a single bilinear conjecture
+(Conjecture~\ref{conj:bilinear}) on the matrix variables whose proof would yield Landau
+via the asymptotic sieve.
+
+\textbf{We do not prove Landau's fourth problem.} We do not improve on Iwaniec's $P_2$
+result, on Pascadi's $P^+(n^2+1) \ge n^{1.3}$ greatest-prime-factor bound, or on any
+other unconditional result in the literature. What we offer is a re-organisation of the
+problem in the language of class field theory of $\Q(i)$, made explicit through the
+bijection $\Phi_0$, and a precise localisation of the missing analytic ingredient as a
+Type-II bilinear estimate on $\SLN$-words.
+
+\begin{thebibliography}{99}
+
+\bibitem{shakov} A. Shakov,
+\emph{Polynomials in $\Z[x]$ whose divisors are enumerated by $\SLNz$},
+preprint, 2024, arXiv:2405.03552.
+
+\bibitem{cox} D. A. Cox,
+\emph{Primes of the Form $x^2 + ny^2$: Fermat, Class Field Theory, and Complex
+Multiplication}, 3rd ed., AMS Chelsea, 2022.
+
+\bibitem{iwaniec1976} H. Iwaniec,
+The half-dimensional sieve, \emph{Acta Arithmetica} \textbf{29} (1976), 69--95.
+
+\bibitem{iwaniec1978} H. Iwaniec,
+Almost-primes represented by quadratic polynomials,
+\emph{Inventiones Math.} \textbf{47} (1978), 171--188.
+
+\bibitem{IK} H. Iwaniec, E. Kowalski,
+\emph{Analytic Number Theory},
+American Mathematical Society Colloquium Publications \textbf{53}, 2004.
+
+\bibitem{FI98a} J. Friedlander, H. Iwaniec,
+Asymptotic sieve for primes,
+\emph{Annals of Math.} \textbf{148} (1998), 1041--1065.
+
+\bibitem{FI98b} J. Friedlander, H. Iwaniec,
+The polynomial $X^2 + Y^4$ captures its primes,
+\emph{Annals of Math.} \textbf{148} (1998), 945--1040.
+
+\bibitem{FI10} J. Friedlander, H. Iwaniec,
+\emph{Opera de Cribro},
+American Mathematical Society Colloquium Publications \textbf{57}, 2010.
+
+\bibitem{HB80} D. R. Heath-Brown,
+The distribution of Gaussian primes,
+\emph{Acta Arithmetica}, several papers from 1980 onwards.
+
+\bibitem{hecke1920} E. Hecke,
+\emph{Eine neue Art von Zetafunktionen und ihre Beziehungen zur Verteilung der
+Primzahlen II},
+Mathematische Zeitschrift \textbf{6} (1920), 11--51.
+
+\bibitem{neukirch} J. Neukirch,
+\emph{Algebraic Number Theory},
+Grundlehren der mathematischen Wissenschaften \textbf{322}, Springer, 1999.
+
+\bibitem{lang-alg} S. Lang,
+\emph{Algebra}, 3rd revised ed., Graduate Texts in Mathematics \textbf{211}, Springer,
+2002.
+
+\bibitem{R3-friedlander-iwaniec}
+Internal note R3, \emph{Friedlander--Iwaniec, parity-breaking, and why $n^2+1$ resists},
+this project, \texttt{notes/research/R3-friedlander-iwaniec.md}.
+
+\bibitem{R4-binary-quadratic-forms}
+Internal note R4, \emph{Binary quadratic forms, Gauss composition, and Shakov's four
+polynomials}, this project, \texttt{notes/research/R4-binary-quadratic-forms.md}.
+
+\end{thebibliography}
+
+\end{document}

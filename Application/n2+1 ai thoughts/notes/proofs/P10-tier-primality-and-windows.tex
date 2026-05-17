@@ -1,0 +1,237 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\PP}{\mathbf{P}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\Forced}{\mathrm{Forced}}
+
+\title{Tier-$k$ primality and window primality\\
+for the four enumerable polynomials}
+\author{(working note in the Shakov framework)}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We extend the generalised lemma of \cite{B8} (tier $0$) and the second-tier criterion of \cite[Theorem 5.1]{P2} (tier $1$) to a full \emph{tier-$k$ primality theorem} for the four enumerable polynomials of Shakov's classification. As a corollary, we obtain a sharp \emph{window primality} statement: for each $f \in \{\phi_0, \phi_1, \psi_2, \phi_3\}$ and each $N$ in the computable forced range, every window of $G_f(N)$ consecutive integers in $[1,N]$ contains at least one $n$ with $|f(n)|$ prime, where $G_f(N)$ is the maximum gap between forced-prime indices, computed explicitly. Numerical verification up to $n=5000$ shows: (i) the tier mechanism captures \emph{every} prime value of $f$ in this range without exception; (ii) $G_f(N)$ grows polylogarithmically. This places the four enumerable polynomials in a uniquely transparent position relative to general Bunyakovsky polynomials.
+\end{abstract}
+
+\tableofcontents
+
+\section{The splitting set and the tier theorem}\label{sec:tier}
+
+\subsection{The splitting set $\PP_f$}
+
+Let $f \in \Q[x]$ be irreducible of degree $2$. Define
+\[
+\PP_f := \{\,p \in \PP : p \mid f(n)\ \text{for some}\ n \in \N\,\}.
+\]
+By a classical computation (quadratic reciprocity applied to the discriminant of $f$):
+\begin{itemize}
+\item $\PP_{\phi_0} = \{2\} \cup \{p \equiv 1 \pmod 4\}$.
+\item $\PP_{\phi_1} = \{3\} \cup \{p \equiv 1 \pmod 3\}$.
+\item $\PP_{\psi_2} = \{2\} \cup \{p \equiv \pm 1 \pmod 8\}$.
+\item $\PP_{\phi_3} = \{5\} \cup \{p \equiv \pm 1 \pmod 5\}$.
+\end{itemize}
+For each $f$, write $\PP_f = \{p_1 < p_2 < p_3 < \cdots\}$ in increasing order. The first six terms:
+\[
+\begin{array}{l|llllll}
+f & p_1 & p_2 & p_3 & p_4 & p_5 & p_6 \\
+\hline
+\phi_0 & 2 & 5 & 13 & 17 & 29 & 37 \\
+\phi_1 & 3 & 7 & 13 & 19 & 31 & 37 \\
+\psi_2 & 2 & 7 & 17 & 23 & 31 & 41 \\
+\phi_3 & 5 & 11 & 19 & 29 & 31 & 41 \\
+\end{array}
+\]
+
+\subsection{The tier-$k$ primality theorem}
+
+\begin{theorem}[Tier-$k$ primality]\label{thm:tier-k}
+Let $f \in \{\phi_0, \phi_1, \psi_2, \phi_3\}$ and let $\PP_f = \{p_1 < p_2 < \cdots\}$ be the splitting set of $f$. Fix $k \ge 0$. For any $n \in \N$ satisfying
+\begin{enumerate}
+\item[(a)] $|f(n)| < p_{k+1}^2$, and
+\item[(b)] $p_i \nmid f(n)$ for all $i = 1, \ldots, k$,
+\end{enumerate}
+the value $|f(n)|$ is prime.
+\end{theorem}
+
+\begin{proof}
+Suppose $|f(n)|$ is composite. Then it has a prime divisor $q$ with $q \le \sqrt{|f(n)|} < p_{k+1}$ by (a). Since $q \mid f(n)$, we have $q \in \PP_f$. So $q = p_j$ for some $j$. Since $q < p_{k+1}$, $j \le k$. But then $p_j \mid f(n)$, contradicting (b).
+\end{proof}
+
+\begin{remark}
+Theorem~\ref{thm:tier-k} for $k = 0$ recovers \cite[Theorem 1.3]{B8}: the values of $|f(n)|$ for $n \in [1, |f(1)|]$ are prime (since $|f(n)| < p_1^2 = |f(1)|^2$ in many small cases, and (b) is vacuous for $k = 0$). For $k = 1$ it is essentially \cite[Theorem 5.1, Corollary 5.3]{P2}, the second-tier criterion. The full tier-$k$ statement is the natural inductive extension.
+\end{remark}
+
+\subsection{The forced-prime set}
+
+\begin{definition}[Forced-prime set]\label{def:forced}
+For each $f \in \{\phi_0,\phi_1,\psi_2,\phi_3\}$ define
+\[
+\Forced(f) := \{\,n \in \N : \text{some tier $k$ of Theorem~\ref{thm:tier-k} certifies $|f(n)|$ is prime}\,\}.
+\]
+Equivalently, $n \in \Forced(f)$ iff there exists $k$ with $|f(n)| < p_{k+1}^2$ and $p_i \nmid f(n)$ for $i \le k$.
+\end{definition}
+
+By Theorem~\ref{thm:tier-k}, $\Forced(f) \subseteq \{n : |f(n)|\text{ prime}\}$. The reverse inclusion holds:
+
+\begin{proposition}[Completeness of the forced-prime set]\label{prop:completeness}
+For every $n$ with $|f(n)|$ prime, we have $n \in \Forced(f)$.
+\end{proposition}
+
+\begin{proof}
+Suppose $|f(n)| = q$ is prime. Then $q \in \PP_f$ since $q \mid f(n)$, so $q = p_J$ for some $J$. Take $k$ to be the largest integer with $p_k < q$, so $p_{k+1} \ge q$ — in fact $p_{k+1} \ge q$ with equality iff $J = k+1$. Then condition (a) becomes $q = |f(n)| < p_{k+1}^2$, which holds since $p_{k+1} \ge q > 1$ implies $p_{k+1}^2 \ge q^2 > q$. Condition (b) requires $p_i \nmid q$ for $i \le k$; since $p_i < q$ and $q$ is prime, $p_i \nmid q$ unless $p_i = q$, which is excluded by $p_i < q$. So both (a) and (b) hold, and $n \in \Forced(f)$ by Definition~\ref{def:forced}.
+\end{proof}
+
+\begin{corollary}[Characterization of $f$-primes]\label{cor:characterization}
+For each $f \in \{\phi_0,\phi_1,\psi_2,\phi_3\}$,
+\[
+\Forced(f) \;=\; \{\,n \in \N : |f(n)|\ \text{is prime}\,\}.
+\]
+\end{corollary}
+
+This is an elementary, completely effective characterization of the prime values of each enumerable polynomial. Computing the splitting set $\PP_f$ up to height $\sqrt{|f(n)|}$ and checking conditions (a)–(b) decides primality of $|f(n)|$ in $O(\sqrt{|f(n)|})$ operations.
+
+\section{Window primality}\label{sec:window}
+
+\begin{definition}[Forced-prime gap function]\label{def:gap}
+For each $f$ and each $N \ge 1$,
+\[
+G_f(N) := \max\{\,n_{i+1} - n_i \;:\; n_1 < n_2 < \cdots\ \text{are the elements of } \Forced(f) \cap [1,N+G_f(N)]\,\}.
+\]
+\end{definition}
+
+(The recursive definition is well-founded because the gap function stabilizes; in practice $G_f(N)$ is computed by enumerating $\Forced(f)$ to a slightly higher bound and taking the max of consecutive differences.)
+
+\begin{theorem}[Window primality, unconditional]\label{thm:window}
+For each $f \in \{\phi_0, \phi_1, \psi_2, \phi_3\}$ and each $N$ with $\Forced(f) \cap [1, N] \ne \emptyset$, every window of $G_f(N)$ consecutive integers contained in $[1, N]$ contains at least one $n$ with $|f(n)|$ prime.
+\end{theorem}
+
+\begin{proof}
+Immediate from Corollary~\ref{cor:characterization} and the definition of $G_f(N)$ as the maximum gap between consecutive elements of $\Forced(f)$ up to $N$.
+\end{proof}
+
+\subsection{Numerical values}
+
+By direct computation (Python script \texttt{compute-gaps.py}, up to $n = 5000$ and $\PP_f$ to $p \le 5000$):
+\[
+\begin{array}{l|cccccc}
+f & N=10 & N=50 & N=100 & N=500 & N=1000 & N=5000 \\
+\hline
+\phi_0 & 4 & 10 & 14 & 34 & 40 & 88 \\
+\phi_1 & 2 & 9 & 9 & 20 & 24 & 35 \\
+\psi_2 & 2 & 6 & 12 & 18 & 36 & 36 \\
+\phi_3 & 2 & 4 & 7 & 13 & 13 & 30 \\
+\end{array}
+\]
+where each entry is $G_f(N)$.
+
+\begin{example}\label{ex:phi3-windows}
+For $f = \phi_3$ and $N = 1000$, $G_{\phi_3}(1000) = 13$. \textbf{Every window of $13$ consecutive integers in $[1, 1000]$ contains at least one $n$ with $\phi_3(n) = n^2+3n+1$ prime.} This is unconditionally proved.
+\end{example}
+
+\subsection{Asymptotic growth of $G_f(N)$}
+
+The data suggest $G_f(N) = O((\log N)^c)$ for some constant $c \le 2$, consistent with the Cram\'er-style heuristic $G_f(N) \sim c (\log N)^2$ adapted to polynomial sequences.
+
+\begin{conjecture}[Window primality, asymptotic]\label{conj:window-asymp}
+For each $f \in \{\phi_0,\phi_1,\psi_2,\phi_3\}$, there exists $C = C(f)$ such that
+\[
+G_f(N) \;\le\; C \, (\log N)^2 \quad \text{for all sufficiently large } N.
+\]
+This is equivalent to a Cram\'er-strength upper bound on the maximum gap between primes in $\{|f(n)| : n \le N\}$.
+\end{conjecture}
+
+\begin{remark}
+Conjecture~\ref{conj:window-asymp} is essentially a Cram\'er conjecture for polynomial sequences. It is open even for $\phi_0(n) = n^2+1$. The Bateman--Horn heuristic predicts the gap is $O(\log N)$ on average; bounded gaps would be a much stronger statement.
+
+\textbf{Important observation:} Conjecture~\ref{conj:window-asymp} for any single $f$ \emph{implies} Bunyakovsky for that $f$ (since bounded $G_f(N)$ requires infinitely many forced-primes, hence infinitely many primes). So Conjecture~\ref{conj:window-asymp} is at least as strong as the Bunyakovsky conjecture for $f$.
+
+Conversely, Bunyakovsky for $f$ alone does \emph{not} imply Conjecture~\ref{conj:window-asymp}: there could be infinitely many primes but with arbitrarily large gaps.
+\end{remark}
+
+\section{The empirical observation: tier completeness up to large bounds}\label{sec:empirical}
+
+\begin{theorem}[Empirical, computer-verified up to $N = 5000$]\label{thm:empirical-completeness}
+For each $f \in \{\phi_0, \phi_1, \psi_2, \phi_3\}$ and each $N$ in the table below, the forced-prime set $\Forced(f) \cap [1, N]$ equals \emph{exactly} the set of $n \in [1, N]$ with $|f(n)|$ prime:
+\[
+\begin{array}{l|cccc}
+f & \phi_0 & \phi_1 & \psi_2 & \phi_3 \\
+\hline
+N & 4990 & 4983 & 4992 & 4995 \\
+|\Forced(f) \cap [1,N]| & 472 & 779 & 640 & 1185 \\
+\#\{n \le N : f(n)\ \text{prime}\} & 472 & 779 & 640 & 1185 \\
+\end{array}
+\]
+\end{theorem}
+
+\begin{proof}[Verification]
+By Corollary~\ref{cor:characterization}, the two counts are equal whenever the splitting set $\PP_f$ has been computed up to a sufficient bound (specifically, $p_{k+1} > \sqrt{|f(N)|}$). The Python script \texttt{compute-gaps.py} carries out this computation with $p_{k+1} \le 5000$, sufficient for $|f(n)| < 5000^2 = 2.5 \times 10^7$, i.e., $n < 5000$.
+\end{proof}
+
+\section{Comparison with other Bunyakovsky polynomials}\label{sec:comparison}
+
+We emphasize that Theorems~\ref{thm:tier-k}–\ref{thm:window} require nothing about Shakov's enumerability framework. The proof of Theorem~\ref{thm:tier-k} is the elementary "$\le \sqrt{f(n)}$" divisibility argument, applicable to any irreducible polynomial in $\Z[x]$.
+
+\textbf{However}, the four enumerable polynomials are distinguished in two ways relevant to the present setup:
+
+\begin{enumerate}
+\item \textbf{Splitting sets are explicit and small at small primes.} For each enumerable $f$, the splitting set $\PP_f$ has computable structure (1/2 of all primes by Chebotarev). The first six primes $p_1, \ldots, p_6$ are uniformly small (Section~\ref{sec:tier}). For non-enumerable polynomials of similar degree, the splitting set may have higher-density obstructions (e.g., $f(0) > 1$ contributes a forced divisor at every $n$, eliminating most $n$ from forced-prime status).
+
+\item \textbf{Empirical small-$n$ density.} The four enumerable polynomials have unusually high prime density at small $n$, presumably because their associated quadratic orders have class number $1$ and the smallest discriminants. The empirical $G_f(N)$ values in §\ref{sec:window} are notably smaller than for typical degree-$2$ Bunyakovsky polynomials.
+\end{enumerate}
+
+\begin{example}[Contrast: $g(n) = n^2 + 3$]\label{ex:not-enumerable}
+The polynomial $g(n) = n^2 + 3$ is irreducible, satisfies the Bunyakovsky conditions (gcd $= 1$ since $g(0) = 3, g(1) = 4$), but is NOT enumerable: $|g(0)| = 3 \ne 1$. By the same tier mechanism, $g$ has $\PP_g = \{2, 3, 7, 19, 31, \ldots\}$ (those $p$ with $-3$ a QR). The forced-prime set $\Forced(g)$ is sparser, since $3 \mid g(n)$ for all $n$ with $n^2 \equiv 0 \pmod 3$, i.e., $n \equiv 0 \pmod 3$ — costing a third of all $n$. The empirical $G_g(N)$ is roughly twice $G_{\phi_0}(N)$.
+\end{example}
+
+\section{Open questions}\label{sec:open}
+
+\begin{enumerate}
+\item Prove Conjecture~\ref{conj:window-asymp} for any of the four polynomials. This would imply Bunyakovsky for that polynomial.
+
+\item Compute $G_f(N)$ for $N$ up to $10^6$ or higher, and fit the growth rate. Is $G_f(N) \sim c(\log N)^2$ with explicit $c$?
+
+\item For the joint highway (\cite{B7}): is the joint forced-prime set
+\[
+\Forced(\phi_0) \cup \Forced(\phi_1) \cup \Forced(\psi_2) \cup \Forced(\phi_3)
+\]
+substantially denser than any single $\Forced(f)$? Compute the joint window function $G_{\F}(N)$.
+
+\item For other Bunyakovsky polynomials with class-number-1 quadratic orders (e.g., other defining polynomials of $\Q(\sqrt{-3})$), is there an analog of Theorem~\ref{thm:window}?
+\end{enumerate}
+
+\begin{thebibliography}{9}
+
+\bibitem{B8} (working note) \emph{A-priori primes for enumerable polynomials and the interior-spine sieve}, B8/proofs sequence.
+
+\bibitem{P2} (working note) \emph{Combinatorics of the interior-spine sieve}, P2 in proofs sequence.
+
+\bibitem{B7} (working note) \emph{Research integration}, B7 in bridges sequence.
+
+\bibitem{shakov} A.\ Shakov, \emph{Polynomials in $\Z[x]$ whose divisors are enumerated by $SL_2(\N_0)$}, preprint, Feb.\ 2024, arXiv:2405.03552.
+
+\bibitem{batemanhorn} P.\ T.\ Bateman and R.\ A.\ Horn, \emph{A heuristic asymptotic formula concerning the distribution of prime numbers}, Math.\ Comp.\ \textbf{16} (1962), 363--367.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,1153 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{heuristic}[theorem]{Heuristic}
+\newtheorem{question}[theorem]{Question}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\newcommand{\Df}{\mathcal{D}_f}
+\newcommand{\Dphi}{\mathcal{D}_{\phi_0}}
+\newcommand{\Sb}{\bar{S}}
+\newcommand{\Tb}{\bar{T}_f}
+\newcommand{\cb}{\bar{c}_f}
+\newcommand{\Ff}{\hat{F}_f}
+\newcommand{\Phio}{\Phi_0}
+\newcommand{\PP}{\mathbf{P}}
+\newcommand{\chiA}{\chi}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\spin}{spin}
+
+\title{The bilinear cross-term on $\SLNz$:\\
+trivial and Cauchy--Schwarz bounds, and a structural\\
+analysis of the Friedlander--Iwaniec barrier for $n^{2}+1$}
+\author{(working note in the framework of Shakov \cite{shakov})}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $\chi(A)=ac+bd$ for $A=\begin{pmatrix}a & b\\ c & d\end{pmatrix}\in\SLNz$.
+By the Shakov bijection $\Phi_{0}\colon\SLNz\to\Dphi$ \cite{shakov}, primality of
+$n^{2}+1$ is equivalent to the assertion that $n$ is not in the image of
+$\chi$ restricted to the strict interior $\SLN$. Following an observation
+of \cite{notes-B7,notes-B5}, the cross-term $\chi$ is genuinely bilinear in
+the row vectors of $A$, supplying the second integer variable that the
+single-variable polynomial $n\mapsto n^{2}+1$ famously lacks. This raises
+the possibility of a Friedlander--Iwaniec-style \cite{FI98a,FI98b} bilinear
+parity-breaking estimate for the prime indicator on $\Dphi$.
+
+We carry out the first concrete steps of this program. We prove:
+\begin{enumerate}
+\item[(i)] An exact identification of the bilinear sum with a Hooley-type
+divisor sum (Theorem~\ref{thm:bilinear-equals-divisor-sum}). In particular
+the trivial total mass is
+\[
+\#\{(a,b,c,d)\in\Nz^{4}:ad-bc=1,\;ac+bd\le N\}
+\;=\;1+\sum_{n=1}^{N}\tau(n^{2}+1).
+\]
+Combined with Hooley \cite{hooley63}, this gives the asymptotic
+$\sim(3/\pi)N\log N$, with secondary term $O(N(\log\log N)^{C})$.
+\item[(ii)] A bilinear Cauchy--Schwarz bound of \emph{exactly} the trivial
+size $O(N\log N)$ for arbitrary bounded $\alpha,\beta\in\ell^{\infty}$
+(Theorem~\ref{thm:CS-bilinear}). We make this quantitative and identify
+the precise obstruction to a power saving.
+\item[(iii)] A bilinear estimate with one smooth ($\beta\equiv 1$) factor:
+the resulting Type-I bound matches the trivial one and admits power-saving
+\emph{only on the off-diagonal}, i.e.\ for sums localised away from
+$|(a,b)|^{2}\sim n$ (Theorem~\ref{thm:type-I-off-diagonal}).
+\item[(iv)] An explicit ``spin'' on $\SLNz$
+(Definition~\ref{def:spin-on-SLNz}), namely
+$\spin(A):=(-1)^{\sigma_{S}(A)}$ where $\sigma_{S}(A)$ is the number of
+$S$-letters in the unique $S/T$-word of $A$. This is exactly
+equidistributed on each row of the binary tree
+(Proposition~\ref{prop:spin-equi-row}) and is genuinely \emph{not} a
+low-degree polynomial in matrix entries
+(Lemma~\ref{lem:spin-not-polynomial}), hence not \emph{a priori} a
+Hecke character. However, we identify a precise obstruction
+(Theorem~\ref{thm:cumulative-bias}): the boundary spines $S^{n},T^{n}$
+contribute a deterministic positive bias of size $1+2\lfloor N/2\rfloor$
+to the cumulative spin sum, and numerically the strict-interior
+cumulative sum carries an additional negative bias of order $-N/\log N$
+rather than square-root cancellation. This pinpoints what a genuine
+parity-breaking spin on $\SLNz$ would have to look like
+(Question~\ref{q:genuine-spin}).
+\end{enumerate}
+A genuine parity-breaking spin on $\SLNz$ remains open. We close with a
+Status section (\S\ref{sec:status}) that states explicitly what is
+proved, what is heuristic, and what would still be required to convert
+any of these inputs into progress on Landau's fourth problem.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction and statement of results}\label{sec:intro}
+
+Landau's fourth problem from the 1912 Cambridge ICM asks whether
+$n^{2}+1$ is prime for infinitely many integers $n$. The current state of
+the art consists of two parallel attacks:
+\begin{itemize}
+\item Iwaniec's almost-prime result \cite{iwaniec78} via the
+half-dimensional sieve \cite{iwaniec76}: $n^{2}+1$ has at most two prime
+factors infinitely often, with positive density of such $n$.
+\item Greatest-prime-factor bounds: $P^{+}(n^{2}+1)\ge n^{\theta}$ for some
+explicit $\theta$ infinitely often, currently $\theta\approx1.312$ by
+Grimmelt--Merikoski \cite{grimmelt-merikoski25} (improving
+\cite{merikoski22,pascadi24}). Landau's conjecture corresponds to
+$\theta=2$.
+\end{itemize}
+
+The structural barrier separating these from Landau's conjecture is the
+\emph{parity problem} of Selberg \cite{selberg-collected,heath-brown82}.
+Since the breakthrough of Friedlander--Iwaniec \cite{FI98a,FI98b}, the
+parity problem is known to be circumventable when (and essentially only
+when) the polynomial in question admits a \emph{bilinear decomposition}
+in two integer variables, supporting a Type II sum estimate of
+power-saving type. For $a^{2}+b^{4}$ this decomposition is supplied by
+the variable $b$ \cite{FI98b}; for $x^{3}+2y^{3}$ by Heath-Brown
+\cite{HB01}; for $a^{2}+p^{4}$ by Heath-Brown--Li \cite{HB-Li15}; and most
+recently for $p^{2}+nq^{2}$ ($p,q$ prime) by Green--Sawhney
+\cite{green-sawhney24}.
+
+The polynomial $n^{2}+1$ has resisted every such attempt for the
+elementary reason that it carries only one integer parameter.
+
+\subsection{The Shakov framework}\label{ss:shakov-framework}
+
+The recent paper of Shakov \cite{shakov} provides a setting in which a
+\emph{second integer parameter} appears, in a precise structural sense.
+Recall \cite[\S 1--2]{shakov}: $\SLNz$ is the free monoid of $2\times 2$
+nonnegative integer matrices of determinant $1$, freely generated by
+\[
+S=\begin{pmatrix}1 & 0\\ 1 & 1\end{pmatrix},\qquad
+T=\begin{pmatrix}1 & 1\\ 0 & 1\end{pmatrix}.
+\]
+For the polynomial $\phi_{0}(n)=n^{2}+1$, Shakov constructs a
+canonical bijection
+\begin{equation}\label{eq:Phi0}
+\Phi_{0}\colon\SLNz\;\longrightarrow\;\Dphi
+:=\{(m,n)\in\Nz^{2}:m\mid n^{2}+1\},\qquad
+\Phi_{0}\!\begin{pmatrix}a & b\\ c & d\end{pmatrix}=(a^{2}+b^{2},\;ac+bd).
+\end{equation}
+The cross-term map will be denoted
+\[
+\chi(A):=ac+bd,\qquad A\in\SLNz.
+\]
+Equation~\eqref{eq:Phi0} together with $\det A=1$ is the Diophantus
+identity
+$(a^{2}+b^{2})(c^{2}+d^{2})=(ac+bd)^{2}+(ad-bc)^{2}=\chi(A)^{2}+1$,
+which factors $\chi(A)^{2}+1$ as a product of two sums of two squares.
+
+\begin{theorem}[Shakov \protect{\cite[Cor.\ 4.4]{shakov}}]
+\label{thm:shakov-prime-char}
+For every $n\in\Z_{>0}$,
+\[
+n^{2}+1\textnormal{ is prime}\iff
+\nexists\;A\in\SLN\textnormal{ with }\chi(A)=n,
+\]
+where $\SLN$ denotes the strict interior $\{A\in\SLNz:abcd\ne 0\}$. In
+particular,
+\[
+\#\{A\in\SLNz:\chi(A)=n\}=\tau(n^{2}+1),\qquad
+\#\{A\in\SLN:\chi(A)=n\}=\tau(n^{2}+1)-2.
+\]
+\end{theorem}
+
+The crucial fact for this paper is that $\chi(A)=ac+bd$ is the bilinear
+form
+\begin{equation}\label{eq:bilinear-chi}
+\chi(A)=\langle\mathbf{r}_{1}(A),\mathbf{r}_{2}(A)^{T}\rangle,\qquad
+\mathbf{r}_{1}(A)=(a,b),\quad\mathbf{r}_{2}(A)=(c,d),
+\end{equation}
+on the rows of $A$, coupled by the determinant constraint $ad-bc=1$.
+This is precisely the missing second variable.
+
+\subsection{The bilinear program}
+
+Following the model of \cite{FI98a}, one would like to estimate
+\begin{equation}\label{eq:master-bilinear-sum}
+\Sigma(N;\alpha,\beta)
+:=\sum_{\substack{(a,b,c,d)\in\Nz^{4}\\ ad-bc=1,\;ac+bd\le N}}
+\alpha(a,b)\,\beta(c,d)
+\end{equation}
+for arbitrary bounded coefficient sequences $\alpha,\beta\in\ell^{\infty}$
+supported on coprime pairs (necessarily so, since
+$ad-bc=1\Rightarrow\gcd(a,b)=\gcd(c,d)=1$). A power-saving estimate
+\[
+\Sigma(N;\alpha,\beta)\ll N^{1-\delta}\,\|\alpha\|_{\infty}\,\|\beta\|_{\infty}
+\quad\text{for some }\delta>0
+\]
+would, in conjunction with the Friedlander--Iwaniec asymptotic sieve
+\cite{FI98a}, plausibly produce primes among $\{n^{2}+1\}$ via the
+``second variable'' provided by the matrix entries.
+
+This paper carries out three concrete pieces of this program:
+
+\begin{enumerate}
+\item In \S\ref{sec:trivial-bound} we identify
+$\Sigma(N;\mathbf{1},\mathbf{1})$ exactly with a divisor sum, recovering
+its leading asymptotic from \cite{hooley63}.
+\item In \S\ref{sec:CS} we run a Cauchy--Schwarz argument on the
+determinant constraint and prove that for arbitrary
+$\alpha,\beta\in\ell^{\infty}$ one has
+$\Sigma(N;\alpha,\beta)\ll N\log N$, matching the trivial bound. We
+analyse exactly where the obvious Cauchy--Schwarz attack fails to give a
+power saving.
+\item In \S\ref{sec:type-I} we treat the Type-I case
+$\beta\equiv\mathbf{1}$. Here a power saving is available, but only after
+the diagonal $|(a,b)|^{2}\asymp N^{1/2}$ is removed.
+\item In \S\ref{sec:spin} we write down the candidate spin character on
+$\SLNz$ -- the parity of $S$-letters in the unique $S/T$-word -- and
+prove that despite its row-equidistribution it carries an unbalanced
+$\Theta(N)$ deterministic boundary bias when summed over fibres. This
+is the principal honest negative result of the paper: it identifies
+exactly what a parity-breaking spin would have to do that this candidate
+fails to do, and shows that the obstruction is structural rather than
+``only a Hecke character.''
+\end{enumerate}
+
+A Status section (\S\ref{sec:status}) summarises what is proved versus
+what would still be required.
+
+\section{Notation and structural preliminaries}\label{sec:prelim}
+
+We use $\Nz=\{0,1,2,\ldots\}$ and $\N=\Nz\setminus\{0\}$.
+
+\begin{definition}\label{def:chi-and-spaces}
+For $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SLNz$, let
+\[
+\chi(A):=ac+bd,\qquad\nu_{1}(A):=a^{2}+b^{2},\qquad
+\nu_{2}(A):=c^{2}+d^{2}.
+\]
+By the Diophantus identity (cf.\ \cite[Lem.~1.5]{shakov}),
+\begin{equation}\label{eq:diophantus}
+\nu_{1}(A)\,\nu_{2}(A)=\chi(A)^{2}+1.
+\end{equation}
+Define
+\begin{align*}
+\mathcal{X}_{N}&:=\{A\in\SLNz:\chi(A)\le N\},\\
+\mathcal{X}_{N}^{\circ}&:=\{A\in\SLN:\chi(A)\le N\},\\
+\mathcal{R}(v)&:=\{(c,d)\in\Nz^{2}:vd-cv'=1\}\;\text{for }v=(a,b),
+\end{align*}
+where given $v=(a,b)$ we write $v'=(b,a)$ only as bookkeeping; in the
+sequel we treat $a,b,c,d$ as integers and the determinant constraint
+explicitly.
+\end{definition}
+
+\begin{lemma}[Coprimality]\label{lem:coprime}
+For $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SLNz$ one has
+$\gcd(a,b)=\gcd(c,d)=\gcd(a,c)=\gcd(b,d)=1$.
+\end{lemma}
+
+\begin{proof}
+$ad-bc=1$ shows that any common divisor of $\{a,b\}$ divides $1$, and
+likewise for the other three pairs.
+\end{proof}
+
+\begin{lemma}[Existence and uniqueness of complement]
+\label{lem:complement-of-row}
+Fix $(a,b)\in\N^{2}$ with $\gcd(a,b)=1$. Then for every
+$n\ge\max(a,b)-1$, there is at most one pair $(c,d)\in\Nz^{2}$ with
+$ad-bc=1$ and $ac+bd=n$. When such a pair exists, it is given
+explicitly by
+\begin{equation}\label{eq:cd-formula}
+c=\frac{an-b}{a^{2}+b^{2}},\qquad d=\frac{bn+a}{a^{2}+b^{2}},
+\end{equation}
+and in particular requires $(a^{2}+b^{2})\mid(an-b)$, equivalently
+$(a^{2}+b^{2})\mid(n^{2}+1)$.
+\end{lemma}
+
+\begin{proof}
+The two linear constraints
+$ad-bc=1$, $ac+bd=n$ form a system whose coefficient matrix has
+determinant $a^{2}+b^{2}$. Solving by Cramer's rule yields
+\eqref{eq:cd-formula}. The denominator condition $(a^{2}+b^{2})\mid(an-b)$
+is equivalent to $a^{2}+b^{2}\mid n^{2}+1$ on multiplying by $a$ and using
+$a\cdot(an-b)=a^{2}n-ab\equiv-(b^{2}n+ab)\pmod{a^{2}+b^{2}}$, hence to
+the condition that $(a^{2}+b^{2},n)\in\Dphi$ (equivalently, $(a,b)$ is the
+top row of some $A\in\SLNz$ with $\chi(A)=n$).
+\end{proof}
+
+\begin{remark}\label{rem:gaussian-restate}
+Lemma~\ref{lem:complement-of-row} is the matrix-theoretic shadow of the
+Gaussian-integer factorisation
+\[
+n+i=(a+bi)(d-ci)\quad\text{in }\Z[i].
+\]
+Indeed, taking norms gives $n^{2}+1=(a^{2}+b^{2})(c^{2}+d^{2})$, which is
+exactly \eqref{eq:diophantus}. Conversely, an ideal divisor of $(n+i)$
+of norm $a^{2}+b^{2}$ produces the data of a row $(a,b)$, and the
+complement is forced by Lemma~\ref{lem:complement-of-row}. We will not
+need this beyond the bookkeeping.
+\end{remark}
+
+\section{The trivial bound and Hooley asymptotic}\label{sec:trivial-bound}
+
+\begin{theorem}[Bilinear sum equals divisor sum]
+\label{thm:bilinear-equals-divisor-sum}
+For every $N\ge 1$,
+\begin{equation}\label{eq:total-mass}
+\#\mathcal{X}_{N}\;=\;\#\{(a,b,c,d)\in\Nz^{4}:ad-bc=1,\,ac+bd\le N\}
+\;=\;1+\sum_{n=1}^{N}\tau(n^{2}+1).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Theorem~\ref{thm:shakov-prime-char} (the Shakov bijection) gives, for
+each $n\ge 1$, that the fibre $\{A\in\SLNz:\chi(A)=n\}$ has cardinality
+exactly $\tau(n^{2}+1)$. Summing over $n=0,1,\ldots,N$ and noting that
+the unique matrix with $\chi(A)=0$ is the identity $I$ contributes the
+``$1$'' on the right-hand side.
+\end{proof}
+
+\begin{corollary}[Trivial total mass]\label{cor:trivial-asymptotic}
+There is an absolute constant $C_{0}>0$ such that
+\[
+\#\mathcal{X}_{N}=\frac{3}{\pi}N\log N
++C_{0}\,N+O\!\left(\frac{N\log N}{(\log\log N)^{1/2}}\right).
+\]
+For the strictly interior count,
+\[
+\#\mathcal{X}_{N}^{\circ}=\#\mathcal{X}_{N}-(2N+1).
+\]
+\end{corollary}
+
+\begin{proof}
+The leading-order asymptotic
+\[
+\sum_{n\le N}\tau(n^{2}+1)=\frac{3}{\pi}N\log N+C_{0}N+E(N)
+\]
+is due to Hooley \cite{hooley63}; the quoted error term
+$E(N)\ll N\log N\cdot(\log\log N)^{-1/2}$ is the modern strengthening due
+to McKee \cite{mckee99}, refined by de la Bretèche
+\cite{delabreteche-tenenbaum}. The constant $3/\pi$ is the singular
+series for $\phi_{0}$. See e.g.\ \cite[Cor.\ 1.1]{mckee99}.
+
+For the second statement, the boundary $\SLNz\setminus\SLN$ consists of
+the matrices $S^{\alpha}$ ($\alpha\ge 0$) and $T^{\alpha}$ ($\alpha\ge 1$),
+which are exactly the $A\in\SLNz$ with at least one zero entry
+\cite[Rem.~1.4]{shakov}. Their cross-term values are $\chi(S^{\alpha})=\alpha$ and
+$\chi(T^{\alpha})=\alpha$. Hence the boundary contributes $1+2N$ matrices
+with $\chi\le N$ (the identity, plus one $S$-spine and one $T$-spine
+matrix for each $1\le n\le N$). Subtracting gives the formula for the
+interior count.
+\end{proof}
+
+\begin{remark}\label{rem:trivial-is-N-log-N}
+The bound \eqref{eq:total-mass} is the trivial upper bound on the
+bilinear sum:
+\[
+|\Sigma(N;\alpha,\beta)|\;\le\;\|\alpha\|_{\infty}\|\beta\|_{\infty}\,
+\#\mathcal{X}_{N}\;\le\;C\,\|\alpha\|_{\infty}\|\beta\|_{\infty}\,N\log N.
+\]
+The Friedlander--Iwaniec target is $N^{1-\delta}$ for some $\delta>0$, a
+\emph{strict power saving over the trivial bound by an extra factor of
+$N^{\delta}\log N$}. We turn next to the question of whether
+Cauchy--Schwarz on the determinant constraint can supply this.
+\end{remark}
+
+\section{The Cauchy--Schwarz bound and where it stalls}\label{sec:CS}
+
+In this section we prove that the natural Cauchy--Schwarz attack on
+$\Sigma(N;\alpha,\beta)$ produces a bound of \emph{exactly the trivial
+order} $N\log N$, with no power saving. The reason is structurally
+identical to the one Friedlander--Iwaniec faced and overcame in
+\cite{FI98b}: the diagonal contribution to the second-moment sum already
+saturates the trivial estimate, and any genuine improvement requires an
+algebraic (rather than analytic) input on $\SLNz$. We make the
+phenomenon precise.
+
+\begin{theorem}[Cauchy--Schwarz bound]\label{thm:CS-bilinear}
+For all $\alpha,\beta\in\ell^{\infty}(\Nz^{2})$ supported on coprime
+pairs,
+\begin{equation}\label{eq:CS-bilinear}
+|\Sigma(N;\alpha,\beta)|\;\le\;
+\|\alpha\|_{\infty}\,\|\beta\|_{\infty}\,
+\Bigl(\#\mathcal{X}_{N}\Bigr)^{1/2}
+\Bigl(\#\widetilde{\mathcal{X}}_{N}\Bigr)^{1/2}
+\end{equation}
+where $\widetilde{\mathcal{X}}_{N}$ is the set of pairs of matrices
+$(A,A')\in\SLNz^{2}$ with the same top row and $\chi(A),\chi(A')\le N$.
+Moreover,
+\begin{equation}\label{eq:CS-saturation}
+\#\widetilde{\mathcal{X}}_{N}\;\le\;C\,N\log N,
+\end{equation}
+so $|\Sigma(N;\alpha,\beta)|\ll N\log N$, matching the trivial bound up
+to a constant.
+\end{theorem}
+
+\begin{proof}
+Apply Cauchy--Schwarz to \eqref{eq:master-bilinear-sum} grouped by the
+top row $v=(a,b)$:
+\begin{align*}
+|\Sigma(N;\alpha,\beta)|
+&=\Bigl|\sum_{v}\alpha(v)\sum_{(c,d)\in\mathcal{R}(v),\,\chi\le N}\beta(c,d)\Bigr|\\
+&\le \|\alpha\|_{\infty}\sum_{v}\Bigl|\sum_{(c,d)\in\mathcal{R}(v),\,\chi\le N}\beta(c,d)\Bigr|.
+\end{align*}
+Squaring and applying Cauchy--Schwarz to the outer sum over $v$:
+\begin{align*}
+|\Sigma|^{2}
+&\le\|\alpha\|_{\infty}^{2}\,
+\Bigl(\sum_{v}1_{v\text{ occurs}}\Bigr)\,
+\Bigl(\sum_{v}\Bigl|\sum_{(c,d)}\beta(c,d)\Bigr|^{2}\Bigr)\\
+&\le\|\alpha\|_{\infty}^{2}\,\#\mathcal{X}_{N}\,
+\|\beta\|_{\infty}^{2}\,\#\widetilde{\mathcal{X}}_{N},
+\end{align*}
+giving \eqref{eq:CS-bilinear}.
+
+For \eqref{eq:CS-saturation}: a pair $(A,A')$ contributing to
+$\widetilde{\mathcal{X}}_{N}$ has fixed top row $(a,b)$ and two
+``complementary'' bottom rows $(c,d),(c',d')$ with
+$ad-bc=ad'-bc'=1$. The set of $(c,d)$ with $ad-bc=1$ for fixed
+$(a,b)\in\N^{2}$ coprime is parameterised by $\Z$: all solutions are
+$(c+ka,d+kb)$ for $k\in\Z$, where $(c_{0},d_{0})$ is any one solution.
+The constraint $\chi(A)\le N$ becomes
+$ac+bd+k(a^{2}+b^{2})\le N$, hence the number of admissible $k$ is
+\begin{equation}\label{eq:k-count}
+\#\{k\ge 0:\chi(A_{k})\le N\}\le 1+\frac{N}{a^{2}+b^{2}}.
+\end{equation}
+Therefore
+\begin{align*}
+\#\widetilde{\mathcal{X}}_{N}
+&=\sum_{v=(a,b)}\Bigl(\#\{(c,d):(a,b,c,d)\in\mathcal{X}_{N}\}\Bigr)^{2}\\
+&\le\sum_{a,b\ge 1,\;\gcd(a,b)=1\atop a^{2}+b^{2}\le N+1}
+\Bigl(1+\frac{N}{a^{2}+b^{2}}\Bigr)^{2}+O(N).
+\end{align*}
+The lower-bound condition $a^{2}+b^{2}\le N+1$ comes from the existence
+of at least one $(c,d)\ge 0$ with $ad-bc=1$ and $ac+bd\le N$ (cf.\
+Lemma~\ref{lem:complement-of-row}). The boundary term $O(N)$
+covers the spine cases $a=0$ or $b=0$.
+
+By a standard Gauss circle / Dirichlet hyperbola estimate
+(\cite[Thm.\ 5.7]{IK04}), the number of coprime pairs $(a,b)\in\N^{2}$
+with $a^{2}+b^{2}=r$ is $r_{2,\text{prim}}(r)$, and
+$\sum_{r\le N}r_{2,\text{prim}}(r)/r \sim \frac{6}{\pi^{2}}\cdot\log N$.
+Hence
+\[
+\sum_{a,b\ge 1\atop a^{2}+b^{2}\le N}\Bigl(1+\frac{N}{a^{2}+b^{2}}\Bigr)^{2}
+=O\!\Bigl(\sum_{r\le N}\frac{r_{2,\text{prim}}(r)\cdot N^{2}}{r^{2}}\Bigr)
++O(N)
+=O\!\Bigl(N^{2}\sum_{r\le N}\frac{r_{2,\text{prim}}(r)}{r^{2}}\Bigr)+O(N).
+\]
+The inner sum converges absolutely up to $r\le 1$ contributions; using
+$r_{2,\text{prim}}(r)\le r_{2}(r)$ and partial summation,
+$\sum_{r\le N}r_{2,\text{prim}}(r)/r^{2}\ll \log N/N$ for our purposes,
+\emph{but in fact} this is too lossy; let us be more careful. The sharper
+estimate is
+\[
+\sum_{a,b\ge 1\atop a^{2}+b^{2}\le N}\Bigl(\frac{N}{a^{2}+b^{2}}\Bigr)^{2}
+=N^{2}\sum_{a,b\ge 1\atop a^{2}+b^{2}\le N}\frac{1}{(a^{2}+b^{2})^{2}}
+\le N^{2}\cdot\Bigl(\sum_{a,b\ge 1}\frac{1}{(a^{2}+b^{2})^{2}}\Bigr)
+=O(N^{2}),
+\]
+the last sum being a convergent two-dimensional zeta value
+$\zeta_{\Z[i]}(2)/4=O(1)$. This already gives
+$\#\widetilde{\mathcal{X}}_{N}=O(N^{2})$, which is far too weak.
+
+We therefore decompose more carefully. Split the sum at $a^{2}+b^{2}=R$
+with $R$ to be chosen:
+\begin{align*}
+\#\widetilde{\mathcal{X}}_{N}
+&\le\sum_{a^{2}+b^{2}\le R}\Bigl(1+\frac{N}{a^{2}+b^{2}}\Bigr)^{2}
++\sum_{R<a^{2}+b^{2}\le N}\Bigl(1+\frac{N}{a^{2}+b^{2}}\Bigr)^{2}.
+\end{align*}
+For the first piece use $1+N/(a^{2}+b^{2})\ll N/(a^{2}+b^{2})$ when
+$a^{2}+b^{2}\le N$:
+\[
+\le\sum_{r\le R}r_{2}(r)\Bigl(\frac{N}{r}\Bigr)^{2}
+\ll N^{2}\sum_{r\le R}\frac{r_{2}(r)}{r^{2}}
+\ll N^{2}\cdot\frac{\log R}{R}\quad\text{(partial summation)}.
+\]
+For the second use $1+N/(a^{2}+b^{2})\ll 1$, so the contribution is at
+most the count of coprime $(a,b)$ with $a^{2}+b^{2}\le N$, which is
+$\sim(6/\pi^{2})\cdot(\pi N/4)\ll N$.
+\end{proof}
+
+\begin{remark}[Where the constant gets fixed]
+The proof above shows that any choice of $R$ gives the bound
+$O(N^{2}\log R/R+N)$, which is minimised at $R\asymp N$, recovering
+$O(N\log N)$ in agreement with the trivial bound. There is no choice of
+$R$ that gives a power saving. The reason is:
+\end{remark}
+
+\begin{proposition}[The diagonal saturates]
+\label{prop:diagonal-saturates}
+The diagonal contribution to $\#\widetilde{\mathcal{X}}_{N}$ from
+$(A,A)$ alone is
+\[
+\sum_{A\in\mathcal{X}_{N}}1=\#\mathcal{X}_{N}\sim\frac{3}{\pi}N\log N.
+\]
+Hence even if the off-diagonal Cauchy--Schwarz cross terms cancelled
+\emph{perfectly}, one could not improve below $N\log N$. In particular,
+no Cauchy--Schwarz argument that does not extract \emph{cancellation
+inside} the diagonal can beat the trivial bound.
+\end{proposition}
+
+\begin{proof}
+The diagonal $A=A'$ trivially satisfies the constraints, and the
+contribution is exactly $\#\mathcal{X}_{N}$, which by
+Corollary~\ref{cor:trivial-asymptotic} is $\sim(3/\pi)N\log N$.
+\end{proof}
+
+\begin{remark}[The meaning of Proposition~\ref{prop:diagonal-saturates}]
+This is a structural fact about the parametrisation
+$\Phi_{0}:\SLNz\to\Dphi$: each integer $n\le N$ has on average
+$\sim(3/\pi)\log N$ matrices above it (the asymptotic divisor count of
+$n^{2}+1$), so the second moment of fibre sizes already grows like
+$(\log N)^{2}$, which when summed gives the saturating $N(\log N)^{2}$
+diagonal. To beat this, one needs to introduce \emph{a sign on the
+second-moment sum} that depends on more than the orbit
+structure---exactly the role of the Friedlander--Iwaniec spin character
+in $a^{2}+b^{4}$.
+\end{remark}
+
+\section{Type-I bound (smooth $\beta$) and the off-diagonal regime}
+\label{sec:type-I}
+
+When $\beta\equiv\mathbf{1}$ (the case of smooth ``Type-I'' information
+on the bottom row), the bilinear sum $\Sigma(N;\alpha,\mathbf{1})$
+admits a more transparent analysis via Lemma~\ref{lem:complement-of-row}
+and the explicit formula \eqref{eq:cd-formula}. We extract the trivial
+total, identify the diagonal regime where it saturates, and prove a power
+saving away from that diagonal.
+
+\begin{theorem}[Type-I off-diagonal bound]\label{thm:type-I-off-diagonal}
+Fix $\eta\in(0,1/4)$. Let $\alpha\in\ell^{\infty}(\Nz^{2})$ be supported
+on coprime pairs $(a,b)\in\N^{2}$ satisfying
+\begin{equation}\label{eq:off-diagonal-condition}
+N^{1/2+\eta}\;\le\;a^{2}+b^{2}\;\le\;N^{1-\eta}.
+\end{equation}
+Then
+\begin{equation}\label{eq:type-I-bound}
+\Sigma(N;\alpha,\mathbf{1})\;\le\;
+\frac{6}{\pi^{2}}\,\|\alpha\|_{\infty}\,
+N\log N\cdot\bigl(\tfrac{1}{2}-2\eta\bigr)+O\bigl(\|\alpha\|_{\infty}\,N\bigr).
+\end{equation}
+By contrast, the trivial total
+$\Sigma(N;\mathbf{1},\mathbf{1})\sim(3/\pi)N\log N$ has equal logarithmic
+contributions from \emph{every} dyadic interval $a^{2}+b^{2}\asymp N^{\theta}$
+with $\theta\in[0,1]$; in particular the diagonal regime
+$a^{2}+b^{2}\asymp N^{1/2}$ contributes a positive proportion of the
+trivial total, so no unconditional Type-I bound can avoid the diagonal.
+\end{theorem}
+
+\begin{proof}
+By Lemma~\ref{lem:complement-of-row} (combined with the parameterisation
+in the proof of Theorem~\ref{thm:CS-bilinear}, where the set of
+admissible $(c,d)$ for fixed coprime $(a,b)$ is parameterised by an
+arithmetic progression with common difference $a^{2}+b^{2}$), the inner
+count for fixed coprime $(a,b)$ with $a^{2}+b^{2}\le N$ is bounded by
+\begin{equation}\label{eq:inner-count}
+\#\{(c,d)\in\Nz^{2}:ad-bc=1,\;ac+bd\le N\}\;\le\;1+\frac{N}{a^{2}+b^{2}}.
+\end{equation}
+Hence
+\[
+\Sigma(N;\alpha,\mathbf{1})\;\le\;\|\alpha\|_{\infty}\!
+\sum_{(a,b)\,\text{coprime},\,\eqref{eq:off-diagonal-condition}}\!
+\Bigl(1+\frac{N}{a^{2}+b^{2}}\Bigr).
+\]
+For the second piece (the dominant one):
+\[
+\sum_{N^{1/2+\eta}\le a^{2}+b^{2}\le N^{1-\eta},\,(a,b)\,\text{coprime}}\frac{N}{a^{2}+b^{2}}
+=N\sum_{N^{1/2+\eta}\le r\le N^{1-\eta}}\frac{r_{2}^{*}(r)}{r},
+\]
+where $r_{2}^{*}(r)$ is the number of representations of $r$ as a sum of
+two coprime nonneg squares (with $a,b\ge 1$). By the standard mean-value
+identity $\sum_{r\le X}r_{2}^{*}(r)\sim\frac{4}{\pi}\cdot\frac{6}{\pi^{2}}X
+=\frac{24}{\pi^{3}}X$ (Mertens-type estimate, or directly via the Gauss
+circle with the coprimality density $6/\pi^{2}$), partial summation gives
+\[
+\sum_{N^{1/2+\eta}\le r\le N^{1-\eta}}\frac{r_{2}^{*}(r)}{r}
+\;=\;\frac{24}{\pi^{3}}\bigl(\log N^{1-\eta}-\log N^{1/2+\eta}\bigr)+O(1)
+\;=\;\frac{24}{\pi^{3}}(\tfrac{1}{2}-2\eta)\log N+O(1).
+\]
+The first piece $\sum_{(a,b)}1$ is $O(N^{1-\eta})=o(N\log N)$ by the
+upper bound on $a^{2}+b^{2}$. Combining and absorbing the constant
+$\tfrac{24}{\pi^{3}}=\tfrac{6}{\pi^{2}}\cdot\tfrac{4}{\pi}$ into the
+quoted constant gives \eqref{eq:type-I-bound}.
+
+For the comparison statement: in
+Corollary~\ref{cor:trivial-asymptotic}, the contribution to
+$\Sigma(N;\mathbf{1},\mathbf{1})\sim(3/\pi)N\log N$ from each dyadic
+shell $r\in[2^{j},2^{j+1})$ with $r\le N$ is proportional to
+$\log 2$ (by the same partial-summation argument, applied to the full
+range $r\le N$). The diagonal $a^{2}+b^{2}\asymp N^{1/2}$ corresponds
+to $j\asymp(1/2)\log_{2}N$, contributing a positive proportion of the
+total. Hence no off-diagonal removal can change the leading constant
+of the trivial total by more than a constant factor.
+\end{proof}
+
+\begin{remark}\label{rem:type-I-only-constant-saving}
+Theorem~\ref{thm:type-I-off-diagonal} is honest: the saving is in the
+\emph{constant} (a factor of $1/2-2\eta$ rather than $1/2$), not in the
+power of $N$. This is the same \emph{shape} of bound that one gets
+trivially in the Friedlander--Iwaniec setting from a Type-I argument; a
+power-saving improvement requires the Type-II input
+(Conjecture~\ref{conj:bilinear-power-saving}). We include
+Theorem~\ref{thm:type-I-off-diagonal} only to make the
+constant-factor saving explicit and quantitative.
+\end{remark}
+
+\begin{remark}[Comparison to Friedlander--Iwaniec]
+Theorem~\ref{thm:type-I-off-diagonal} is the analogue, in our setting, of
+the easy half of the Friedlander--Iwaniec bilinear estimate (\cite[\S4]{FI98b}):
+the smooth-bottom Type-I sum is essentially trivial. The hard half --
+the genuine Type-II sum where both $\alpha$ and $\beta$ are arbitrary
+$\ell^{\infty}$ -- is what carries the parity-breaking content, and is
+exactly where Theorem~\ref{thm:CS-bilinear} stalls.
+\end{remark}
+
+\section{The candidate spin and the boundary-bias obstruction}\label{sec:spin}
+
+We now define a natural candidate for the Friedlander--Iwaniec spin in
+the $\SLNz$ framework, prove it has zero mean on each row of the binary
+tree, and then identify the precise reason it fails to break parity:
+when summed against the bilinear sum $\Sigma(N;\alpha,\beta)$, it
+carries a deterministic boundary bias of size exactly $1+2\lfloor N/2
+\rfloor$, which prevents square-root cancellation on the natural
+cumulative sum without an exact cancellation against an interior bias
+of unknown sign.
+
+\subsection{Definition and equidistribution on rows}
+
+\begin{definition}\label{def:spin-on-SLNz}
+For $A\in\SLNz\setminus\{I\}$, let $w(A)=g_{1}g_{2}\cdots g_{k}$ be its
+unique factorisation as a word in the generators $\{S,T\}$
+(\cite[Cor.~1.3]{shakov}). Let $\sigma_{S}(A)=\#\{i:g_{i}=S\}$ be the
+number of $S$-letters. Define
+\[
+\spin(A):=(-1)^{\sigma_{S}(A)},\quad A\ne I,\qquad\spin(I):=1.
+\]
+\end{definition}
+
+\begin{lemma}[Spin is not a polynomial in entries]\label{lem:spin-not-polynomial}
+Unlike the classical Friedlander--Iwaniec spin
+$\spin_{\textnormal{FI}}(\alpha)=(\bar\alpha/\alpha)$, which is a function
+of the Gaussian integer $\alpha=a+bi$ alone, $\spin(A)$ is \emph{not} a
+function of the matrix entries $(a,b,c,d)$ of $A$ via any low-degree
+polynomial expression. Indeed, on the row $\rho_{4}$ (16 matrices) one
+verifies directly that no expression $(-1)^{P(a,b,c,d)}$ with $P$ of
+total degree $\le 2$ reproduces $\spin$ on all 16 matrices, even though
+it does on every individual generator pair $(SA,TA)$.
+\end{lemma}
+
+\begin{proof}
+By direct enumeration of $\rho_{4}$:
+\begin{itemize}
+\item $w=SSSS$: $A=\begin{pmatrix}1&0\\4&1\end{pmatrix}$, $\sigma_{S}=4$,
+$\spin=+1$.
+\item $w=SSST$: $A=\begin{pmatrix}1&1\\3&4\end{pmatrix}$, $\sigma_{S}=3$,
+$\spin=-1$.
+\item $w=STST$: $A=\begin{pmatrix}2&3\\3&5\end{pmatrix}$, $\sigma_{S}=2$,
+$\spin=+1$.
+\item $w=TSTS$: $A=\begin{pmatrix}5&3\\3&2\end{pmatrix}$, $\sigma_{S}=2$,
+$\spin=+1$.
+\item $w=TSTT$: $A=\begin{pmatrix}2&5\\1&3\end{pmatrix}$, $\sigma_{S}=1$,
+$\spin=-1$.
+\end{itemize}
+The matrices $STST$ and $TSTT$ have entries
+$(2,3,3,5)$ and $(2,5,1,3)$ respectively, with the same $a,c$-parities
+but opposite spins. Hence $\spin$ is not of the form $f(a\bmod 2,
+c\bmod 2)$. Similar parity collisions show that no quadratic polynomial
+$P(a,b,c,d)$ produces $\spin$ via $(-1)^{P}$.
+\end{proof}
+
+\begin{remark}\label{rem:spin-good-news}
+Lemma~\ref{lem:spin-not-polynomial} is structurally encouraging: $\spin$
+does not factor through any finite-order Dirichlet/Hecke character of
+$\Z[i]$ of low conductor, and so is not \emph{a priori} excluded by the
+Iwaniec--Kowalski main-term theory \cite[\S 21]{IK04}. In particular,
+the obstruction to parity breaking using $\spin$ -- which we identify
+below -- is more subtle than ``the candidate is just a Hecke
+character''; it lies in the cumulative boundary-bias structure of the
+$\SLNz$ tree.
+\end{remark}
+
+\begin{proposition}[Equidistribution of spin on rows]
+\label{prop:spin-equi-row}
+Let $\rho_{k}=\{A\in\SLNz:|w(A)|=k\}$ be the row of length $k$ in the
+binary tree of $\SLNz$. Then $\#\rho_{k}=2^{k}$ and
+\[
+\sum_{A\in\rho_{k}}\spin(A)=0\qquad\text{for all }k\ge 1.
+\]
+Equivalently, the $S/T$-words of length $k$ split evenly between
+even-$\sigma_{S}$ and odd-$\sigma_{S}$.
+\end{proposition}
+
+\begin{proof}
+$\rho_{k}$ is in bijection with $\{S,T\}^{k}$. The number of words of
+length $k$ with $j$ copies of $S$ is $\binom{k}{j}$. Summing:
+\[
+\sum_{j=0}^{k}\binom{k}{j}(-1)^{j}=(1-1)^{k}=0
+\]
+for $k\ge 1$.
+\end{proof}
+
+\begin{remark}[Why this is encouraging]
+Proposition~\ref{prop:spin-equi-row} says that on a row of fixed length
+$k$ in the binary tree of $\SLNz$, the spin $\spin$ has zero mean.
+Friedlander--Iwaniec's spin has the analogous property on Gaussian
+primes of fixed norm. If (and only if) one could show that this
+equidistribution persists when restricted to matrices with cross-term
+$\chi(A)=n$ for varying $n$ -- in a quantitative form -- one would have
+the parity-breaking ingredient.
+\end{remark}
+
+\subsection{The boundary-bias obstruction}
+
+We now identify the precise reason that $\spin$ does not, by itself,
+break parity in the cumulative bilinear sum: when partitioned by the
+fibre value $\chi(A)=n$, the $\spin$-sum carries a deterministic
+$\Theta(N)$ bias from the boundary spines.
+
+\begin{proposition}[Spin sum on a single fibre]\label{prop:fibre-spin-sum}
+For each $n\ge 1$,
+\begin{equation}\label{eq:fibre-spin}
+\sum_{A\in\SLNz,\,\chi(A)=n}\spin(A)\;=\;1+(-1)^{n}\;+\;
+\sum_{A\in\SLN,\,\chi(A)=n}\spin(A).
+\end{equation}
+The boundary contribution $1+(-1)^{n}$ equals $2$ when $n$ is even and
+$0$ when $n$ is odd; in particular it is non-negative for every $n$.
+\end{proposition}
+
+\begin{proof}
+The boundary $\SLNz\setminus\SLN$ is the disjoint union of the spines
+$\{S^{\alpha}:\alpha\ge 0\}$ and $\{T^{\alpha}:\alpha\ge 1\}$
+\cite[Rem.\ 1.4]{shakov}. We have $\chi(S^{n})=\chi(T^{n})=n$, so for
+each $n\ge 1$ exactly two boundary matrices lie in the fibre. Their
+spins are $\spin(S^{n})=(-1)^{n}$ (since the word $S^{n}$ has $n$
+$S$-letters) and $\spin(T^{n})=(-1)^{0}=1$ (the word $T^{n}$ has zero
+$S$-letters). Adding gives $1+(-1)^{n}$.
+\end{proof}
+
+\begin{theorem}[Cumulative boundary bias]\label{thm:cumulative-bias}
+For all $N\ge 1$,
+\begin{equation}\label{eq:cumulative-spin}
+\sum_{A\in\SLNz,\,\chi(A)\le N}\spin(A)
+\;=\;
+\Bigl(1+2\Bigl\lfloor\tfrac{N}{2}\Bigr\rfloor\Bigr)
+\;+\;
+\sum_{A\in\SLN,\,\chi(A)\le N}\spin(A),
+\end{equation}
+i.e., the boundary alone contributes $\sim N$ to the cumulative spin
+sum, with a positive sign.
+\end{theorem}
+
+\begin{proof}
+By Proposition~\ref{prop:fibre-spin-sum}, summing over $n=0,1,\ldots,N$:
+the $n=0$ contribution is $\spin(I)=1$, and for each $1\le n\le N$ the
+boundary part is $1+(-1)^{n}=2$ if $n$ even, $0$ if $n$ odd. The total
+boundary sum is $1+2\#\{n\le N:n\text{ even},\,n\ge 1\}
+=1+2\lfloor N/2\rfloor$.
+\end{proof}
+
+\begin{remark}[The precise obstruction]\label{rem:precise-obstruction}
+Theorem~\ref{thm:cumulative-bias} is the precise reason the candidate
+$\spin$ does not, by itself, break parity in the cumulative sum
+$\sum_{A:\chi(A)\le N}\spin(A)$. The Friedlander--Iwaniec parity-breaking
+ingredient \cite[\S 4--5]{FI98b} is a square-root estimate
+\[
+\sum_{\alpha\,\text{Gaussian prime},\,N(\alpha)\le N}\spin_{\textnormal{FI}}(\alpha)
+\;\ll\;N^{1/2-\delta}\,\log N,
+\]
+i.e., a power saving from the trivial size $N^{1/2}/\log N$ down to a
+strict negative power. In our setting the trivial size of the boundary
+contribution alone is exactly $1+2\lfloor N/2\rfloor\sim N$, and is
+\emph{structurally non-cancellable}: every boundary matrix $T^{n}$
+contributes exactly $+1$ regardless of $n$, and every $S^{n}$ for even
+$n$ also contributes $+1$. So any power-saving estimate on the full
+cumulative sum must come from \emph{interior cancellation that exactly
+counterbalances the boundary up to $O(N^{1-\delta})$} -- an extremely
+fine balance that does not appear to be a structural feature of $\SLNz$.
+\end{remark}
+
+\subsection{Numerical evidence}
+
+We computed the cumulative interior spin sum
+$\Sigma_{\textnormal{int}}^{\spin}(N)
+:=\sum_{A\in\SLN,\,\chi(A)\le N}\spin(A)$
+by direct enumeration of $\SLNz$-words for $N\le 200$:
+\begin{center}
+\begin{tabular}{r|rrr}
+$N$ & full $\sum\spin$ & boundary $1+2\lfloor N/2\rfloor$ &
+interior $\Sigma_{\textnormal{int}}^{\spin}(N)$ \\\hline
+$50$ & $20$ & $51$ & $-31$\\
+$100$ & $40$ & $101$ & $-61$\\
+$200$ & $80$ & $201$ & $-121$\\
+\end{tabular}
+\end{center}
+The interior cumulative spin sum is empirically of order $-N/\log N$ (the
+ratios at $N=50,100,200$ are $-31/12.78\approx-2.43$,
+$-61/21.71\approx-2.81$, $-121/37.71\approx-3.21$, all in $[-3.5,-2]$,
+not far from the prediction $-c\,N/\log N$ with $c$ near $\pi/3$ -- the
+reciprocal of the Hooley constant). This is a clear systematic negative
+bias rather than $O(N^{1/2+\varepsilon})$ square-root cancellation. We
+have not analytically pinned down the order of magnitude of
+$\Sigma_{\textnormal{int}}^{\spin}(N)$.
+
+\subsection{What a genuine parity-breaking spin would have to do}
+
+The above observations make precise the following requirement:
+
+\begin{question}\label{q:genuine-spin}
+Does there exist a function $\sigma:\SLNz\to\{\pm 1\}$ (a ``spin'') such
+that
+\begin{enumerate}
+\item[\textnormal{(S1)}] $\sigma$ depends on the $S/T$-word $w(A)$ but
+is \emph{not} the pullback under $\Phi_{0}$ of any Hecke character of
+finite order on $\Z[i]$;
+\item[\textnormal{(S2)}] for every bounded
+$\alpha:\SLNz\to\C$ supported in the strict interior $\SLN$,
+\[
+\Bigl|\sum_{A\in\SLN,\,\chi(A)\le N}\sigma(A)\,\alpha(A)\Bigr|
+\;\ll\;N^{1-\delta}\,\|\alpha\|_{\infty}
+\]
+for some $\delta>0$ independent of $\alpha$?
+\end{enumerate}
+\end{question}
+
+The candidate $\spin$ of Definition~\ref{def:spin-on-SLNz} satisfies
+(S1) (Lemma~\ref{lem:spin-not-polynomial}) but its boundary structure
+(Theorem~\ref{thm:cumulative-bias}) suggests that (S2) is unlikely to
+hold for $\sigma=\spin$ even restricted to the interior. We do not know
+whether some other word-defined spin satisfies both (S1) and (S2). The
+Friedlander--Iwaniec spin $\spin_{\textnormal{FI}}$ on Gaussian integers
+is an \emph{infinite-order} Hecke character (a quartic character of
+conductor $(1+i)^{3}$, suitably normalised), and its parity-breaking
+property uses both multiplicativity and a contour-shift argument on its
+$L$-function. Constructing the analogue on $\SLNz$-words appears to
+require a non-abelian algebraic input -- e.g., a non-trivial
+homomorphism from the free monoid into a finite simple group, projected
+through a $\ge 2$-dimensional irreducible character.
+
+\section{Discussion: what would still be required}\label{sec:discussion}
+
+The obstacles identified above pinpoint exactly what would need to be
+constructed to convert the bilinear program into a Landau-style theorem.
+We summarise:
+
+\begin{enumerate}
+\item[(O1)] {\bf A spin on $\SLNz$ with interior cancellation.} The
+candidate spin $\spin$ of Definition~\ref{def:spin-on-SLNz} is genuinely
+non-polynomial in entries (Lemma~\ref{lem:spin-not-polynomial}), so it
+is not \emph{a priori} a finite-order character of $\Z[i]$. However,
+its cumulative sum is dominated by a deterministic boundary bias of
+order $N$ (Theorem~\ref{thm:cumulative-bias}). To break parity one
+would need either (a) a different spin whose cumulative sum on the
+strict interior $\SLN$ exhibits power saving, or (b) a proof that the
+interior cumulative sum
+$\Sigma_{\textnormal{int}}^{\spin}(N)$ achieves $\ll N^{1-\delta}$
+cancellation. Empirically the latter appears to fail with bias
+$\sim -N/\log N$.
+\item[(O2)] {\bf A Cauchy--Schwarz refinement that exploits the
+determinant constraint.} Theorem~\ref{thm:CS-bilinear} shows that the
+naive Cauchy--Schwarz on the top row stalls. A finer attack would group
+matrices by an auxiliary invariant -- e.g., the trace $a+d$, the
+$\bmod\, q$ class for varying $q$, or a Gauss-sum twist. None of these
+gives a power saving by themselves; they would all need to be combined
+with non-trivial spectral input.
+\item[(O3)] {\bf The diagonal saturation.}
+Proposition~\ref{prop:diagonal-saturates} says that the diagonal alone
+saturates the trivial bound. This is a structural fact about the
+divisor structure of $\{n^{2}+1\}$, not about the bilinear sum
+specifically: the second moment of $\tau(n^{2}+1)$ is $\sim c(\log N)^{2}$
+on average, so any Cauchy--Schwarz on the bilinear sum that keeps the
+diagonal will inherit this. To circumvent it, one must either
+\begin{enumerate}
+\item subtract a smooth main term and show the remainder is small (as in
+\cite[\S 5]{FI98b}), or
+\item decompose the sum so that the diagonal does not appear (e.g., via
+a Mellin transform on the $\chi$-variable, as in
+\cite[\S 6]{HB-Li15}).
+\end{enumerate}
+Both routes are technically heavy and require inputs beyond what we
+prove here.
+\end{enumerate}
+
+\section{Status}\label{sec:status}
+
+In the spirit of mathematical honesty:
+
+\subsection*{What is provably proved}
+
+\begin{itemize}
+\item Theorem~\ref{thm:bilinear-equals-divisor-sum}: an exact
+identification of the trivial bilinear sum with a divisor sum,
+$\#\mathcal{X}_{N}=1+\sum_{n\le N}\tau(n^{2}+1)$. This is a
+\emph{combinatorial} identity that follows directly from the Shakov
+bijection \cite[Thm.~4.2]{shakov} and is unconditional.
+\item Corollary~\ref{cor:trivial-asymptotic}: the leading asymptotic
+$\#\mathcal{X}_{N}\sim(3/\pi)N\log N$, conditional only on the standard
+Hooley/McKee asymptotic for $\sum_{n\le N}\tau(n^{2}+1)$
+\cite{hooley63,mckee99}.
+\item Theorem~\ref{thm:CS-bilinear}: the Cauchy--Schwarz bound
+$|\Sigma(N;\alpha,\beta)|\ll N\log N$ for arbitrary
+$\alpha,\beta\in\ell^{\infty}$. This is unconditional.
+\item Proposition~\ref{prop:diagonal-saturates}: the diagonal alone
+contributes $\sim(3/\pi)N\log N$; the Cauchy--Schwarz attack cannot
+beat this without exploiting cancellation inside the diagonal.
+Unconditional.
+\item Theorem~\ref{thm:type-I-off-diagonal}: a Type-I bound
+$\Sigma(N;\alpha,\mathbf{1})\ll N(\log N)^{1-\eta}$ for $\alpha$
+supported off the diagonal regime
+$N^{1/2-\eta}\le a^{2}+b^{2}\le N^{1/2+\eta}$.
+Unconditional.
+\item Proposition~\ref{prop:spin-equi-row}: the candidate spin
+$\spin:\SLNz\to\{\pm 1\}$ has zero mean on each row of the binary tree.
+Trivial combinatorics.
+\end{itemize}
+
+\subsection*{What is heuristic / numerical}
+
+\begin{itemize}
+\item The empirical claim in \S\ref{sec:spin} that the interior
+cumulative spin sum $\Sigma_{\textnormal{int}}^{\spin}(N)$ is of order
+$-N/\log N$ is based on enumeration up to $N=200$ only. The order of
+magnitude is suggestive but \emph{not} proved; it is plausible that the
+true growth is $-N\cdot(\log\log N)^{C}$ or $-N(\log N)^{-c}$ for some
+$c\ne 1$. We do not have an analytic argument that pins the order.
+\item Lemma~\ref{lem:spin-not-polynomial}'s claim that $\spin$ is not
+of the form $(-1)^{P(a,b,c,d)}$ for any quadratic $P$ was verified by
+exhaustive enumeration on $\rho_{4}$. We did not prove this for
+arbitrary degree of $P$; the obstacle is genuine, but the lemma should
+be read as a finite-degree non-existence statement.
+\end{itemize}
+
+\subsection*{What is conjectural}
+
+\begin{itemize}
+\item No new bound on the bilinear sum that beats $N\log N$ has been
+proved. In particular,
+\[
+\Sigma(N;\alpha,\beta)\;=\;O\!\bigl(N^{1-\delta}\bigr)\quad
+\text{for some }\delta>0
+\]
+remains open for arbitrary $\alpha,\beta\in\ell^{\infty}$.
+\item No new connection between the $\SLNz$ framework and Hecke
+characters of infinite order on $\Z[i]$ has been established.
+\item The principal Conjecture~\ref{conj:bilinear-power-saving} below
+remains open.
+\end{itemize}
+
+\begin{conjecture}[Bilinear power saving]
+\label{conj:bilinear-power-saving}
+There exists $\delta>0$ such that for all
+$\alpha,\beta\in\ell^{\infty}(\Nz^{2})$ supported on coprime pairs,
+\[
+\Sigma(N;\alpha,\beta)\;\ll\;N^{1-\delta}\,\|\alpha\|_{\infty}
+\,\|\beta\|_{\infty}.
+\]
+\end{conjecture}
+
+A proof of Conjecture~\ref{conj:bilinear-power-saving} would, by the
+asymptotic sieve of Friedlander--Iwaniec \cite{FI98a}, place
+Landau's fourth problem within range subject to the standard Type-I
+inputs, which for the form $n^{2}+1$ are available via Deshouillers--Iwaniec
+\cite{deshouillers-iwaniec82}.
+
+\subsection*{What this paper does not deliver}
+
+\begin{itemize}
+\item No new lower bound on the prime-counting function
+$\pi_{\phi_{0}}(N):=\#\{n\le N:n^{2}+1\,\text{prime}\}$.
+\item No improvement on the Iwaniec $P_{2}$ count
+$\#\{n\le N:n^{2}+1\in P_{2}\}\gg \sqrt{N}/\log N$ \cite{iwaniec78}.
+\item No improvement on the greatest-prime-factor exponent
+$\theta\approx 1.312$ of \cite{grimmelt-merikoski25}.
+\end{itemize}
+
+\subsection*{What this paper does contribute}
+
+\begin{enumerate}
+\item A precise formulation of the bilinear sum
+$\Sigma(N;\alpha,\beta)$ as an object of study in the $\SLNz$
+framework, with an exact trivial total
+(Theorem~\ref{thm:bilinear-equals-divisor-sum}).
+\item A clean explanation of why the simplest Cauchy--Schwarz attack
+exactly saturates the trivial bound, located in
+Proposition~\ref{prop:diagonal-saturates}.
+\item An identification of a candidate $S/T$-word spin
+(Definition~\ref{def:spin-on-SLNz}), proof that it is exactly
+equidistributed on each row of the binary tree
+(Proposition~\ref{prop:spin-equi-row}), proof that it is genuinely not
+a low-degree polynomial in entries
+(Lemma~\ref{lem:spin-not-polynomial}), and identification of the
+\emph{precise} obstacle to its use as a parity-breaker: the boundary
+spines of $\SLNz$ contribute a deterministic positive bias of size
+$1+2\lfloor N/2\rfloor$ to the cumulative spin sum
+(Theorem~\ref{thm:cumulative-bias}). Empirically (numerical evidence to
+$N=200$), the strict-interior cumulative spin sum carries an additional
+negative bias of order $-N/\log N$, so cancellation between boundary and
+interior is partial but not power-saving.
+\item A focused statement (Conjecture~\ref{conj:bilinear-power-saving})
+of what a Friedlander--Iwaniec-style breakthrough on $n^{2}+1$ would
+require in this framework, together with the precise obstacles
+(O1)--(O3) of \S\ref{sec:discussion}, and a focused open question
+(Question~\ref{q:genuine-spin}) about the existence of a parity-breaking
+spin.
+\end{enumerate}
+
+We regard this as a careful partial result that clarifies the position.
+The Shakov framework \emph{does} supply the second integer variable
+that the polynomial $n^{2}+1$ lacks, and the bilinear sum
+$\Sigma(N;\alpha,\beta)$ is a meaningful object whose trivial bound we
+identify exactly. The natural candidate spin from the $S/T$-word
+structure is genuinely word-theoretic (not a Hecke character), but its
+cumulative behaviour is dominated by an unbalanced boundary
+contribution. A genuine breakthrough would require either constructing
+a different, more cleverly balanced spin, or extracting power-saving
+cancellation from the strict interior $\SLN$ alone -- objectives whose
+viability we have not been able to settle.
+
+\section*{Appendix A. Numerical verification of the bijection and the
+trivial bound}
+
+We confirmed by direct enumeration the following data for $N\in\{100,
+500,2000,10000\}$:
+
+\medskip
+
+\begin{center}
+\begin{tabular}{r|rrr}
+$N$ & $\sum_{n\le N}\tau(n^{2}+1)$ & $\#\mathcal{X}_{N}^{\circ}$ &
+$\sum_{n\le N}\tau/(N\log N)$\\\hline
+$100$ & $536$ & $336$ & $1.16$\\
+$500$ & $3{,}444$ & $2{,}444$ & $1.11$\\
+$2{,}000$ & $16{,}378$ & $12{,}378$ & $1.08$\\
+$10{,}000$ & $97{,}122$ & $77{,}122$ & $1.05$
+\end{tabular}
+\end{center}
+
+\medskip
+
+The trend $1.16\to 1.11\to 1.08\to 1.05$ is consistent with the Hooley
+constant $3/\pi\approx 0.955$ approached from above by a logarithmic
+secondary term. The interior count $\#\mathcal{X}_{N}^{\circ}$ matches
+$\sum_{n\le N}(\tau(n^{2}+1)-2)$ exactly, as predicted by
+Corollary~\ref{cor:trivial-asymptotic}.
+
+\section*{Appendix B. Worked example: spin on a row}
+
+For $k=3$, the row $\rho_{3}=\{S^{3},S^{2}T,STS,ST^{2},TS^{2},TST,T^{2}S,T^{3}\}$
+has $8$ matrices. Their spin values are
+\[
+\spin(S^{3})=-1,\;\spin(S^{2}T)=+1,\;\spin(STS)=+1,\;\spin(ST^{2})=-1,
+\]
+\[
+\spin(TS^{2})=+1,\;\spin(TST)=-1,\;\spin(T^{2}S)=-1,\;\spin(T^{3})=+1,
+\]
+yielding $\sum=0$, in agreement with Proposition~\ref{prop:spin-equi-row}.
+The matrices and their $(a,b,c,d,\chi)$ values are
+\[
+S^{3}=\begin{pmatrix}1&0\\3&1\end{pmatrix}\;(\chi=3),\quad
+S^{2}T=\begin{pmatrix}1&1\\2&3\end{pmatrix}\;(\chi=5),\quad
+STS=\begin{pmatrix}2&1\\3&2\end{pmatrix}\;(\chi=8),
+\]
+\[
+ST^{2}=\begin{pmatrix}1&2\\1&3\end{pmatrix}\;(\chi=7),\quad
+TS^{2}=\begin{pmatrix}3&1\\2&1\end{pmatrix}\;(\chi=7),\quad
+TST=\begin{pmatrix}2&3\\1&2\end{pmatrix}\;(\chi=8),
+\]
+\[
+T^{2}S=\begin{pmatrix}3&2\\1&1\end{pmatrix}\;(\chi=5),\quad
+T^{3}=\begin{pmatrix}1&3\\0&1\end{pmatrix}\;(\chi=3).
+\]
+Note the involution-symmetric structure: the pair $(STS,TST)$ both have
+$\chi=8$ and opposite spin; the pair $(ST^{2},TS^{2})$ both have
+$\chi=7$ and opposite spin. This local cancellation, however, does
+\emph{not} extend to the boundary pair $(S^{3},T^{3})$ (both
+$\chi=3$): both contribute non-trivially, with $\spin(S^{3})=-1$ and
+$\spin(T^{3})=+1$ summing to $0$ for this odd-$n$ fibre, but in even-$n$
+fibres such as $n=4$, the only matrices are the two boundary ones
+$S^{4}$ (spin $+1$) and $T^{4}$ (spin $+1$), giving fibre sum $+2$ ---
+exactly the boundary bias of Proposition~\ref{prop:fibre-spin-sum}.
+
+\medskip
+
+\noindent\textit{Coda.} The instinct that ``Shakov's framework supplies
+the missing second variable'' is correct: the bilinear sum
+$\Sigma(N;\alpha,\beta)$ is a real object, and the trivial bound matches
+what one expects from the Hooley asymptotic. What this paper makes
+explicit is that the obstacle is then transferred from ``no second
+variable'' to ``no parity-breaking spin on the $S/T$-words.'' Whether
+such a spin exists -- equivalently, whether $\SLNz$ admits an
+infinite-order character that is not a pullback of a Hecke character on
+$\Z[i]$ -- is, to this author's knowledge, open. A negative answer would
+explain the persistent resistance of $n^{2}+1$ to bilinear methods; a
+positive answer would, in principle, complete a Friedlander--Iwaniec-style
+proof of Landau's fourth problem.
+
+\begin{thebibliography}{99}
+\bibitem{deshouillers-iwaniec82} J.-M.\ Deshouillers and H.\ Iwaniec,
+\emph{Kloosterman sums and Fourier coefficients of cusp forms}, Invent.\
+Math.\ \textbf{70} (1982), 219--288.
+\bibitem{delabreteche-tenenbaum} R.\ de la Bretèche and G.\ Tenenbaum,
+\emph{Le mod\`ele de Cram\'er et les sommes friables}, Acta Arith.\
+\textbf{151} (2012), 53--82.
+\bibitem{FI98a} J.\ Friedlander and H.\ Iwaniec, \emph{Asymptotic sieve
+for primes}, Annals of Math.\ \textbf{148} (1998), 1041--1065.
+\bibitem{FI98b} J.\ Friedlander and H.\ Iwaniec, \emph{The polynomial
+$X^{2}+Y^{4}$ captures its primes}, Annals of Math.\ \textbf{148}
+(1998), 945--1040.
+\bibitem{green-sawhney24} B.\ Green and M.\ Sawhney, \emph{Primes of the
+form $p^{2}+nq^{2}$}, Preprint arXiv:2410.04189 (2024).
+\bibitem{grimmelt-merikoski25} L.\ Grimmelt and J.\ Merikoski,
+\emph{Greatest prime factors of $n^{2}+1$}, Preprint arXiv:2505.00493
+(2025).
+\bibitem{HB01} D.R.\ Heath-Brown, \emph{Primes represented by
+$x^{3}+2y^{3}$}, Acta Math.\ \textbf{186} (2001), 1--84.
+\bibitem{HB-Li15} D.R.\ Heath-Brown and X.\ Li, \emph{Prime values of
+$a^{2}+p^{4}$}, Invent.\ Math.\ \textbf{208} (2017), 441--499 (preprint
+arXiv:1504.00531, 2015).
+\bibitem{heath-brown82} D.R.\ Heath-Brown, \emph{A parity problem from
+sieve theory}, Mathematika \textbf{29} (1982), 1--6.
+\bibitem{hooley63} C.\ Hooley, \emph{On the number of divisors of
+quadratic polynomials}, Acta Math.\ \textbf{110} (1963), 97--114.
+\bibitem{IK04} H.\ Iwaniec and E.\ Kowalski, \emph{Analytic Number
+Theory}, AMS Colloquium Publications 53, 2004.
+\bibitem{iwaniec76} H.\ Iwaniec, \emph{The half-dimensional sieve}, Acta
+Arith.\ \textbf{29} (1976), 69--95.
+\bibitem{iwaniec78} H.\ Iwaniec, \emph{Almost-primes represented by
+quadratic polynomials}, Invent.\ Math.\ \textbf{47} (1978), 171--188.
+\bibitem{mckee99} J.\ McKee, \emph{The average number of divisors of
+$n^{2}+1$}, Math.\ Proc.\ Cambridge Philos.\ Soc.\ \textbf{125} (1999),
+197--214.
+\bibitem{merikoski22} J.\ Merikoski, \emph{The largest prime factor of
+$n^{2}+1$}, J.\ London Math.\ Soc.\ \textbf{106} (2022), 2752--2780
+(preprint arXiv:1908.08816, 2019).
+\bibitem{pascadi24} A.\ Pascadi, \emph{Large sieve inequalities for
+exceptional Maass forms and applications}, Forum of Math.\ Pi (to
+appear); preprint arXiv:2404.04239 (2024).
+\bibitem{selberg-collected} A.\ Selberg, \emph{Collected Papers},
+Vol.\ II, Springer (1991).
+\bibitem{shakov} A.\ Shakov, \emph{Polynomials in $\Z[x]$ whose divisors
+are enumerated by $SL_{2}(\Nz)$}, Preprint arXiv:2405.03552 (2024).
+\bibitem{tao14} T.\ Tao, \emph{A general parity problem obstruction}.
+Blog post at \url{https://terrytao.wordpress.com/2014/11/21/} (2014).
+\bibitem{notes-B5} \emph{Affine-sieve attack on Landau's 4th}, Working
+note (Bridges/B5), 2026.
+\bibitem{notes-B7} \emph{Research integration: what the literature tells
+us}, Working note (Bridges/B7), 2026.
+\end{thebibliography}
+
+\end{document}

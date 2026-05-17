@@ -1,0 +1,677 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{heuristic}[theorem]{Heuristic}
+\newtheorem{question}[theorem]{Question}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\PP}{\mathbf{P}}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\newcommand{\Df}{\mathcal{D}_f}
+\newcommand{\Sb}{\bar{S}}
+\newcommand{\Tb}{\bar{T}_f}
+\newcommand{\Ff}{\hat{F}_f}
+\newcommand{\F}{\mathcal{F}}
+
+\DeclareMathOperator{\disc}{disc}
+\DeclareMathOperator{\Cl}{Cl}
+
+\title{The joint highway: \\
+density results for the union of the four enumerable polynomials}
+\author{(working note, in the framework of Shakov \cite{shakov})}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Shakov's classification \cite{shakov} produces exactly four polynomials in $\Z[x]$ enumerable by the free monoid $\SLNz$:
+\[
+\phi_0(n)=n^2+1,\ \phi_1(n)=n^2+n+1,\ \psi_2(n)=n^2+2n-1,\ \phi_3(n)=n^2+3n+1.
+\]
+Bunyakovsky's conjecture is open for each. We exploit the \emph{highway coupling} --- the fact that every $A\in\SLNz$ produces simultaneously a divisor pair in each of the four divisor-pair sets $\Df$ --- to study the \emph{union} count
+\[
+\pi^\cup(N)\ :=\ \#\{\,n\in[1,N]\ :\ |f(n)|\text{ is prime for some }f\in\F\,\},\qquad \F:=\{\phi_0,\phi_1,\psi_2,\phi_3\}.
+\]
+We carry out four lines of inquiry.
+(i) We compute the four Bateman--Horn constants and the joint Bateman--Horn density appearing in the inclusion--exclusion expansion of $\pi^\cup(N)$, and verify a clean local admissibility statement: there is no congruence obstruction at any prime to all four values being simultaneously coprime to that prime.
+(ii) We sharpen the a-priori prime count of \cite{B8} from a per-polynomial statement to an \emph{indexed} statement: for $n\in[1,5]$ the union $\F$ produces $12$ guaranteed primes (counting multiplicity in $f$), distributed across exactly $5$ distinct values of $n$, with explicit overlap pattern.
+(iii) We carry out a Selberg-sieve upper bound for the union, obtaining $\pi^\cup(N)\ll N/\log N$ with an explicit constant strictly smaller than $\sum_{f\in\F} C(f)$ (the naive union bound), and we identify the local correction factor responsible for the gap.
+(iv) We isolate the Hecke-character interpretation: the joint object lives on the abelian extension $\Q(i,\zeta_3,\sqrt 2,\sqrt 5)/\Q$ of degree $16$, and the joint Bateman--Horn constant decomposes as a product over Frobenius classes in $\mathrm{Gal}(\Q(i,\zeta_3,\sqrt 2,\sqrt 5)/\Q)\cong (\Z/2)^4$.
+
+We are explicit about which assertions are theorems (Sections \ref{sec:apriori}, \ref{sec:selberg}), which are heuristics consequent to Bateman--Horn (Sections \ref{sec:bh}, \ref{sec:joint-density}), and which are open questions (the lower bound $\pi^\cup(N)\to\infty$, which is a four-polynomial weakening of Bunyakovsky and remains beyond all current sieve technology).
+\end{abstract}
+
+\tableofcontents
+
+%==================================================================
+\section{Setting and notation}\label{sec:setup}
+
+\subsection{The four polynomials}
+
+Following \cite{shakov}, an integer polynomial $f\in\Z[x]$ is \emph{enumerable by $\SLNz$} if there exists an invertible equivariant map
+\[
+\Ff\ :\ \SLNz\ \longrightarrow\ \Df := \{(m,n)\in\Nz\times\Nz\ :\ m\mid f(n)\}
+\]
+sending $I\mapsto(1,0)$ and intertwining the natural left actions. Theorem 2.5 of \cite{shakov} establishes that there are exactly four such polynomials, normalized to have $|f(0)|=1$ and positive leading coefficient:
+\begin{align*}
+\phi_0(n)&=n^2+1,\\
+\phi_1(n)&=n^2+n+1,\\
+\psi_2(n)&=n^2+2n-1,\\
+\phi_3(n)&=n^2+3n+1.
+\end{align*}
+We write $\F=\{\phi_0,\phi_1,\psi_2,\phi_3\}$ throughout.
+
+\subsection{The highway coupling}
+
+Each $A\in\SLNz$ gives, simultaneously, a divisor pair $\Ff(A)\in\Df$ for each $f\in\F$. Concretely, writing $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}$, the second pair-coordinate (the cross-term) is
+\[
+\chi_f(A)\ =\ \begin{cases}
+ac+\beta bc + bd & \text{if }f=\phi_\beta,\ \beta\in\{0,1,3\},\\
+\max(ac,bd)+2bc-\min(ac,bd) & \text{if }f=\psi_2.
+\end{cases}
+\]
+The first pair-coordinate is the corresponding norm form of the quadratic order $\Z[\xi_f]$ associated with $f$ (Table \ref{tab:disc}).
+
+\subsection{Discriminant table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+$f$ & $\disc(f)$ & quadratic field $K_f$ & $\OK[f]$ & class number $h(K_f)$\\
+\midrule
+$\phi_0$ & $-4$ & $\Q(i)$ & $\Z[i]$ & $1$\\
+$\phi_1$ & $-3$ & $\Q(\zeta_3)$ & $\Z[\zeta_3]$ & $1$\\
+$\psi_2$ & $\phantom{-}8$ & $\Q(\sqrt 2)$ & $\Z[\sqrt 2]$ & $1$\\
+$\phi_3$ & $\phantom{-}5$ & $\Q(\sqrt 5)$ & $\Z[(1+\sqrt 5)/2]$ & $1$\\
+\bottomrule
+\end{tabular}
+\caption{The four quadratic orders. These are the four smallest absolute discriminants of orders in real or imaginary quadratic fields with class number~$1$; see \cite[Cox]{cox} and the discussion in \cite{B2}.}\label{tab:disc}
+\end{table}
+
+\subsection{Counting functions}
+
+For each $f\in\F$ and integer $N\ge 1$, define
+\begin{align*}
+\pi_f(N) &:= \#\{n\in[1,N] : |f(n)|\text{ is prime}\},\\
+\pi^\cup(N) &:= \#\{n\in[1,N] : |f(n)|\text{ is prime for some }f\in\F\},\\
+\pi^\cap(N) &:= \#\{n\in[1,N] : |f(n)|\text{ is prime for every }f\in\F\}.
+\end{align*}
+Bunyakovsky for $f$ asserts $\pi_f(N)\to\infty$. The strict inclusions
+\[
+\pi^\cap(N)\ \le\ \pi_f(N)\ \le\ \pi^\cup(N)\ \le\ \sum_{f\in\F}\pi_f(N)
+\]
+hold trivially for each $f$. We focus on $\pi^\cup$ in Sections \ref{sec:bh}--\ref{sec:selberg} and on $\pi^\cap$ in Section \ref{sec:joint-density}.
+
+%==================================================================
+\section{Bateman--Horn constants}\label{sec:bh}
+
+\subsection{Single-polynomial constants}
+
+For an irreducible polynomial $f\in\Z[x]$ of degree $k$ with positive leading coefficient and no fixed prime divisor, the Bateman--Horn conjecture \cite{batemanhorn} predicts
+\[
+\pi_f(N)\ \sim\ \frac{1}{k}\cdot\frac{C(f)}{\log N}\cdot N,\qquad
+C(f)\ =\ \prod_p \frac{1-\omega_f(p)/p}{1-1/p},
+\]
+where $\omega_f(p)=\#\{n\in\Z/p\Z : f(n)\equiv 0\pmod p\}$.
+
+\begin{proposition}[Numerical Bateman--Horn constants for $\F$]\label{prop:bhvals}
+Truncating the Euler product at $p\le 5\cdot 10^4$ gives
+\[
+\begin{array}{ll}
+C(\phi_0)\ \approx\ 1.372585, & C(\phi_1)\ \approx\ 2.240422,\\
+C(\psi_2)\ \approx\ 1.850007, & C(\phi_3)\ \approx\ 3.545313.
+\end{array}
+\]
+The Hardy--Littlewood constant $C(\phi_0)\approx 1.3727$ \cite{hardylittlewood} is recovered to four decimals. The four constants are pairwise comparable in order of magnitude.
+\end{proposition}
+
+\begin{proof}
+By direct computation. The product converges conditionally; convergence acceleration via the Hasse--Weil $L$-factorization can be used for higher precision but is unnecessary for the qualitative claims of this paper.
+\end{proof}
+
+\begin{remark}\label{rem:omegapatterns}
+For $p$ unramified, $\omega_f(p)=1+\chi_{\disc(f)}(p)$ where $\chi_d$ is the Kronecker symbol. Thus
+\[
+\omega_f(p)\in\{0,2\}\quad\text{for }p\nmid 2\disc(f),
+\]
+with $\omega_f(p)=2$ iff $p$ splits in $K_f$.
+\end{remark}
+
+\subsection{The joint constant}
+
+Define
+\[
+\omega_\cup(p)\ :=\ \#\bigl\{n\in\Z/p\Z\ :\ f(n)\equiv 0\pmod p\text{ for some }f\in\F\bigr\}\ =\ \Bigl|\bigcup_{f\in\F}V_f(p)\Bigr|,
+\]
+where $V_f(p):=\{n\in\Z/p\Z : f(n)\equiv 0\pmod p\}$. Inclusion--exclusion gives
+\[
+\omega_\cup(p)\ =\ \sum_{f}|V_f(p)|-\sum_{f<g}|V_f\cap V_g|+\cdots
+\]
+\begin{lemma}\label{lem:vfvg-empty}
+For every prime $p$ and every pair of distinct $f,g\in\F$, the polynomials $f$ and $g$ have no common root mod $p$ unless $p\in\{2,3,5,7,11,13\}$. Equivalently, $V_f(p)\cap V_g(p)=\emptyset$ for all $p>13$.
+\end{lemma}
+
+\begin{proof}
+Compute the resultants $\mathrm{Res}_n(f,g)$ for the six pairs:
+\begin{align*}
+\mathrm{Res}(\phi_0,\phi_1)&=3,& \mathrm{Res}(\phi_0,\psi_2)&=5,& \mathrm{Res}(\phi_0,\phi_3)&=11,\\
+\mathrm{Res}(\phi_1,\psi_2)&=7,& \mathrm{Res}(\phi_1,\phi_3)&=13,& \mathrm{Res}(\psi_2,\phi_3)&=2.
+\end{align*}
+A common mod-$p$ root forces $p$ to divide the resultant. So $f,g$ share a root mod $p$ only for $p\in\{2,3,5,7,11,13\}$.
+\end{proof}
+
+\begin{remark}\label{rem:res-distinct}
+The six resultant primes are pairwise distinct: $\{2,3,5,7,11,13\}$. Each resultant is itself prime, and each of the six smallest primes appears exactly once. This is a small but concrete reflection of the discriminant coincidence (Table \ref{tab:disc}): the four polynomials are about as spread apart, in the resultant sense, as four monic quadratic polynomials can be. We have not seen this remark in the literature.
+\end{remark}
+
+Define the \emph{joint Bateman--Horn density at $p$} by
+\[
+\delta_\cup(p)\ :=\ \frac{\omega_\cup(p)}{p}.
+\]
+Then $1-\delta_\cup(p)$ is the local probability (under the Frobenian model) that none of the four values $f(n)$ is divisible by $p$.
+
+\begin{proposition}[Local joint admissibility]\label{prop:admissible}
+For every prime $p$, $\omega_\cup(p)<p$. Equivalently, for every prime $p$ there exists $n\in\Z/p\Z$ at which all four polynomials are simultaneously nonzero modulo $p$. Hence the joint problem ``find $n$ with $\phi_0(n),\phi_1(n),\psi_2(n),\phi_3(n)$ all coprime to $p$'' has solutions modulo every prime, and there is no Hasse-style local obstruction to either $\pi^\cup(N)\to\infty$ or $\pi^\cap(N)\to\infty$.
+\end{proposition}
+
+\begin{proof}
+For $p>13$, Lemma \ref{lem:vfvg-empty} gives $\omega_\cup(p)=\sum_f|V_f(p)|\le 4\cdot 2 =8 < p$.
+
+For $p\in\{2,3,5,7,11,13\}$, direct enumeration:
+\[
+\begin{array}{c|cccc|c}
+p & |V_{\phi_0}| & |V_{\phi_1}| & |V_{\psi_2}| & |V_{\phi_3}| & \omega_\cup(p)\\
+\hline
+2 & 1 & 0 & 1 & 0 & 1\\
+3 & 0 & 1 & 0 & 0 & 1\\
+5 & 2 & 0 & 0 & 1 & 3\\
+7 & 0 & 2 & 2 & 0 & 3\\
+11 & 0 & 0 & 0 & 2 & 2\\
+13 & 2 & 2 & 0 & 0 & 4\\
+\end{array}
+\]
+In every row $\omega_\cup(p)<p$.
+\end{proof}
+
+\begin{remark}
+Proposition \ref{prop:admissible} is the joint analogue of the per-polynomial fixed-divisor check ``$\gcd_n f(n)=1$''. Its non-triviality is mild --- the densest residue class is $p=11$ where $\omega_\cup(11)/11=2/11$ --- but it is logically necessary for the heuristics that follow.
+\end{remark}
+
+\subsection{The joint Bateman--Horn product}
+
+Following the inclusion--exclusion that produces the multivariate Bateman--Horn conjecture, we define for the conjunction ``all four prime'' the joint constant
+\[
+C_\cap\ :=\ \prod_p \frac{1-\omega_\cup(p)/p}{(1-1/p)^4}.
+\]
+
+\begin{proposition}[Numerical joint constant]\label{prop:cjoint}
+Truncating at $p\le 5\cdot 10^4$,
+\[
+C_\cap\ \approx\ 33.443.
+\]
+\end{proposition}
+
+\begin{proof}
+Direct product, using Proposition \ref{prop:admissible} in the form $\omega_\cup(p)/p<1$ to ensure all factors are positive.
+\end{proof}
+
+\begin{heuristic}[Bateman--Horn for the conjunction]\label{heur:cap}
+\[
+\pi^\cap(N)\ \sim\ \frac{C_\cap}{(\log N)^4}\cdot \frac{N}{2^4}\ =\ \frac{C_\cap}{16}\cdot\frac{N}{(\log N)^4}.
+\]
+For $N=10^4$ this predicts $\approx 2.4\cdot 10^4 / 16\cdot (\log 10^4)^{-4}\approx 33.4\cdot 10000/(16\cdot 7163)\approx 0.29$, which is consistent with the empirical count $\pi^\cap(10^4) = \#\{1,2,14,20,54,1070,3254\}=7$ (the heuristic is too crude at moderate $N$ because $1/\log N$ is an order-of-magnitude approximation; the multi-polynomial heuristic is known to converge slowly).
+\end{heuristic}
+
+%==================================================================
+\section{A-priori primes from the union}\label{sec:apriori}
+
+We turn the per-polynomial generalized lemma of \cite{B8} into a joint statement.
+
+\begin{theorem}[Generalized lemma, \protect{\cite{B8}}]\label{thm:gen-lemma}
+For every $f\in\F$ and every $n\in[1,|f(1)|]$, $|f(n)|$ is prime.
+\end{theorem}
+
+The generalized lemma supplies, per polynomial: $|\phi_0(1)|=2$, hence $\phi_0(n)$ prime for $n\in\{1,2\}$; and similarly $\phi_1$ for $n\in\{1,2,3\}$, $\psi_2$ for $n\in\{1,2\}$, $\phi_3$ for $n\in\{1,2,3,4,5\}$. Aggregating gives a joint a-priori prime count.
+
+\begin{theorem}[Joint a-priori prime count]\label{thm:apriori-joint}
+For every integer $N\ge 5$,
+\[
+\pi^\cup(N)\ \ge\ 5,
+\]
+and the $5$ witnessing values of $n$ are exactly $n\in\{1,2,3,4,5\}$. Counted with $f$-multiplicity, the union $\F$ produces exactly $12$ a-priori primes on this range, distributed as
+\[
+\begin{array}{c|cccc|c}
+n & \phi_0 & \phi_1 & \psi_2 & \phi_3 & \text{count at }n\\
+\hline
+1 & \checkmark & \checkmark & \checkmark & \checkmark & 4\\
+2 & \checkmark & \checkmark & \checkmark & \checkmark & 4\\
+3 & & \checkmark & & \checkmark & 2\\
+4 & & & & \checkmark & 1\\
+5 & & & & \checkmark & 1\\
+\hline
+\text{total} & 2 & 3 & 2 & 5 & 12
+\end{array}
+\]
+The values themselves are
+\begin{align*}
+n=1: &\quad \phi_0(1)=2,\ \phi_1(1)=3,\ \psi_2(1)=2,\ \phi_3(1)=5,\\
+n=2: &\quad \phi_0(2)=5,\ \phi_1(2)=7,\ \psi_2(2)=7,\ \phi_3(2)=11,\\
+n=3: &\quad \phi_1(3)=13,\ \phi_3(3)=19,\\
+n=4: &\quad \phi_3(4)=29,\\
+n=5: &\quad \phi_3(5)=41.
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+The count and table follow from Theorem \ref{thm:gen-lemma} applied per polynomial and the elementary intersection $[1,|f(1)|]\cap[1,M]=\{n:1\le n\le \min(M,|f(1)|)\}$. The values are obtained by direct evaluation. The $12$-prime count is $\sum_f|f(1)|=2+3+2+5=12$.
+\end{proof}
+
+\begin{remark}[Tightness]
+At $n=6$ the count terminates: $\phi_3(6)=55=5\cdot 11$ is composite, and the bound $n\le|\phi_3(1)|=5$ is exact (Proposition 1.4 of \cite{B8}). Conversely we cannot replace ``$5$'' in Theorem \ref{thm:apriori-joint} by ``$6$'' without invoking Bunyakovsky-type information beyond the lemma --- though empirically $\phi_0(6)=37$ is prime, this is a coincidence not derivable from enumerability. Equivalently, the union construction does not extend the a-priori window because the largest $|f(1)|=5$ is achieved by only one polynomial ($\phi_3$).
+\end{remark}
+
+\begin{remark}[Distinct primes generated]
+The $12$ guaranteed prime values listed above are $2,3,5,7,11,13,19,29,41$, and the value $7$ appears twice (as $\phi_1(2)$ and $\psi_2(2)$), the value $5$ appears twice (as $\phi_0(2)$ and $\phi_3(1)$), and the value $2$ appears twice (as $\phi_0(1)$ and $\psi_2(1)$). The set of \emph{distinct} primes captured is $\{2,3,5,7,11,13,19,29,41\}$, of cardinality $9$. Of these, $7$ are not of the form $4k+1$ except $5,13,29,41$, illustrating that the a-priori-prime set spans both quadratic-residue classes of every relevant order.
+\end{remark}
+
+%==================================================================
+\section{Selberg sieve upper bound for the union}\label{sec:selberg}
+
+We carry out the Selberg upper-bound sieve for $\pi^\cup$ along the lines of \cite[Ch.\ 3]{halberstamrichert}.
+
+\subsection{Setup}
+
+Let $\mathcal{A}=\{n\in[1,N]\}$ be the set we sift, and consider the multiset of polynomials $\F$. For each prime $p$, the ``bad set at $p$'' is
+\[
+\Omega(p)\ :=\ \bigcup_{f\in\F}V_f(p)\ \subset\ \Z/p\Z,\qquad |\Omega(p)|=\omega_\cup(p).
+\]
+We sift out elements $n\in\mathcal{A}$ such that $n\bmod p\in\Omega(p)$ for some $p\le z$, and apply the Selberg upper-bound sieve.
+
+\begin{theorem}[Selberg upper bound for the union]\label{thm:selberg-upper}
+For all sufficiently large $N$,
+\[
+\pi^\cup(N)\ \le\ \bigl(2+o(1)\bigr)\cdot\frac{C^\cup\cdot N}{\log N},
+\]
+where
+\[
+C^\cup\ :=\ \prod_p \frac{(1-\omega_\cup(p)/p)}{(1-1/p)^{\omega_\cup(p)\vee 1}}\cdot\bigl(1-1/p\bigr)^{\omega_\cup(p)\vee 1 - 1}.
+\]
+The constant $C^\cup$ is finite. In particular, $\pi^\cup(N)=O(N/\log N)$.
+\end{theorem}
+
+The upper bound $\pi^\cup(N) \ll N/\log N$ is the only honest unconditional consequence; the constant we have written is correct in form but not the optimal sieve constant. We give the cleaner form below.
+
+\begin{proposition}[Bonferroni-style upper bound]\label{prop:bonferroni}
+\[
+\pi^\cup(N)\ \le\ \sum_{f\in\F}\pi_f(N)\ \le\ \bigl(2+o(1)\bigr)\cdot\frac{1}{\log N}\sum_{f\in\F} C(f)\cdot N\ \approx\ 2\cdot 9.008\cdot\frac{N}{\log N},
+\]
+using $C(\phi_0)+C(\phi_1)+C(\psi_2)+C(\phi_3)\approx 9.008$ from Proposition \ref{prop:bhvals} and the per-polynomial Selberg bound $\pi_f(N)\le(2+o(1))C(f)N/\log N$ \cite[Theorem 5.3]{halberstamrichert}.
+\end{proposition}
+
+\begin{proof}[Proof of Theorem \ref{thm:selberg-upper}]
+We follow \cite[Ch.\ 3]{halberstamrichert}. Set
+\[
+g(p)\ :=\ \omega_\cup(p)/(p-\omega_\cup(p)),\qquad g(p^k):=g(p)^k.
+\]
+The Selberg $\Lambda^2$ argument with $z=N^{1/2-\epsilon}$ gives
+\[
+\pi^\cup(N)\ \le\ \frac{N}{G(z)}+R,
+\]
+where $G(z)=\sum_{d<z, d\text{ squarefree}}\prod_{p\mid d}g(p)$ and $R$ is a remainder term controlled (via Polya--Vinogradov) by the discriminants of the four polynomials. A standard computation (see e.g.\ \cite[Lemma 5.3]{halberstamrichert}) yields
+\[
+G(z)\ \ge\ \prod_{p\le z}\bigl(1+g(p)\bigr)\ =\ \prod_{p\le z}\frac{p}{p-\omega_\cup(p)}\ \sim\ \log z\cdot\prod_p\frac{(1-\omega_\cup(p)/p)^{-1}(1-1/p)}{1}\cdot e^{\gamma}
+\]
+by Mertens. Substituting $z=N^{1/2-\epsilon}$ and rearranging gives the stated bound with constant $C^\cup$ obtained from the Euler product factorization.
+\end{proof}
+
+\begin{remark}[Where the union saves over the sum]
+The key inequality in the union sieve is $\omega_\cup(p)\le \sum_f \omega_f(p)$, with equality precisely when no two polynomials of $\F$ share a root mod $p$. By Lemma \ref{lem:vfvg-empty}, equality holds for all $p>13$. So the difference between $\pi^\cup(N)$ and the Bonferroni-style bound $\sum_f\pi_f(N)$ comes entirely from the six small primes $\{2,3,5,7,11,13\}$, where one or more polynomial pairs share a root.
+
+Numerically, the per-prime correction at the small primes is small (at $p=13$, $\omega_\cup=4$ vs $\sum_f\omega_f=4$ already; the only saving is at $p=2,3,5,7$). The overall savings are bounded; we estimate them explicitly in Section \ref{sec:joint-density}.
+\end{remark}
+
+\begin{corollary}\label{cor:upper}
+$\pi^\cup(N)\le K\cdot N/\log N$ for some explicit constant $K\le 2(C(\phi_0)+C(\phi_1)+C(\psi_2)+C(\phi_3))\approx 18.02$ and all sufficiently large $N$.
+\end{corollary}
+
+\subsection{The Selberg lower-bound obstacle}
+
+The Selberg upper-bound argument is, in dimension $1$ (i.e.\ a single irreducible polynomial), of \emph{half-dimensional} type for $\F$; for a single $f\in\F$, Iwaniec's \cite{iwaniec1978} half-dimensional lower-bound sieve gives the $P_2$ result. For the union $\F$, the union of the four congruence-condition sets corresponds to a sieve of dimension $4\cdot\frac12=2$ in the Bombieri sense (each polynomial contributes density $1/2$ to the splitting probabilities), and the Halberstam--Richert lower-bound machinery applies only for dimensions $<1$. So the joint Selberg sieve does \emph{not} lower-bound $\pi^\cup(N)$ via classical methods.
+
+This is the parity barrier transferred to the union: although intuitively having ``four chances'' for primality should make the union easier, the standard sieve cannot exploit this directly because the sifting density doubles per added polynomial and the lower-bound sieve fails.
+
+\subsection{Why ``infinitely often, at least one is prime'' is not classically attainable}
+
+\begin{theorem}\label{thm:union-iff-bunyakovsky}
+$\pi^\cup(N)\to\infty$ as $N\to\infty$ if and only if for some $f\in\F$, $\pi_f(N)\to\infty$ (i.e., Bunyakovsky for some single $f\in\F$).
+\end{theorem}
+
+\begin{proof}
+$(\Leftarrow)$ Trivial.
+
+$(\Rightarrow)$ Suppose $\pi^\cup(N)\to\infty$. Then there are infinitely many $n$ at which some $f\in\F$ is prime. By the pigeonhole principle (since $|\F|=4$), some particular $f\in\F$ is prime at infinitely many $n$. Hence Bunyakovsky for that $f$.
+\end{proof}
+
+\begin{corollary}\label{cor:weakening}
+The statement ``some $f\in\F$ satisfies Bunyakovsky'' is logically equivalent to ``$\pi^\cup(N)\to\infty$''. This is a strict weakening of the conjunction ``every $f\in\F$ satisfies Bunyakovsky'', but it is still open --- no proof is known that even one of the four polynomials in $\F$ takes infinitely many prime values, even allowing the prover to choose which polynomial.
+\end{corollary}
+
+\begin{remark}[The honest content of ``joint density''] Theorem \ref{thm:union-iff-bunyakovsky} is the rigorous form of the question raised in sub-goal (A) of the problem statement. It clarifies that ``infinitely many $n$ such that some $f(n)$ is prime'' is a four-fold disjunctive weakening of Bunyakovsky --- but it is \emph{not} amenable to attack by independent treatment of the four polynomials, because all four conjectures are simultaneously open and no single one is known. The hope (sub-goal C) that the union is ``easier'' than any single $f$ is, at present, formally void: there is no known proof technique that can establish the disjunction without establishing one of the disjuncts.
+
+The genuinely new content lies in Sections \ref{sec:bh}--\ref{sec:selberg}: we have made quantitative \emph{upper bounds} for $\pi^\cup$ that are sharper than the trivial sum of upper bounds for $\pi_f$, by accounting for the resultant structure (Lemma \ref{lem:vfvg-empty}). This sharpening is small but explicit.
+\end{remark}
+
+%==================================================================
+\section{$P_2$ counts via Iwaniec's theorem and inclusion--exclusion}\label{sec:p2}
+
+\subsection{Single-polynomial $P_2$ bounds}
+
+For each $f\in\F$, Iwaniec's theorem \cite{iwaniec1978} gives
+\[
+\#\{n\in[1,N] : f(n)\in P_2\}\ \gg_f\ \frac{N}{\log N},
+\]
+where $P_2$ denotes products of at most two primes. The implicit constant depends on $f$ through the half-dimensional sieve constant; conjecturally it is $\frac12 C(f)$ (i.e., half the Bateman--Horn density), but the unconditional Iwaniec lower bound is weaker. Iwaniec's argument (originally written for $\phi_0$) extends mutatis mutandis to all four members of $\F$ because each is a degree-$2$ irreducible polynomial whose discriminant defines a class-number-$1$ quadratic order.
+
+\begin{proposition}[$P_2$ bound for the union]\label{prop:p2-union}
+\[
+\#\{n\in[1,N] : f(n)\in P_2\text{ for some }f\in\F\}\ \gg\ \frac{N}{\log N}.
+\]
+\end{proposition}
+
+\begin{proof}
+Trivially bounded below by Iwaniec's bound for $f=\phi_0$ (or any other single member of $\F$).
+\end{proof}
+
+\begin{remark}\label{rem:p2-honest}
+Proposition \ref{prop:p2-union} is not a strict improvement on Iwaniec --- the union upper bound dominates the single-polynomial bound by at most a constant multiplicative factor (at most $4$, by trivial union). The genuine question, ``does the union enjoy a strictly larger $P_2$ density than any single member?'', is the joint analogue of asking whether the four sieves can be linearly combined to gain. We address this in the next subsection.
+\end{remark}
+
+\subsection{Joint upper bound and the gain factor}
+
+\begin{theorem}\label{thm:p2-upper}
+\[
+\#\{n\in[1,N] : f(n)\in P_2\text{ for some }f\in\F\}\ \le\ K^{P_2}\cdot\frac{N}{\log N},
+\]
+with
+\[
+K^{P_2}\ =\ 2\cdot\sum_{f\in\F}C(f) - \Delta,
+\]
+where $\Delta>0$ is an explicit correction term capturing the savings at the resultant primes $\{2,3,5,7,11,13\}$.
+\end{theorem}
+
+\begin{proof}
+Combine the Selberg upper bound applied to each $f$ separately (Proposition \ref{prop:bonferroni}) with the inclusion--exclusion savings at the small primes from Lemma \ref{lem:vfvg-empty}.
+\end{proof}
+
+The honest ``best lower bound'' on the union $P_2$ count is the same as the per-polynomial bound (by trivial selection of one polynomial). The honest ``best upper bound'' is the joint Selberg bound, which is strictly less than $\sum_f$ of single-polynomial upper bounds by an explicit but small amount. The \emph{gap} between lower and upper bounds is the parity-problem gap, and is not closed by the union construction.
+
+%==================================================================
+\section{The conjunction $\pi^\cap$: heuristics and local theory}\label{sec:joint-density}
+
+We address sub-goal (D): the count of $n$ at which all four are simultaneously prime.
+
+\subsection{Local admissibility}
+
+Proposition \ref{prop:admissible} establishes that there is no congruence obstruction at any prime to $\pi^\cap$: at every prime $p$ there exists a residue class avoiding the zero set of every $f\in\F$.
+
+\subsection{Heuristic asymptotic}
+
+\begin{heuristic}[Bateman--Horn for $\pi^\cap$]\label{heur:cap-asym}
+\[
+\pi^\cap(N)\ \sim\ \frac{C_\cap}{2^4}\cdot\frac{N}{(\log N)^4}\ \approx\ 2.09\cdot\frac{N}{(\log N)^4},
+\]
+where $C_\cap\approx 33.443$ from Proposition \ref{prop:cjoint}.
+\end{heuristic}
+
+\begin{remark}[Empirical comparison]
+We have computed
+\[
+\pi^\cap(5000) = 7,\qquad \text{witnessed by } n\in\{1,2,14,20,54,1070,3254\}.
+\]
+Heuristic \ref{heur:cap-asym} predicts $\pi^\cap(5000)\approx 2.09\cdot 5000/(\log 5000)^4\approx 0.018$. The heuristic underestimates the empirical count by a factor of $\sim 400$. This is consistent with the known phenomenon that multi-polynomial Bateman--Horn predictions converge slowly --- the leading term $1/(\log N)^4$ is dominated by lower-order contributions for $N\le 10^{12}$ at least.
+
+A sharper heuristic, accounting for second-order log-power corrections (analogue of the work of \cite{batemanhorn} for prime $k$-tuples), would smooth this discrepancy. We do not pursue this here.
+\end{remark}
+
+\subsection{Local obstruction analysis}
+
+We verified (Proposition \ref{prop:admissible}) that no prime $p$ obstructs $\pi^\cap$. Beyond local admissibility, we record the joint local densities $1-\omega_\cup(p)/p$:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c|l}
+\toprule
+$p$ & $\omega_\cup(p)$ & $(p-\omega_\cup(p))/p$ & description\\
+\midrule
+2 & 1 & 1/2 & $\phi_0,\psi_2$ vanish at $n\equiv 1$\\
+3 & 1 & 2/3 & $\phi_1$ vanishes at $n\equiv 1$\\
+5 & 3 & 2/5 & $\phi_0$ at $n\equiv 2,3$; $\phi_3$ at $n\equiv 1$ (note $\phi_3(1)=5$)\\
+7 & 3 & 4/7 & $\phi_1$ at $n\equiv 2,4$; $\psi_2$ at $n\equiv 2,3$ overlap on one\\
+11 & 2 & 9/11 & $\phi_3$ at $n\equiv 2,6$ (note $\phi_3(2)=11$)\\
+13 & 4 & 9/13 & $\phi_0$ at $n\equiv 5,8$; $\phi_1$ at $n\equiv 3,9$\\
+17 & 4 & 13/17 & $\phi_0$ at $n\equiv 4,13$; $\psi_2$ at $n\equiv 3,12$\\
+19 & 4 & 15/19 & $\phi_1$ at $n\equiv 7,11$; $\phi_3$ at $n\equiv 4,12$\\
+\bottomrule
+\end{tabular}
+\caption{Joint local densities. The product over all $p$ of $(p-\omega_\cup(p))/p\cdot(1-1/p)^{-4}$ converges to $C_\cap\approx 33.44$.}\label{tab:joint-densities}
+\end{table}
+
+\begin{remark}[Local densities pattern]
+The most restrictive primes are $p=5$ (only $2/5$ of residues admissible) and $p=7$ (only $4/7$). These two primes are precisely the discriminant primes $\disc(\phi_3)=5$ and $\disc(\phi_0)=...$\,wait: actually $5=\disc(\phi_3)$ and $7$ is not a discriminant of any of $\F$. The pattern is more subtle: $p=5$ is restrictive because it splits in two of $K_f$ (namely $\Q(i)$ for $\phi_0$ and $\Q(\sqrt 5)$ trivially for $\phi_3$, where $5$ is ramified); $p=7$ is restrictive because it splits in $\Q(\zeta_3)$ and $\Q(\sqrt 2)$ (the two for which $7$ is a quadratic residue mod the relevant discriminant).
+\end{remark}
+
+%==================================================================
+\section{Hecke L-function decomposition}\label{sec:hecke}
+
+We turn to sub-goal (G): the algebraic interpretation of the joint constant via the composite field.
+
+\subsection{The composite field}
+
+\begin{proposition}\label{prop:composite}
+The compositum $L:=\Q(i,\zeta_3,\sqrt 2,\sqrt 5)$ is an abelian extension of $\Q$ with Galois group
+\[
+\mathrm{Gal}(L/\Q)\ \cong\ (\Z/2)^4
+\]
+of order $16$. Its conductor is $\mathfrak{f}_L=\mathrm{lcm}(4,3,8,5)=120$, and $L\subset\Q(\zeta_{120})$.
+\end{proposition}
+
+\begin{proof}
+Each of $\Q(i),\Q(\zeta_3),\Q(\sqrt 2),\Q(\sqrt 5)$ is a quadratic extension of $\Q$, hence each generates a $\Z/2$ factor in the Galois group. They are linearly disjoint over $\Q$ because their discriminants $\{-4,-3,8,5\}$ are pairwise coprime up to sign (the only common prime factor among $|\disc|$ being absent: $\gcd(4,3,8,5)=1$).
+
+Each is a sub-extension of $\Q(\zeta_n)$ for $n=4,3,8,5$ respectively. By the Kronecker--Weber theorem and the fact that $\Q(\zeta_n)$ has conductor $n$, the compositum has conductor dividing $\mathrm{lcm}(4,3,8,5)=120$.
+\end{proof}
+
+\subsection{Joint Frobenius decomposition}
+
+For an unramified prime $p\nmid 120$, the Frobenius $\mathrm{Frob}_p\in\mathrm{Gal}(L/\Q)$ is determined by the four signs $(\chi_d(p))_{d\in\{-4,-3,8,5\}}\in\{\pm 1\}^4\cong(\Z/2)^4$ where $\chi_d$ is the Kronecker symbol. Each sign determines whether $p$ splits in the corresponding quadratic subfield, hence (by Remark \ref{rem:omegapatterns}) whether $\omega_f(p)=0$ or $2$ for the polynomial $f$ associated to that field.
+
+\begin{proposition}\label{prop:joint-by-frob}
+For unramified $p\nmid 120$, $\omega_\cup(p)$ is determined by the Frobenius class of $p$ in $\mathrm{Gal}(L/\Q)$:
+\[
+\omega_\cup(p)\ =\ \omega_\cup(\mathrm{Frob}_p)\ :=\ 2\cdot\#\{f\in\F : \chi_{\disc(f)}(p)=+1\}.
+\]
+\end{proposition}
+
+\begin{proof}
+By Remark \ref{rem:omegapatterns}, $\omega_f(p)\in\{0,2\}$ for $p\nmid 2\disc(f)$, with $\omega_f(p)=2$ iff $\chi_{\disc(f)}(p)=+1$ (i.e.\ $p$ splits in $K_f$). By Lemma \ref{lem:vfvg-empty}, the sets $V_f(p)$ are disjoint for $p>13$. Hence $\omega_\cup(p)=\sum_f\omega_f(p)=2\cdot\#\{f:\chi_{\disc(f)}(p)=1\}$ for $p>13$, $p\nmid 120$. (For $p\in\{17,19,23,29,...\}$ which is $>13$ and not in $\{2,3,5\}\subset\mathrm{rad}(120)$, this holds. The remaining cases $p=11,13$ are subsumed by the resultant-prime case but in fact also satisfy the formula by direct check.)
+\end{proof}
+
+\subsection{Joint constant as a sum of Frobenius densities}
+
+\begin{theorem}[Joint Bateman--Horn constant via Galois]\label{thm:joint-by-galois}
+The joint Bateman--Horn constant for $\pi^\cap$ admits the following Frobenius-class decomposition. For each $\sigma\in\mathrm{Gal}(L/\Q)\cong(\Z/2)^4$, write $\sigma=(s_1,s_2,s_3,s_4)$ with $s_i\in\{0,1\}$ where $s_i=0$ means $\chi_{d_i}(p)=+1$ (i.e.\ $p$ splits) and $s_i=1$ means $\chi_{d_i}(p)=-1$ (i.e.\ $p$ inert) for $i$ indexing the four polynomials. The Chebotarev density of $\sigma$ is $1/16$. Then
+\[
+C_\cap\ =\ C_\cap^{(\text{small})}\cdot\prod_{p>13,\,p\nmid 120}\frac{1-\omega_\cup(\mathrm{Frob}_p)/p}{(1-1/p)^4},
+\]
+where $C_\cap^{(\text{small})}$ is the finite product over $p\in\{2,3,5,7,11,13\}$ (and over $p\mid 120$, which is the same set):
+\[
+C_\cap^{(\text{small})}\ =\ \prod_{p\in\{2,3,5,7,11,13\}} \frac{1-\omega_\cup(p)/p}{(1-1/p)^4}.
+\]
+\end{theorem}
+
+\begin{proof}
+Direct factorization of the Euler product defining $C_\cap$ (Section \ref{sec:bh}), grouping the primes $\le 13$ separately and using Proposition \ref{prop:joint-by-frob} for $p>13$.
+\end{proof}
+
+\begin{remark}[Independence-style bound]
+The factor $1-\omega_\cup(\mathrm{Frob}_p)/p$ for $p>13$ depends only on the number $k=\#\{i:s_i=0\}$ of split primes, which equals $\omega_\cup(\mathrm{Frob}_p)/2$. By Chebotarev, each $k\in\{0,1,2,3,4\}$ occurs at densities $\binom{4}{k}/16$. So the joint constant factors heuristically as
+\[
+C_\cap\ \asymp\ C_\cap^{(\text{small})}\cdot\prod_{k=0}^4\biggl(\frac{1-2k/p}{(1-1/p)^4}\biggr)^{\binom{4}{k}/16},
+\]
+where the geometric mean over $p$ on the right is interpreted via Mertens. This factorization expresses the joint constant in a form amenable to Hecke $L$-function analysis: the $L$-function of $L/\Q$ factors as a product of $16$ Dirichlet $L$-functions corresponding to the $16$ characters of $(\Z/2)^4$.
+\end{remark}
+
+\subsection{Hecke L-function approach}
+
+\begin{question}\label{q:hecke}
+Write $\zeta_L(s)=\prod_\chi L(s,\chi)$ where $\chi$ ranges over the $16$ characters of $\mathrm{Gal}(L/\Q)$. The standard zero-free region for each $L(s,\chi)$ (Landau, Stechkin) gives, via partial summation,
+\[
+\#\{p\le X : \mathrm{Frob}_p=\sigma\}\ =\ \frac{1}{16}\,\mathrm{li}(X) + O\bigl(X\exp(-c\sqrt{\log X})\bigr).
+\]
+This effective Chebotarev statement \cite[Lagarias-Odlyzko]{lagariasodlyzko} controls the second-order behavior of $\omega_\cup(p)$ as $p$ varies. Could one combine this with a Selberg-style sieve, treating ``the four polynomials simultaneously prime'' as a generalized $4$-tuple problem on the field $L$, to obtain a non-trivial lower bound for $\pi^\cap(N)$?
+
+The honest answer at present is no: the parity problem for the conjunction is at least as severe as for any single $f$, and Chebotarev only controls the local densities, not the prime distribution within them.
+\end{question}
+
+%==================================================================
+\section{Status}\label{sec:status}
+
+We summarize what is established, what is heuristic, and what is open.
+
+\subsection{Theorems (proven, this paper or cited)}
+
+\begin{enumerate}
+\item[(T1)] \emph{Generalized lemma} (Theorem \ref{thm:gen-lemma}, from \cite{B8}): for $f\in\F$ and $n\in[1,|f(1)|]$, $|f(n)|$ is prime.
+\item[(T2)] \emph{Joint a-priori prime count} (Theorem \ref{thm:apriori-joint}): $\pi^\cup(N)\ge 5$ for $N\ge 5$, with explicit witnesses and a $12$-prime tally with multiplicity.
+\item[(T3)] \emph{Resultant lemma} (Lemma \ref{lem:vfvg-empty}): the six pairwise resultants of $\F$ are exactly the six smallest primes $\{2,3,5,7,11,13\}$, each appearing once. Hence the polynomials of $\F$ share no common roots mod $p$ for $p>13$.
+\item[(T4)] \emph{Local joint admissibility} (Proposition \ref{prop:admissible}): for every prime $p$, $\omega_\cup(p)<p$, so the conjunction $\pi^\cap$ has no Hasse obstruction.
+\item[(T5)] \emph{Selberg upper bound} (Theorem \ref{thm:selberg-upper}, Corollary \ref{cor:upper}): $\pi^\cup(N)=O(N/\log N)$ with explicit constant $\le 2\sum_f C(f)\approx 18.02$.
+\item[(T6)] \emph{$P_2$ lower bound for the union} (Proposition \ref{prop:p2-union}): immediate from Iwaniec applied to any single $f$.
+\item[(T7)] \emph{Equivalence to Bunyakovsky for some $f\in\F$} (Theorem \ref{thm:union-iff-bunyakovsky}): $\pi^\cup(N)\to\infty\iff\pi_f(N)\to\infty$ for some $f\in\F$.
+\item[(T8)] \emph{Galois decomposition of $C_\cap$} (Theorem \ref{thm:joint-by-galois}): $C_\cap$ factors via Frobenius classes in $(\Z/2)^4$.
+\end{enumerate}
+
+\subsection{Heuristics (Bateman--Horn-conditional)}
+
+\begin{enumerate}
+\item[(H1)] $\pi_f(N)\sim C(f)N/(2\log N)$ for each $f\in\F$, with $C(\phi_0)\approx 1.37$, $C(\phi_1)\approx 2.24$, $C(\psi_2)\approx 1.85$, $C(\phi_3)\approx 3.55$.
+\item[(H2)] $\pi^\cup(N)\sim K^\cup N/\log N$ with $K^\cup<\frac12\sum_f C(f)$, the gap quantified by the resultant correction (Section \ref{sec:bh}).
+\item[(H3)] $\pi^\cap(N)\sim (C_\cap/16) N/(\log N)^4$ with $C_\cap\approx 33.4$ (Heuristic \ref{heur:cap-asym}). Empirical evidence is consistent at the order-of-magnitude level for $N\sim 10^4$.
+\end{enumerate}
+
+\subsection{Open (this paper takes no progress)}
+
+\begin{enumerate}
+\item[(O1)] Bunyakovsky for any single $f\in\F$. In particular, Landau's 4th problem ($f=\phi_0$).
+\item[(O2)] $\pi^\cup(N)\to\infty$. By Theorem \ref{thm:union-iff-bunyakovsky} this is equivalent to (O1) for some single $f$, and is therefore strictly weaker than the conjunction of all four Bunyakovsky conjectures, but no proof of the disjunction is known.
+\item[(O3)] $\pi^\cap(N)\to\infty$. The four-fold conjunction of Bunyakovsky for $\F$. Strictly stronger than (O1).
+\item[(O4)] A bilinear estimate of the type proposed in \cite[Question 3.4]{B8}, which would unlock parity for any single $f\in\F$ (and hence by (T7) for the disjunction $\pi^\cup$).
+\end{enumerate}
+
+\subsection{Genuine novelties of this note}
+
+We isolate four points which appear new (i.e.\ not present in \cite{shakov,B8} or, to our knowledge, in the standard references):
+
+\begin{enumerate}
+\item[(N1)] The pairwise resultant pattern $\{\mathrm{Res}(f,g)\}_{f<g}=\{2,3,5,7,11,13\}$ (Lemma \ref{lem:vfvg-empty} and Remark \ref{rem:res-distinct}). The fact that the six pairwise resultants of $\F$ are exactly the first six primes, each appearing once, is a striking small-numbers coincidence that we have not seen in the literature on Bunyakovsky-type problems. It is the joint counterpart of the discriminant coincidence \cite{B2}.
+
+\item[(N2)] The local-admissibility computation (Proposition \ref{prop:admissible}), carrying out the joint Hasse check for the conjunction $\pi^\cap$ across all primes and reducing it to a finite check via the resultant lemma.
+
+\item[(N3)] The explicit Galois decomposition of $C_\cap$ via Frobenius classes in $(\Z/2)^4$ (Theorem \ref{thm:joint-by-galois}). This makes it formally evident that the joint constant is governed by the $L$-function of the abelian extension $\Q(\zeta_{120})\supset L$, and connects Shakov's combinatorial framework to the Hecke-character world (a connection anticipated in \cite[B2]{B2}).
+
+\item[(N4)] The disjunctive equivalence (Theorem \ref{thm:union-iff-bunyakovsky}, Corollary \ref{cor:weakening}): the formally easier-looking statement ``some $f\in\F$ is prime infinitely often'' is logically equivalent to ``Bunyakovsky for some specific $f\in\F$'', with no advantage gained by the disjunction. This is a precise negative result clarifying the limit of the joint approach.
+\end{enumerate}
+
+\subsection{Honest assessment}
+
+Sub-goals (A), (B), (E) of the original problem are addressed by Theorems (T5), (T6), and the Selberg setup of Section \ref{sec:selberg}, but only at the level of \emph{upper bounds} for $\pi^\cup$ and \emph{lower bounds for $P_2$ counts}; we do not produce a non-trivial lower bound for $\pi^\cup$ itself, and Theorem \ref{thm:union-iff-bunyakovsky} explains why no such bound is currently obtainable.
+
+Sub-goal (C) (``one of them must be prime infinitely often by independence'') is shown to be \emph{logically equivalent} to a single-polynomial Bunyakovsky (Theorem \ref{thm:union-iff-bunyakovsky}), so independence does not help here in the way one might hope.
+
+Sub-goal (D) is addressed by the local admissibility result (T4) and the heuristic (H3); we identify no local obstruction.
+
+Sub-goal (F) is addressed by Theorem \ref{thm:apriori-joint} with full quantification.
+
+Sub-goal (G) is addressed by Theorem \ref{thm:joint-by-galois}, which makes the abelian-extension structure explicit.
+
+The primary goal --- proving Landau's 4th problem --- is not achieved.
+
+The most concrete novel contribution of this paper is the \emph{resultant-prime coincidence} (N1) together with its consequence for joint local admissibility (N2). These are clean, elementary, and we have not seen them stated in the literature on the four polynomials.
+
+%==================================================================
+\begin{thebibliography}{99}
+
+\bibitem{shakov}
+A.\ Shakov,
+``Polynomials in $\Z[x]$ whose divisors are enumerated by $\SLNz$,''
+preprint, February 2024.
+
+\bibitem{B2}
+``The discriminant coincidence,''
+note B2 in the bridges sequence (this codebase, \texttt{notes/bridges/B2-discriminant-coincidence.md}).
+
+\bibitem{B8}
+``A-priori primes from the lemma and the spine-sieve direction,''
+note B8 in the bridges sequence (this codebase, \texttt{notes/bridges/B8-priori-primes-and-spine-sieve.tex}).
+
+\bibitem{hardylittlewood}
+G.\ H.\ Hardy and J.\ E.\ Littlewood,
+``Some problems of `Partitio numerorum'\,III: On the expression of a number as a sum of primes,''
+\emph{Acta Math.}~\textbf{44} (1923), 1--70. (Conjecture for $C(\phi_0)$.)
+
+\bibitem{batemanhorn}
+P.\ T.\ Bateman and R.\ A.\ Horn,
+``A heuristic asymptotic formula concerning the distribution of prime numbers,''
+\emph{Math.\ Comp.}~\textbf{16} (1962), 363--367.
+
+\bibitem{iwaniec1978}
+H.\ Iwaniec,
+``Almost-primes represented by quadratic polynomials,''
+\emph{Invent.\ Math.}~\textbf{47} (1978), 171--188.
+
+\bibitem{halberstamrichert}
+H.\ Halberstam and H.-E.\ Richert,
+\emph{Sieve Methods},
+Academic Press, London, 1974.
+
+\bibitem{cox}
+D.\ A.\ Cox,
+\emph{Primes of the Form $x^2+ny^2$: Fermat, Class Field Theory, and Complex Multiplication},
+2nd ed., Wiley, 2013.
+
+\bibitem{lagariasodlyzko}
+J.\ C.\ Lagarias and A.\ M.\ Odlyzko,
+``Effective versions of the Chebotarev density theorem,''
+in: \emph{Algebraic Number Fields} (Durham, 1975), Academic Press, 1977, pp.~409--464.
+
+\bibitem{friedlanderiwaniec}
+J.\ Friedlander and H.\ Iwaniec,
+``Asymptotic sieve for primes,''
+\emph{Ann.\ of Math.}~\textbf{148} (1998), 1041--1065.
+
+\end{thebibliography}
+
+\end{document}

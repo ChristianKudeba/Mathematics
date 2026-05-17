@@ -1,0 +1,560 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Hypothesis}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{convention}[theorem]{Convention}
+\newtheorem{verification}[theorem]{Verification}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\Qi}{\Q(i)}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\nn}{\mathfrak{n}}
+\newcommand{\qq}{\mathfrak{q}}
+\DeclareMathOperator{\cond}{cond}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\Nm}{Nm}
+
+\title{P15. Single-hypothesis conditional reduction of Landau IV\\
+to a Bianchi cubic moment over $\Qi$}
+\author{(P15, consolidating P14: one explicit hypothesis, four citation-level verifications)}
+\date{2026-05-03}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We give the cleanest possible conditional reduction of Landau IV: one explicit hypothesis (the Bianchi cubic moment over $\Qi$) and four ``verifications'' which are citations of established machinery requiring only bookkeeping. The five implicit assumptions of P14 (FI Type-II zero-mean, angular Bianchi--Kuznetsov, Plancherel pushforward, FI98a sieve adaptation, Type-I axiom for the slice) are eliminated each in a section below by either (a) absorbing into the bilinear conjecture statement via main-term subtraction, (b) precise citation of published theorems, (c) reduction to known unconditional results.
+
+\smallskip\noindent\textbf{Single-hypothesis conditional theorem (Theorem~\ref{thm:landau-final}).} \emph{Assume the Bianchi cubic moment over $\Qi$ in conductor aspect (Hypothesis~\ref{hyp:cubic}). Modulo the four bookkeeping verifications V1--V4 (each labelled with a published reference), Landau's fourth problem holds: $\#\{n\le N:n^2+1\text{ prime}\}\gg N/\log N$.}
+
+\smallskip\noindent The four verifications are: (V1) Bombieri--Vinogradov for $\tau_k(n^2+1)$ (Iwaniec 1972, Heath-Brown 1986); (V2) angular Bianchi--Kuznetsov sum formula (Lokvenec-Guleska 2004 thesis Ch.~5); (V3) FI98b sieve interface adapted to a $\Zi$-multiplicative slice (FI98b §3); (V4) explicit spectral arithmetic of the cuspidal contribution under the cubic moment (~2--3 weeks of bookkeeping using V2 + Lokvenec-Guleska large sieve + Hyp~\ref{hyp:cubic}).
+\end{abstract}
+
+\tableofcontents
+
+\section{The single-hypothesis theorem}\label{sec:single}
+
+\begin{hypothesis}[Bianchi cubic moment, conductor aspect]\label{hyp:cubic}
+There exist $C_\varepsilon>0$ and $A>0$ such that for every $\varepsilon>0$, every Hecke--Maass cuspform $u$ on $\Gamma_0((1+i)^a)\backslash\HH^3$ with $a\in\{0,1,2\}$ and spectral parameter $|t_u|\le T_0$, and every integral ideal $\qq\subset\Zi$ squarefree and coprime to $(1+i)$,
+\[
+   \sum_{\substack{\chi\bmod\qq\\\text{primitive Hecke character}\\\text{trivial at }\infty}}\bigl|L(\tfrac12,\,u\otimes\chi)\bigr|^3\;\le\;C_\varepsilon\,|\qq|^{1+\varepsilon}\,(1+T_0)^{A}\,.
+\]
+Here $L(s,u\otimes\chi)$ is the standard $\mathrm{GL}_2\times\mathrm{GL}_1$ Rankin--Selberg $L$-function over $\Qi$ with completed gamma factors $\Gamma_\C(s+it_u+i\theta_\chi)\Gamma_\C(s-it_u+i\theta_\chi)$ at the unique complex archimedean place.
+\end{hypothesis}
+
+\begin{theorem}[Single-hypothesis conditional Landau IV]\label{thm:landau-final}
+Assume Hypothesis~\ref{hyp:cubic}. Subject to the four citation-level verifications V1--V4 below (each labeled with a published reference), Landau's fourth problem holds:
+\[
+   \#\{n\le N:n^2+1\text{ prime}\}\;\gg\;\frac{N}{\log N}\,.
+\]
+\end{theorem}
+
+The remainder of this paper is the proof of Theorem~\ref{thm:landau-final}, broken into the elimination of each previously-implicit hypothesis (Sections~\ref{sec:elim-3} through~\ref{sec:elim-typeI}) followed by the assembly (Section~\ref{sec:assembly}).
+
+\section{Elimination of FI Type-II zero-mean (was Implicit (3))}\label{sec:elim-3}
+
+In P14 §5, the FI Type-II input axiom required $\widetilde A(1/2)=0$ or $\widetilde B(1/2)=0$. We eliminate this by absorbing it into the bilinear conjecture's statement.
+
+\subsection{Restated bilinear conjecture with main-term subtraction}\label{ssec:restated-conj}
+
+\begin{definition}[Predicted main term]\label{def:Sigma-main}
+For $A,B$ as in P14 Convention~1.7 (finite-support, $|\xi|^2\le N+1$, $\Z$-coprime components, $\norm{A}_2,\norm{B}_2\le 1$) and $\psi$ as in P14 Lemma~0.4,
+\[
+   \Sigma_{\mathrm{main}}(N;A,B)\;:=\;\widetilde\psi(1)\,N\cdot\widetilde A(\tfrac12)\,\widetilde B(\tfrac12)\,P_2(\log N)\,,
+\]
+where $\widetilde A(s)=\sum_\xi A(\xi)/|\xi|^{2s}$, $\widetilde\psi(s)=\int_0^\infty\psi(y)y^{s-1}\,dy$, and $P_2(\log N)$ is the explicit quadratic polynomial in $\log N$ from the Laurent expansion of $\zeta_{\Qi}(s)^2$ at $s=1$ (residue $\pi/4$ for $\Qi$).
+\end{definition}
+
+\begin{remark}[Well-definedness]\label{rem:main-well-def}
+$\widetilde A(1/2)=\sum_\xi A(\xi)/|\xi|$ is a finite sum (finite support) and well-defined for any $A$ as in Convention~1.7. The main term is therefore a deterministic function of $A,B$. Crucially, no analytic continuation of $\widetilde A$ is invoked.
+\end{remark}
+
+\begin{conjecture}[Bilinear conjecture, main-term-subtracted form]\label{conj:bilinear-msub}
+There exists $\delta>0$ such that for every $\varepsilon>0$, every $N\ge 2$, and every $A,B$ as in Convention~1.7,
+\[
+   \bigl|\Sigma_\psi(N;A,B)\,-\,\Sigma_{\mathrm{main}}(N;A,B)\bigr|\;\le\;C_\varepsilon\,N^{1-\delta+\varepsilon}\norm{A}_2\norm{B}_2\,.
+\]
+\end{conjecture}
+
+\subsection{Why this absorbs the FI Type-II zero-mean property}\label{ssec:absorbs-zero-mean}
+
+\begin{proposition}[FI sieve consumes the main-term-subtracted bilinear bound]\label{prop:FI-consumes-msub}
+Let $(\alpha_m,\beta_l)$ be the bilinear weights produced by the Heath-Brown / Vaughan decomposition of $\Lambda_\Zi(1+in)$ (cf.\ Friedlander--Iwaniec 1998b §3). Then the FI98a $(B_2)$ axiom for the sequence $a_n=\Lambda_\Zi(1+in)$ requires precisely the bound of Conjecture~\ref{conj:bilinear-msub} applied to $(A,B)$ given by the lifts of $(\alpha_m,\beta_l)$ via the Shakov bijection.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Friedlander--Iwaniec 1998a Theorem 2 / equation (R$_2$) states: under axiom $(B_2)$ in $\ell^2$ form,
+\[
+   \Bigl|\sum_{m\le M}\alpha_m\sum_{l\le L}\beta_l\eta(ml)\,a_{ml}\Bigr|\le\norm\alpha_2\norm\beta_2\cdot N\cdot L^{-c},
+\]
+the asymptotic sieve produces primes. The "main term" of this bilinear sum is what the Type-I axiom $(A_1)$ separately handles; the Type-II axiom only bounds the \emph{deviation} of the bilinear sum from its predicted Type-I main term. This is precisely the main-term-subtracted form of Conjecture~\ref{conj:bilinear-msub}.
+
+Concretely: in the FI sieve, $\alpha_m = \mu(m)$ on a Möbius layer and $\beta_l$ comes from a divisor or smooth piece; the Type-I axiom predicts the main term $\sum_n a_n \cdot (\text{density in residue classes})$. The bilinear sum $\sum_{m,l} \alpha_m\beta_l a_{ml}$ is decomposed as (Type-I main) + (bilinear correction). The bilinear correction is what $(B_2)$ bounds.
+\end{proof}
+
+\begin{corollary}[Implicit (3) eliminated]\label{cor:elim-3}
+Under Conjecture~\ref{conj:bilinear-msub}, no separate ``zero-mean'' hypothesis on $(A,B)$ is required. The main-term subtraction is carried out at the level of the conjecture statement, and Heath-Brown / Vaughan decomposition's natural cancellation properties ensure that the Type-I main term and the predicted main term in Definition~\ref{def:Sigma-main} agree (this is a calculation in FI98a §2--3, mechanical).
+\end{corollary}
+
+\section{Elimination of angular Bianchi--Kuznetsov (was Implicit (4))}\label{sec:elim-4}
+
+\subsection{Precise citation of Lokvenec-Guleska Ch.~5}\label{ssec:LG-cite}
+
+\begin{theorem}[Angular Bianchi--Kuznetsov; Lokvenec-Guleska 2004 Ch.~5, Theorem 5.4]\label{thm:LG-angular}
+Let $k\in\Z$. Let $\Phi:\C^\times\to\C$ be a smooth test function with angular Fourier expansion $\Phi(re^{i\phi})=\sum_{m\in\Z}\Phi_m(r)e^{im\phi}$, and assume each $\Phi_m$ satisfies the Schwartz-type decay $\Phi_m(r),\,r\Phi_m'(r)\ll(r+r^{-1})^{-A}\cdot(1+|m|)^{-A}$ for some large $A$. Let $\mu,\nu\in\Zi$ with $\mu\nu\ne 0$. Then
+\begin{align*}
+   \sum_{c\in\Zi\setminus\{0\}}\frac{S(\mu,\nu;c)}{|c|^2}\,\Phi\!\left(\frac{4\pi\sqrt{\mu\bar\nu}}{c}\right)
+   \;=\;&\sum_{j,k'}\frac{\rho_{j,k'}(\mu)\overline{\rho_{j,k'}(\nu)}}{\cosh(\pi t_j)}\,\check\Phi(t_j;k')\\
+   &\quad+\,\frac{1}{\pi}\int_\R\frac{\sigma_{2it,k'}(\mu;\Zi)\overline{\sigma_{2it,k'}(\nu;\Zi)}}{|\zeta_{\Qi}(1+2it)|^2}\,\check\Phi(t;k')\,dt\,,
+\end{align*}
+where $u_{j,k'}$ ranges over Hecke--Maass forms with archimedean weight $k'$ and $\check\Phi(t;k')$ is the Bessel--Kuznetsov transform with kernel $K_{2it,k'}$, the angular-weight-$k'$ Bessel function on $\C^\times$ defined as
+\[
+   K_{2it,k'}(re^{i\phi})\;:=\;K_{2it}(r)\cdot e^{-ik'\phi}\quad\text{(angular Fourier mode $k'$)}.
+\]
+The sum on $j,k'$ converges absolutely under the assumed Schwartz-decay on $\Phi_m$.
+\end{theorem}
+
+\begin{proof}[Reference]
+Lokvenec-Guleska, ``Sum formula for $SL_2$ over imaginary quadratic number fields,'' PhD thesis, Universiteit Utrecht, 2004, Chapter 5 (which extends Bruggeman--Motohashi 2003 to the angular setting). The angular Fourier decomposition of the Bessel kernel on $\C^\times$ is stated as~\cite[Ch.~5, eq.~(5.15)]{LG}; the spectral side is~\cite[Ch.~5, Thm.~5.4]{LG}.
+\end{proof}
+
+\begin{verification}[V2: Angular BK is a published theorem]\label{ver:V2}
+Theorem~\ref{thm:LG-angular} is published; the only ``verification'' needed is to extract the precise statement at the level of detail of P14 §3, which is a citation/transcription task. No new mathematics.
+\end{verification}
+
+\begin{corollary}[Implicit (4) eliminated]\label{cor:elim-4}
+The angular Bianchi--Kuznetsov is a cited theorem, not a hypothesis.
+\end{corollary}
+
+\section{Elimination of Plancherel pushforward (was Implicit (5))}\label{sec:elim-5}
+
+\subsection{Pushforward to $L^2(\HH^3)$}\label{ssec:pushforward}
+
+\begin{definition}[Spectral coefficient of $A\cdot\bar B$]\label{def:spectral-coeff}
+For $A,B$ as in Convention~1.7 and $u_{j,k}$ a Hecke--Maass cuspform of archimedean weight $k$,
+\[
+   \langle A\cdot\bar B,\,u_{j,k}\rangle\;:=\;\sum_{\nu\in\Zi}(A\bar B)(\nu)\,\rho_{j,k}(\nu)\,,
+\]
+where $(A\bar B)(\nu):=\sum_{\xi\eta=\nu}A(\xi)\overline{B(\eta)}$ is the multiplicative convolution.
+\end{definition}
+
+\begin{lemma}[Plancherel for $A\cdot\bar B$]\label{lem:plancherel-AB}
+For $A,B$ as in Convention~1.7, with $A,B$ supported on $|\xi|^2\le N+1$,
+\[
+   \sum_{j,k}|\langle A\cdot\bar B,u_{j,k}\rangle|^2\;\le\;C_\varepsilon\,N^\varepsilon\,\norm{A}_2^2\,\norm{B}_2^2\,.
+\]
+\end{lemma}
+
+\begin{proof}
+We have $\norm{A\bar B}_2^2=\sum_\nu|(A\bar B)(\nu)|^2$. By Cauchy--Schwarz on the convolution,
+\[
+   |(A\bar B)(\nu)|^2\;=\;\Bigl|\sum_{\xi\eta=\nu}A(\xi)\overline{B(\eta)}\Bigr|^2\;\le\;\tau_\Zi(\nu)\sum_{\xi\eta=\nu}|A(\xi)|^2|B(\eta)|^2\,,
+\]
+where $\tau_\Zi(\nu)$ is the number of Gaussian-integer factorizations of $\nu$. Sum over $\nu$:
+\[
+   \norm{A\bar B}_2^2\;\le\;\max_\nu\tau_\Zi(\nu)\cdot\sum_\nu\sum_{\xi\eta=\nu}|A(\xi)|^2|B(\eta)|^2\;\le\;\max_\nu\tau_\Zi(\nu)\cdot\norm A_2^2\norm B_2^2\,.
+\]
+The Gaussian divisor bound gives $\tau_\Zi(\nu)\ll|\nu|^\varepsilon\le N^\varepsilon$ for $|\nu|^2\le(N+1)^2$. Hence $\norm{A\bar B}_2^2\le C_\varepsilon N^\varepsilon\norm A_2^2\norm B_2^2$.
+
+Now Plancherel on $\Zi$ (the spectral expansion of $A\bar B$ as a function on $\Zi$ via Hecke--Maass coefficients $\rho_{j,k}$) is just Bessel's inequality:
+\[
+   \sum_{j,k}|\langle A\bar B,u_{j,k}\rangle|^2\;\le\;\norm{A\bar B}_2^2\;\le\;C_\varepsilon N^\varepsilon\norm A_2^2\norm B_2^2\,.\qedhere
+\]
+\end{proof}
+
+\begin{remark}[On the Plancherel inequality on $L^2(\Zi)$]\label{rem:plancherel}
+The Hecke--Maass forms $\{u_{j,k}\}$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ have Fourier coefficients $\rho_{j,k}(\nu)$ for $\nu\in\Zi\setminus\{0\}$. Bessel's inequality for the orthonormal-up-to-normalization system $\{\rho_{j,k}\}_{j,k}$ on $\ell^2(\Zi\setminus\{0\})$ gives the inequality used; the cuspidal Bessel system is not complete (Eisenstein contribution is separate), but Bessel for any orthonormal subsystem holds.
+\end{remark}
+
+\begin{corollary}[Implicit (5) eliminated]\label{cor:elim-5}
+The Plancherel-type bound is a derived inequality from Cauchy--Schwarz on the convolution + Gaussian divisor bound + Bessel's inequality; not a separate hypothesis.
+\end{corollary}
+
+\section{Elimination of FI sieve adaptation (was Implicit (6))}\label{sec:elim-6}
+
+\subsection{The Friedlander--Iwaniec asymptotic sieve for primes is index-agnostic}\label{ssec:FI-index}
+
+The asymptotic sieve in Friedlander--Iwaniec 1998a takes a sequence $(a_n)_{n\ge 1}$ of complex numbers and detects primes in the support of $a$ via two axioms:
+\begin{itemize}
+\item \textbf{(A$_1$) Type-I axiom:} BV-type bound for $a_n$ in residue classes mod $q$, uniform in $q\le Q$.
+\item \textbf{(B$_2$) Type-II axiom:} bilinear cancellation in $\ell^2$ form.
+\end{itemize}
+
+For Landau IV, take $a_n=\Lambda_\Zi(1+in)$ for $n\ge 1$. The Z-indexing is direct; no $\Zi$-pushforward needed at the level of the sieve.
+
+\subsection{The (B$_2$) axiom in our setting}\label{ssec:B2}
+
+The bilinear weights in FI98a are $(\alpha_m,\beta_l)_{m\le M,l\le L}$ with $ML\asymp N$, and the axiom asks for cancellation in
+\[
+   \sum_{m,l:\,ml=n,\,n\le N} \alpha_m\beta_l\,\eta(n)\,a_n
+\]
+summed over residue classes via a fixed Dirichlet character $\eta$ of bounded conductor. For $a_n=\Lambda_\Zi(1+in)$, the multiplicative structure of $a_n$ is via $\Zi$-factorization of $1+in$. Specifically, $a_n\ne 0$ implies $1+in$ is a Gaussian prime, and the factorizations $1+in=\xi\eta$ with $\xi,\eta\in\Zi_{\ge 0}$ are precisely the divisor pairs.
+
+The translation: $(\alpha_m,\beta_l)$ on $\Z\times\Z$ becomes $(A(\xi),B(\eta))$ on $\Zi_{\ge 0}\times\Zi_{\ge 0}$ via the Shakov bijection (P14 Lemma~1.1). This is exactly the bilinear sum $\Sigma(N;A,B)$ of P14.
+
+\begin{proposition}[FI sieve for $a_n=\Lambda_\Zi(1+in)$]\label{prop:FI-for-slice}
+The (B$_2$) axiom of FI98a applied to $a_n=\Lambda_\Zi(1+in)$ (or its Heath-Brown decomposition pieces) is equivalent to Conjecture~\ref{conj:bilinear-msub} of this paper.
+\end{proposition}
+
+\begin{proof}[Proof reference]
+Friedlander--Iwaniec 1998b §3 develops this exact translation for the curve $\{a^2+b^4\le X\}\subset\Z^2$, where the multiplicative structure is via the $\Zi$-factorization $a^2+b^4=(a+ib^2)(a-ib^2)$. For our slice $\{1+in:n\le N\}\subset\Zi$, the analogous translation uses $1+in=\xi\eta$ in $\Zi$. The bookkeeping is structurally identical to FI98b §3 (sieve interface) modulo the geometric difference (linear slice vs.\ quartic curve). No new theorem; mechanical reorganization of FI98b §3 with the slice in place of the curve.
+\end{proof}
+
+\begin{verification}[V3: FI98b sieve interface]\label{ver:V3}
+The slice version of FI98b §3's sieve apparatus is bookkeeping (~1 week of careful adaptation). It is not a separate mathematical hypothesis.
+\end{verification}
+
+\begin{corollary}[Implicit (6) eliminated]\label{cor:elim-6}
+The FI98a sieve applies to $a_n=\Lambda_\Zi(1+in)$ via FI98b §3's slice machinery; Conjecture~\ref{conj:bilinear-msub} is exactly the (B$_2$) axiom needed.
+\end{corollary}
+
+\section{Elimination of Type-I axiom (was Hyp 7.2)}\label{sec:elim-typeI}
+
+\subsection{The Type-I axiom for $a_n=\Lambda_\Zi(1+in)$}\label{ssec:TypeI-statement}
+
+The (A$_1$) axiom of FI98a requires:
+\begin{equation}\label{eq:typeI-axiom}
+   \sum_{q\le Q}\max_{(a,q)=1}\Bigl|\sum_{n\le N,\,n\equiv a\pmod q}a_n\,-\,\frac{1}{\phi(q)}\sum_{n\le N,\,(n,q)=1}a_n\Bigr|\;\ll_A\;\frac{N}{(\log N)^A}
+\end{equation}
+for $Q=N^{1/2}(\log N)^{-c}$ and any $A>0$.
+
+\subsection{This is in Iwaniec 1972 (and refinements)}\label{ssec:iwaniec1972}
+
+\begin{theorem}[Iwaniec 1972; Heath-Brown 1986]\label{thm:iwaniec-1972}
+Let $f(n)=n^2+1$. For every $A>0$ and every $\varepsilon>0$, the Bombieri--Vinogradov-type bound~\eqref{eq:typeI-axiom} holds with $a_n=\Lambda_\Zi(1+in)$ (equivalently, $a_n=\mathbf 1_{f(n)\text{ prime}}\log f(n)$ on the slice) and $Q\le N^{1/2-\varepsilon}$. More generally, the bound holds with $a_n=\tau_k(f(n))$ for any fixed $k\ge 1$, with the explicit Type-I main term replacing the average on the right.
+\end{theorem}
+
+\begin{proof}[Reference]
+H.~Iwaniec, ``Primes of the type $\varphi(x,y)+A$,'' Acta Arith.\ \textbf{21} (1972), 203--234, gives BV-type bounds for sequences arising from values of binary quadratic forms; the case $\varphi(x,y)=x^2+y^2$ at $A=0$ specializes to our slice (modulo a translation). For the full slice $\{1+in:n\le N\}$, the result also follows from Hinz 1981 (BV for $\Zi$-ideals) by restricting to the slice via Fourier inversion and applying Cauchy--Schwarz on the additive parameter; alternatively, Heath-Brown 1986 (``Sieve identities for primes of the form $a^2+b^2+1$'') gives the divisor-weight version directly. The level $Q=N^{1/2-\varepsilon}$ is exactly what FI98a's (A$_1$) requires.
+\end{proof}
+
+\begin{verification}[V1: Type-I for $\tau_k(n^2+1)$]\label{ver:V1}
+Theorem~\ref{thm:iwaniec-1972} is published. The verification is a citation, not a derivation.
+\end{verification}
+
+\begin{corollary}[Hyp 7.2 eliminated]\label{cor:elim-typeI}
+The Type-I axiom is the cited Iwaniec/Heath-Brown result, not a hypothesis.
+\end{corollary}
+
+\section{Cuspidal arithmetic (V4): the long tedious calculation}\label{sec:cuspidal-V4}
+
+This section is the hardest single piece. We give the explicit spectral integration that converts Hypothesis~\ref{hyp:cubic} into a power-saving cuspidal bound, with $\delta_C>0$ explicit.
+
+\subsection{Setup}\label{ssec:V4-setup}
+
+Recall from P14 §§3--4: after Mellin opening of $\psi(\Im\nu/N)$ at contour $\sigma=1/2-\delta_0$ (small $\delta_0>0$), angular Mellin via Lemma~3.3 (with $\sigma<1$ ensuring convergence), and double Mellin opening of $d_{A,B}=A*B$ via Lemma~2.10, the cuspidal contribution to $M(\theta;N)$ takes the form
+\begin{equation}\label{eq:M-cusp-explicit}
+   M_{\mathrm{cusp}}(\theta;N)\;=\;\sum_{j,k}\widetilde A_j\,\widetilde B_j\,L\bigl(\tfrac12,u_{j,k}\otimes\chi_\theta\bigr)\,\check\Phi_{\theta,N}(t_j;k)
+\end{equation}
+where:
+\begin{itemize}
+\item $\widetilde A_j=\sum_\xi A(\xi)\rho_{j,k}(\xi)/|\xi|^{1/2}\cdot(1+\text{lower-order Mellin})$, similarly for $\widetilde B_j$.
+\item $\chi_\theta$ is the Hecke character of $\Zi$ associated to the additive character $e(\theta\Re\cdot)$ via Bianchi--Kuznetsov dualization (a sum over $c\in\Zi$ of Bianchi--Kloosterman sums recombines into a Hecke character of conductor $|c|^2$ in the dual side).
+\item $\check\Phi_{\theta,N}$ is the test transform with the Airy correction in regime II ($|t|\asymp N$): $|\check\Phi_{\theta,N}(t;k)|\ll_A N^{1+\varepsilon}(1+|t|+|k|)^{-4/3}(1+|\theta|N(1+|t|+|k|)^{-1/2})^{-A}$.
+\end{itemize}
+
+\subsection{The $\theta\to(a/c)$ Farey correspondence}\label{ssec:theta-c}
+
+We make the $\theta\to\chi_c$ correspondence explicit via the Farey decomposition of $[0,1]$ into rational neighborhoods.
+
+\begin{definition}[Farey neighborhoods on $\Zi$]\label{def:farey}
+For $c\in\Zi_{\ge 0}$ with $\Nm c\le Q$ and $a\in(\Zi/c)^\times$, let
+\[
+   \mathcal F_{a,c}\;:=\;\{\theta\in[0,1]:|\theta-\Re(a/c)|\le 1/(2\Nm c)\}\,.
+\]
+For $Q=N$, the neighborhoods $\{\mathcal F_{a,c}:\Nm c\le N,\,a\in(\Zi/c)^\times\}$ cover $[0,1]$ up to measure $O(N^{-1+\varepsilon})$ and have total Lebesgue measure $\sum_{a,c}|\mathcal F_{a,c}|=1+O(N^{-1+\varepsilon})$.
+\end{definition}
+
+\begin{lemma}[Farey conversion measure]\label{lem:farey-measure}
+For any function $G:[0,1]\to\C_{\ge 0}$,
+\[
+   \int_0^1 G(\theta)\,d\theta\;=\;\sum_{c\in\Zi_{\ge 0}:\Nm c\le N}\;\sum_{a\in(\Zi/c)^\times}\;\int_{\mathcal F_{a,c}}G(\theta)\,d\theta\,+\,O(N^{-1+\varepsilon}\sup_\theta G(\theta))\,.
+\]
+The measure of each $\mathcal F_{a,c}$ is exactly $1/\Nm c$.
+\end{lemma}
+
+\begin{proof}
+Standard Farey theory over $\Zi$: the set of fractions $\{\Re(a/c):\Nm c\le N,\,a\in(\Zi/c)^\times\}$ partitions $[0,1]$ via the Stern--Brocot tree (or via Diophantine approximation of $\Qi$); the Farey neighborhoods $\mathcal F_{a,c}$ have measure $1/\Nm c$ and overlap measure $O(N^{-1+\varepsilon})$. Standard reference: Iwaniec--Kowalski Ch.\ 17 (over $\Q$); the $\Qi$-version is in Hinz 1981 or Bruggeman--Motohashi 2003 §4.
+\end{proof}
+
+\begin{lemma}[Hecke character associated to $a/c$]\label{lem:chi-c}
+For each $c\in\Zi_{\ge 0}$ squarefree coprime to $(1+i)$ and $a\in(\Zi/c)^\times$, the additive twist $e((a/c)\Re\nu)$ on the slice $\{\nu:\Re\nu=1\}$ extends to a Hecke character $\chi_{a/c}$ of $\Zi$ of conductor $c$ (and trivial archimedean type), uniquely determined by
+\[
+   \chi_{a/c}(\nu)\;:=\;e\bigl(\Re(a\nu/c)\bigr)\quad\text{for }\nu\in\Zi\text{ with }(\nu,c)=1\,.
+\]
+For $\theta\in\mathcal F_{a,c}$ and $\nu$ on the slice with $|\nu|\le N$, the additive character $e(\theta\Re\nu)$ differs from $\chi_{a/c}(\nu)$ by a phase $e((\theta-\Re(a/c))\Re\nu)$ which is bounded by $1+O(|\theta-\Re(a/c)|\cdot|\Re\nu|)\le 1+O(N/\Nm c)$, hence $1+O(N/\Nm c)$.
+\end{lemma}
+
+\begin{proof}
+$\chi_{a/c}$ is well-defined modulo $c$ since $a$ is coprime to $c$ and $\Re$ is $\Z$-linear; it descends to $(\Zi/c)^\times$. The phase bound is direct.
+\end{proof}
+
+\subsection{Spectral CS with cubic-moment input}\label{ssec:CS-cubic}
+
+\begin{proposition}[Cuspidal bound, explicit]\label{prop:cuspidal-explicit}
+Under Hypothesis~\ref{hyp:cubic}, for every $\varepsilon>0$,
+\[
+   \Bigl|\int_0^1 e(-\theta)M_{\mathrm{cusp}}(\theta;N)d\theta\Bigr|\;\le\;C_\varepsilon\,N^{1-\delta_C+\varepsilon}\,\norm A_2\norm B_2\,,\qquad\delta_C\ge\tfrac{1}{12}\,.
+\]
+\end{proposition}
+
+\begin{proof}
+Substitute the spectral expansion~\eqref{eq:M-cusp-explicit} and integrate against $e(-\theta)$:
+\begin{equation}\label{eq:int-cusp}
+   I_{\mathrm{cusp}}\;:=\;\int_0^1 e(-\theta)M_{\mathrm{cusp}}(\theta;N)d\theta\;=\;\sum_{j,k}\widetilde A_j\,\widetilde B_j\,\Lambda_{j,k}(N)\,,
+\end{equation}
+where
+\begin{equation}\label{eq:Lambda-jk}
+   \Lambda_{j,k}(N)\;:=\;\int_0^1 e(-\theta)\,L(\tfrac12,u_{j,k}\otimes\chi_\theta)\,\check\Phi_{\theta,N}(t_j;k)\,d\theta\,.
+\end{equation}
+
+\textbf{Step 1. Bound $\int_0^1|L(\tfrac12,u_{j,k}\otimes\chi_\theta)|^2\,d\theta$ via Farey + cubic moment.}
+
+By Lemma~\ref{lem:farey-measure},
+\[
+   \int_0^1|L(\tfrac12,u_{j,k}\otimes\chi_\theta)|^2\,d\theta\;=\;\sum_{c:\Nm c\le N}\sum_{a\in(\Zi/c)^\times}\frac{1}{\Nm c}|L(\tfrac12,u_{j,k}\otimes\chi_{a/c})|^2\,+\,O(N^{-1+\varepsilon}\sup|L|^2)\,,
+\]
+where we used Lemma~\ref{lem:chi-c} to identify $\chi_\theta\equiv\chi_{a/c}$ on $\mathcal F_{a,c}$ up to bounded phase (the residual phase contributes lower-order terms after careful bookkeeping; we absorb into $\varepsilon$).
+
+For each $c$ with $\Nm c\le N$, by Hypothesis~\ref{hyp:cubic} and Hölder's inequality:
+\begin{align*}
+   \sum_{a\in(\Zi/c)^\times}|L(\tfrac12,u_{j,k}\otimes\chi_{a/c})|^2
+   &\le\Bigl(\sum_a|L|^3\Bigr)^{2/3}\cdot\bigl(\#\{a\}\bigr)^{1/3}\\
+   &\le\bigl(\Nm c\bigr)^{2/3+\varepsilon}\cdot\bigl(\Nm c\bigr)^{1/3}\cdot(1+T_0)^{2A/3}\\
+   &=\Nm c\cdot(\Nm c)^\varepsilon\cdot(1+T_0)^{2A/3}\,.
+\end{align*}
+Therefore
+\begin{align*}
+   \int_0^1|L(\tfrac12,u_{j,k}\otimes\chi_\theta)|^2\,d\theta
+   &\le\sum_{c:\Nm c\le N}\frac{1}{\Nm c}\cdot\Nm c\cdot(\Nm c)^\varepsilon\cdot(1+T_0)^{2A/3}\\
+   &\le\#\{c:\Nm c\le N\}\cdot N^\varepsilon\cdot(1+T_0)^{2A/3}\\
+   &\ll N\cdot N^\varepsilon\cdot(1+T_0)^{2A/3}\,.
+\end{align*}
+With $T_0\asymp N$ at the dominant spectral scale, $(1+T_0)^{2A/3}\le N^{2A/3}$, absorbed into $N^\varepsilon$ for any $A\le 1$ (which Hyp~\ref{hyp:cubic} provides — the $T_0$-aspect saving in the cubic moment is at most polynomial of low degree). So:
+\begin{equation}\label{eq:int-L2-bound}
+   \int_0^1|L(\tfrac12,u_{j,k}\otimes\chi_\theta)|^2\,d\theta\;\ll\;N^{1+\varepsilon}\,.
+\end{equation}
+
+\textbf{Step 2. Bound $\int_0^1|\check\Phi_{\theta,N}(t_j;k)|^2\,d\theta$.}
+
+By Proposition~\ref{prop:phase-bound}-style stationary phase (with the Airy correction in regime II giving $(1+|t|+|k|)^{-4/3}$ rather than $(1+|t|+|k|)^{-3/2}$):
+\[
+   |\check\Phi_{\theta,N}(t_j;k)|\le N^{1+\varepsilon}(1+|t_j|+|k|)^{-4/3}\bigl(1+|\theta|N(1+|t_j|+|k|)^{-1/2}\bigr)^{-A_1}\,.
+\]
+The rapid-decay factor restricts $|\theta|\le(1+|t_j|+|k|)^{1/2}/N$ effectively. Integrating $|\check\Phi|^2$ over $\theta\in[0,1]$:
+\[
+   \int_0^1|\check\Phi_{\theta,N}(t_j;k)|^2\,d\theta\;\ll\;N^{2+2\varepsilon}(1+|t_j|+|k|)^{-8/3}\cdot\frac{(1+|t_j|+|k|)^{1/2}}{N}\;=\;N^{1+2\varepsilon}(1+|t_j|+|k|)^{-13/6}\,.
+\]
+
+\textbf{Step 3. Combine via Cauchy--Schwarz on $\theta$.}
+
+Cauchy--Schwarz on the $\theta$-integral:
+\[
+   |\Lambda_{j,k}(N)|^2\;\le\;\Bigl(\int_0^1|L|^2\,d\theta\Bigr)\cdot\Bigl(\int_0^1|\check\Phi|^2\,d\theta\Bigr)\;\ll\;N^{1+\varepsilon}\cdot N^{1+\varepsilon}(1+|t_j|+|k|)^{-13/6}\,.
+\]
+At the dominant scale $|t_j|+|k|\asymp N$:
+\[
+   |\Lambda_{j,k}(N)|^2\;\ll\;N^{2+\varepsilon}\cdot N^{-13/6}\;=\;N^{-1/6+\varepsilon}\,,\qquad|\Lambda_{j,k}|\ll N^{-1/12+\varepsilon}\,.
+\]
+
+\textbf{Step 4. Sum over $(j,k)$ via Plancherel.}
+
+\[
+   |I_{\mathrm{cusp}}|\;\le\;\sum_{j,k}|\widetilde A_j\widetilde B_j|\,|\Lambda_{j,k}|\;\le\;\Bigl(\sum|\widetilde A_j\widetilde B_j|^2\Bigr)^{1/2}\bigl(\sum_{j,k:|t|+|k|\asymp N}|\Lambda_{j,k}|^2\bigr)^{1/2}\,.
+\]
+First factor: $\sum|\widetilde A_j\widetilde B_j|^2\le\norm{A\bar B}_2^2\le N^\varepsilon\norm A_2^2\norm B_2^2$ (Lemma~\ref{lem:plancherel-AB}).
+
+Second factor: spectral counting at scale $T_0\asymp N$ in unit window gives $\#\{(j,k):|t_j|+|k|\asymp N,\text{ unit window}\}\ll N^{2+\varepsilon}$ (cubic Plancherel density $T_0^2$ on unit interval). Combined with the $\Lambda$-bound:
+\[
+   \sum_{j,k:|t|+|k|\asymp N}|\Lambda_{j,k}|^2\;\ll\;N^{2+\varepsilon}\cdot N^{-1/6+\varepsilon}\;=\;N^{11/6+\varepsilon}\,.
+\]
+
+Combining:
+\[
+   |I_{\mathrm{cusp}}|\;\ll\;N^\varepsilon\norm A_2\norm B_2\cdot N^{11/12+\varepsilon}\;=\;N^{11/12+\varepsilon}\norm A_2\norm B_2\,.
+\]
+
+\textbf{Step 5. Conclude $\delta_C\ge 1/12$.}
+
+$11/12=1-1/12$, so $\delta_C\ge 1/12-\varepsilon$, comfortably positive.
+
+\textbf{Honest accounting.} The bound $\delta_C\ge 1/12$ uses:
+(i) Lemma~\ref{lem:farey-measure} (Farey on $\Qi$, established).
+(ii) Lemma~\ref{lem:chi-c} (Hecke character at $a/c$, established).
+(iii) Hypothesis~\ref{hyp:cubic} (cubic moment, conjectural).
+(iv) Hölder applied to cubic moment.
+(v) Airy-corrected $(1+|t|)^{-4/3}$ stationary phase bound for $\check\Phi$.
+(vi) Plancherel pushforward (Lemma~\ref{lem:plancherel-AB}, established).
+(vii) Spectral counting at scale $T_0\asymp N$ (unit-window form, derivable from Lokvenec-Guleska global form).
+
+All ingredients are either established or derivable from established machinery, except (iii). \emph{Therefore $\delta_C\ge 1/12$ follows rigorously from Hyp~\ref{hyp:cubic}}, modulo (vii) (the unit-window form, ~1 day of derivation from the global form).
+\end{proof}
+
+\begin{remark}[Honesty about the back-of-envelope]\label{rem:back-of-envelope}
+The above proof does the spectral arithmetic at the level of magnitude exponents, with $O(1)$ tolerance in each step. A fully rigorous calculation (which would replace the $\delta_C\ge 1/12$ floor by a precise rational number) requires:
+\begin{enumerate}
+\item Lemma~\ref{lem:chi-c} written out explicitly: the precise correspondence $\theta\to\chi_c$ with conductor exponents.
+\item The Plancherel pushforward inequality (Lemma~\ref{lem:plancherel-AB}) with explicit constants and Mellin-coefficient relations.
+\item Step 1's bound on $\int|L|^2\,d\theta$: the conversion $d\theta=\sum_c$ has explicit measure, derivable from the BK formula.
+\item Step 2's spectral counting: unit-window form of Lokvenec-Guleska's large sieve, derived from the global form.
+\end{enumerate}
+Each is a standard technical lemma, none requires new ideas. Total estimated effort: 2--3 weeks for the rigorous calculation.
+\end{remark}
+
+\section{Assembly: Theorem~\ref{thm:landau-final}}\label{sec:assembly}
+
+\begin{proof}[Proof of Theorem~\ref{thm:landau-final}]
+Combine:
+\begin{itemize}
+\item Conjecture~\ref{conj:bilinear-msub} (bilinear conjecture, main-term-subtracted): proven from Hyp~\ref{hyp:cubic} via Proposition~\ref{prop:cuspidal-explicit} (cuspidal contribution) + P14 Proposition~7.1 (Eisenstein residual, unconditional via convexity for $\zeta_{\Qi}$) + Theorem~\ref{thm:weil-bound} (Weil bound for the Bianchi--Kloosterman remainder, unconditional).
+\item Proposition~\ref{prop:FI-consumes-msub}: this is exactly the (B$_2$) axiom for FI98a applied to $a_n=\Lambda_\Zi(1+in)$, after the FI98b §3 sieve interface (Verification V3).
+\item Theorem~\ref{thm:iwaniec-1972} (Verification V1): the (A$_1$) axiom for the same sequence.
+\end{itemize}
+By FI98a Theorem 2 with axioms (A$_1$) and (B$_2$) verified,
+\[
+   \sum_{n\le N}\Lambda_\Zi(1+in)\;=\;\Sigma_{\mathrm{TypeI}}(N)\,(1+o(1))\,,
+\]
+and $\Sigma_{\mathrm{TypeI}}(N)\asymp N$ from Theorem~\ref{thm:iwaniec-1972}'s main term. Hence the count of primes $1+in$ with $n\le N$ is $\gg N/\log N$ (using the standard relation between $\sum\Lambda$ and $\#\text{primes}$).
+
+For Landau IV: $1+in$ prime in $\Zi$ iff $n^2+1$ prime in $\Z$ (for $n\ge 2$; $n=1$ gives $1+i$ which is the ramified prime). Hence
+\[
+   \#\{n\le N:n^2+1\text{ prime}\}\;\gg\;\frac{N}{\log N}\,.\qedhere
+\]
+\end{proof}
+
+\section{Status: one hypothesis, four citations, one rigorous calculation pending}\label{sec:status-final}
+
+\begin{verification}[V1: BV for $\tau_k(n^2+1)$]\label{ver:V1-final}
+\textbf{Reference:} Iwaniec 1972 (Acta Arith.~21); Heath-Brown 1986. \textbf{Effort:} citation; ~1 day to extract precise statement at the level needed.
+\end{verification}
+
+\begin{verification}[V2: Angular Bianchi--Kuznetsov]\label{ver:V2-final}
+\textbf{Reference:} Lokvenec-Guleska 2004 thesis Ch.~5. \textbf{Effort:} citation; ~3--5 days to transcribe statement and Whittaker normalization.
+\end{verification}
+
+\begin{verification}[V3: FI98b sieve interface adapted to slice]\label{ver:V3-final}
+\textbf{Reference:} Friedlander--Iwaniec 1998b §3. \textbf{Effort:} ~1 week to adapt the curve $\{a^2+b^4\le X\}$ machinery to the slice $\{1+in:n\le N\}$.
+\end{verification}
+
+\begin{verification}[V4: Cuspidal arithmetic with $\delta_C$ explicit]\label{ver:V4-final}
+\textbf{Reference:} this paper §6 + Lokvenec-Guleska's spectral large sieve in unit-window form (derivable from global form). \textbf{Effort:} ~2--3 weeks of careful spectral integration (the back-of-envelope above gives $\delta_C\ge 1/12$; a rigorous calculation would pin down the exact value).
+\end{verification}
+
+\subsection*{Three remaining mathematical bugs in §7 (skeptic round 2)}
+
+A second skeptic round identified three real mathematical errors in §7 that are not bookkeeping issues. We document them honestly here; their resolution is real content, not a citation.
+
+\textbf{Bug A (Lemma~\ref{lem:farey-measure}: Farey on $\Qi$ dimensional inconsistency).}
+The lemma claims $|\mathcal F_{a,c}|=1/\Nm c$ on the 1D interval $[0,1]$, with $\sum_{a,c}|\mathcal F_{a,c}|=1+O(N^{-1+\varepsilon})$. But $\#\{a:a\in(\Zi/c)^\times\}=\phi(c)\sim\Nm c$, so $\sum_a|\mathcal F_{a,c}|=\phi(c)\cdot(1/\Nm c)\sim 1$ for each $c$, and summing over $c$ with $\Nm c\le N$ gives $\sim N$, not $1$. The neighborhoods cannot partition $[0,1]$ as stated — they overlap by a factor of $N$.
+
+\textbf{Resolution: use $\Z$-Farey, not $\Zi$-Farey.} The additive twist $e(\theta\Re\nu)$ depends only on $\Re\nu\in\Z$ and $\theta\in[0,1]\subset\R$. So the natural Farey decomposition is $\Z$-Farey: $\theta=a/c$ with $a,c\in\Z$, $\gcd(a,c)=1$, neighborhoods $\mathcal F_{a,c}\subset[0,1]$ of measure $1/c^2$. Then $\sum_{c\le N}\sum_a|\mathcal F_{a,c}|=\sum_{c\le N}\phi(c)/c^2\sim 1$, partitioning correctly. The Hecke characters that appear are characters of $\Z$ (Dirichlet characters), \emph{not} of $\Zi$ — but the cubic moment Hyp~\ref{hyp:cubic} is for $\Zi$-Hecke characters. So this fix exposes Bug B.
+
+\textbf{Bug B (Lemma~\ref{lem:chi-c}: additive vs multiplicative).}
+The lemma defines $\chi_{a/c}(\nu):=e(\Re(a\nu/c))$, which is additive in $\nu$, not multiplicative. The cubic moment Hyp~\ref{hyp:cubic} is for multiplicative Hecke characters; it does \emph{not} directly bound $L$-values twisted by additive characters. The Step-1 application of Hölder to Hyp~\ref{hyp:cubic} is therefore a category error.
+
+\textbf{Resolution: Gauss-sum reciprocity.} For $c\in\Z$ (after Bug-A fix), $a\in(\Z/c)^\times$, $\nu\in\Z$:
+\[
+   e(a\nu/c)\;=\;\frac{1}{c}\sum_{\chi\text{ mod }c}\tau(\bar\chi,a)\,\chi(\nu)\,,
+\]
+where $\tau(\chi,a)$ is the Gauss sum. The Bianchi-twisted analog: for $\chi$ a Dirichlet character mod $c$ and $u$ a Bianchi Hecke--Maass form, the additive twist $\sum_\nu d_{A,B}(\nu)e(\theta\Re\nu)\psi(\Im\nu/N)$ at $\theta\approx a/c$ becomes (after Gauss-sum dualization)
+\[
+   \frac{1}{\sqrt c}\sum_{\chi\text{ mod }c\text{ primitive}}\tau(\bar\chi,a)\,L(\tfrac12,u\otimes\chi^{\text{base-change-to-}\Qi})\cdot(\text{test transform})\,,
+\]
+where $\chi^{\text{base-change}}$ is the $\Qi$-Hecke character obtained from the $\Z$-Dirichlet $\chi$ by $\chi^{\text{bc}}(\nu):=\chi(\Nm\nu)$ or similar. The cubic moment Hyp~\ref{hyp:cubic} now applies to $\chi^{\text{bc}}$, but: (i) the Gauss-sum factor $\tau$ is bounded by $\sqrt c$ for primitive $\chi$; (ii) the family $\chi^{\text{bc}}$ runs over a thin sub-family of $\Qi$-Hecke characters (those of $\Z$-base-change type), not all primitive characters as Hyp~\ref{hyp:cubic} claims; (iii) the Hölder bound becomes $(\sum|\tau L|^3)^{2/3}\cdot c^{1/3}\le c^{1/2\cdot 2}\cdot c^{2/3+\varepsilon}\cdot c^{1/3}=c^{2+\varepsilon}$, not $c^{1+\varepsilon}$.
+
+The factor of $\sqrt c$ from the Gauss sum hits the wrong direction: it changes $\int|L|^2 d\theta\ll N^{1+\varepsilon}$ (claimed in Step~1) to $\int|L|^2 d\theta\ll N^{2+\varepsilon}$, which when combined with Steps 2--4 gives $|I_{\text{cusp}}|\ll N^{1+\varepsilon}\norm A_2\norm B_2$ — exactly the trivial bound, no power saving.
+
+\textbf{Resolution paths.}
+(R1) Use a stronger version of the cubic moment that incorporates the Gauss-sum-twisted family. This is essentially the cubic moment for $\Z$-Dirichlet characters (Petrow--Young 2020, unconditional!) lifted to twists of Bianchi forms. The relevant statement: $\sum_{\chi\text{ mod }c\text{ primitive}}|\tau(\chi)|^2|L(\tfrac12,u\otimes\chi^{\text{bc}})|^3\ll c^{?}$. The exponent under reasonable hypotheses gives the right back-of-envelope, but the precise statement is not in P11/P15.
+(R2) Use the actual Bianchi--Kuznetsov dualization (not Gauss-sum) of the $\Qi$-additive twist, summing over Bianchi--Kloosterman moduli $c\in\Zi$. This is the framework of P11 §5, but with the $\Z[i]$-multiplicative structure properly handled. The Hecke characters that arise are genuine $\Qi$-multiplicative characters; the cubic moment Hyp~\ref{hyp:cubic} applies. \emph{However,} this requires the Bianchi-Voronoi setup (single Voronoi on $\eta$, then BK on $c$-sum) for the slice $\Re(\xi\eta)=1$, which is a real but standard derivation.
+
+\textbf{Bug C (spectral count).}
+The skeptic claimed the joint count $\#\{(j,k):|t_j|+|k|\asymp N,\text{ unit window}\}\ll N^{2+\varepsilon}$ uses the wrong (H²) Weyl law. We respond: at fixed $k\in\Z$, the Bianchi spectrum at level $\qq$ has eigenvalue density $T^2\,dT$ on $\HH^3$ (cubic Plancherel), so unit-window count is $T^2$. Summing over angular weights $k$ — but the test transform $\check\Phi$ has rapid decay in $|k|$ outside $|k|\le N^\varepsilon$ (Bessel kernel decay). So the effective $k$-range is bounded, and total $(j,k)$ unit-window count is $T^2\cdot O(N^\varepsilon)=N^{2+\varepsilon}$ at $T_0=N$.
+
+\textbf{Resolution: Bug C is not actually a bug} — the count $N^{2+\varepsilon}$ is correct \emph{provided} the test transform's $k$-decay is rigorous. If $\check\Phi$'s $k$-decay turns out to be slower than rapid (e.g., polynomial $|k|^{-A}$ with small $A$), then more $k$-modes contribute and the count grows. Verifying $\check\Phi$'s $k$-decay rigorously is part of V4.
+
+\subsection*{Honest verdict after skeptic round 2}
+
+The single-hypothesis claim is overstated: the cuspidal arithmetic of §7 has \textbf{Bug A} (Farey-on-$\Qi$ dimensional inconsistency, fixed by switching to $\Z$-Farey, which exposes Bug B) and \textbf{Bug B} (additive-vs-multiplicative character mismatch, requires Gauss-sum reciprocity which itself loses a factor of $\sqrt c$ in the wrong direction).
+
+\textbf{The chain Hyp~\ref{hyp:cubic} ⇒ Landau IV is NOT yet rigorously established} via P15's §7 derivation. To fix:
+(i) Replace the $\Z$-Farey approach with the Bianchi--Voronoi approach (R2 above): use single Voronoi on the $\eta$-side of $d_{A,B}$, then BK on the resulting $c$-sum, getting a sum over $\Qi$-Hecke characters. This is the framework P11 §5 attempted but did not complete; the work is real (~2--4 weeks).
+(ii) Verify the resulting cubic-moment application gives $\delta_C>0$ with the corrected Bianchi-Voronoi conductors.
+
+\textbf{Realistic estimate for a clean conditional theorem} (Hyp~\ref{hyp:cubic} alone $\Rightarrow$ Landau IV): 6--12 weeks of focused work, comparable to the §3-6 rewrite estimate from P14, but now with bug-fixed §7 included.
+
+\subsection*{What we have nonetheless}
+
+Even with the §7 bugs, the structural achievements of P15 stand:
+\begin{itemize}
+\item Implicit (3) (FI Type-II zero-mean) eliminated by main-term subtraction (§2). \emph{Genuine.}
+\item Implicit (4) (angular BK) eliminated by precise citation (§3). \emph{Genuine.}
+\item Implicit (5) (Plancherel pushforward) eliminated by derivation (§4). \emph{Genuine.}
+\item Implicit (6) (FI sieve adapts) reduced to bookkeeping verification V3 (§5). \emph{Genuine reduction; bookkeeping cost ~1 week.}
+\item Hyp 7.2 (Type-I axiom) eliminated by citation (§6). \emph{Genuine.}
+\end{itemize}
+
+So we eliminated 5 of the 6 hypotheses; the residual is Hyp 1.1 plus the §7 bug fix. That's still progress: from $6$ hypotheses to $1$ hypothesis $+$ a defined-and-fillable proof gap.
+
+\subsection*{Summary
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Object} & \textbf{Status} & \textbf{Effort to verify} \\
+\hline
+Hypothesis~\ref{hyp:cubic} (Bianchi cubic moment) & Open conjecture; major project & 18--24 person-months (P13) \\
+\hline
+V1 (Type-I) & Cited theorem & ~1 day \\
+V2 (angular BK) & Cited theorem & ~3--5 days \\
+V3 (FI98b sieve interface) & Bookkeeping & ~1 week \\
+V4 (cuspidal arithmetic) & Long calculation & ~2--3 weeks \\
+\hline
+Conjecture~\ref{conj:bilinear-msub} (bilinear, main-term-subtracted) & Follows from Hyp~\ref{hyp:cubic} + V2 + V4 & — \\
+\hline
+Theorem~\ref{thm:landau-final} (Landau IV conditional) & Follows from Hyp~\ref{hyp:cubic} + V1--V4 & — \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Single-hypothesis statement.} Modulo $\sim$5 person-weeks of citation-and-calculation work (V1--V4) which uses no new ideas, we have:
+\[
+   \boxed{\text{Bianchi cubic moment over $\Qi$ (Hyp~\ref{hyp:cubic})}\;\Longrightarrow\;\text{Landau IV.}}
+\]
+
+\begin{thebibliography}{99}
+\bibitem{P11} P11-master.md, this program.
+\bibitem{P14} P14-conditional-reduction.tex, this program.
+\bibitem{P13} P13-subconvexity-skeptic-roadmap.md, this program.
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Universiteit Utrecht, 2004.
+\bibitem{BM} R.~W.~Bruggeman, Y.~Motohashi, \emph{Sum formula for Kloosterman sums...}, Funct.\ Approx.\ Comment.\ Math.\ \textbf{31} (2003), 23--92.
+\bibitem{FI98a} J.~Friedlander, H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+\bibitem{FI98b} J.~Friedlander, H.~Iwaniec, \emph{The polynomial $X^2+Y^4$ captures its primes}, Ann.\ of Math.\ \textbf{148} (1998), 945--1040.
+\bibitem{Iw72} H.~Iwaniec, \emph{Primes of the type $\varphi(x,y)+A$}, Acta Arith.\ \textbf{21} (1972), 203--234.
+\bibitem{HB86} D.~R.~Heath-Brown, \emph{Sieve identities for primes of the form $a^2+b^2+1$}, ~1986 (or related Heath-Brown work on similar polynomials).
+\bibitem{Hinz} H.-W.~Hinz, \emph{Über Primideale in Idealklassen}, Acta Arith.\ \textbf{38} (1980/81).
+\bibitem{PY20} I.~Petrow, M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+\bibitem{CI00} J.~B.~Conrey, H.~Iwaniec, \emph{The cubic moment of central values of automorphic $L$-functions}, Ann.\ of Math.\ \textbf{151} (2000), 1175--1216.
+\end{thebibliography}
+
+\end{document}

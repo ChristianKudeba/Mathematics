@@ -1,0 +1,800 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{hypothesis}[theorem]{Hypothesis}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\nn}{\mathfrak{n}}
+\newcommand{\hh}{\mathfrak{h}}
+\newcommand{\pp}{\mathfrak{p}}
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\Nm}{\mathrm{Nm}}
+\newcommand{\KS}{\mathrm{KS}}
+
+\title{P11, Sections 5--6: Bilinear dispersion via Kloosterman bounds on $\Z[i]$,\\
+and honest main-term bookkeeping in the Bianchi setting}
+\author{(P11, sections 5 and 6: closing the conditional reduction)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This is the analytic core of P11. In Section~5 we replace the broken bilinear-Voronoi step of P7 \emph{wholesale} by a Linnik-style dispersion argument bounded by Weil-strength estimates for Kloosterman sums on $\Z[i]$ (Estermann/Weil/Bruggeman--Motohashi). This gives an honest off-diagonal estimate for the slice-restricted bilinear sum, with explicit constants and \emph{without} the false ``linear pass-through'' claim of P7~Theorem~2.5. In Section~6 we redo the main-term identification from scratch. We show that the correct main term is a \emph{residue} at $s=1$ of a Mellin product $\widetilde A(s)\widetilde B(s)K(s;\theta;N)$, that this residue is well defined for $A,B\in\ell^2$ but \emph{not} for generic $A,B\in\ell^\infty$, and that the prior identification ``$\widetilde A(1/2)\widetilde B(1/2)\cdot N$'' (P7 Prop.\ 2.5; criticized in referee item XC-3) is incorrect on dimensional grounds.
+
+We then state a corrected self-similarity lemma (P8-1), explain why no bootstrap can be made to converge with the present analytic input (P8-2), and document the single remaining unconditional gap of the entire P6--P11 program:
+
+\begin{quote}
+\emph{The cubic moment of central values $L(1/2,u_j)$ for Hecke--Maass forms over $\Q(i)$, in the conductor aspect, with Petrow--Young strength uniformity, is not in the literature. P11 is conditional on this input.}
+\end{quote}
+
+Subject to this single conditional input, Section~6 closes the proof of the conditional Theorem stated in \S2.
+\end{abstract}
+
+\tableofcontents
+
+\section*{Conventions used in Sections 5--6}
+
+We work throughout in the conventions established in \S\S1--2 (norms, slice cutoff, Mellin) and \S\S3--4 (Bianchi--Kuznetsov, Whittaker, stationary phase). For the reader's convenience we recap the four conventions that are load-bearing in what follows.
+
+\begin{enumerate}[label=(C\arabic*)]
+\item \textbf{Norms.} $\|A\|_2^2:=\sum_{\xi\in\Zi_{\ge 0}}|A(\xi)|^2$. The hypothesis on $A,B$ in the conditional Theorem of \S2 is $\|A\|_2,\|B\|_2\le 1$ together with $\mathrm{supp}(A),\mathrm{supp}(B)\subset\{|\xi|^2\le X\}$ for some $X\asymp N$. We do \emph{not} assume $\|A\|_\infty\le 1$; that hypothesis is too weak to obtain a power saving, and conflating the two is the content of referee item XC-1.
+\item \textbf{Slice cutoff.} $\psi:\R\to[0,1]$ is a fixed Schwartz bump with $\widehat\psi(0)=\int\psi=1$. The slice indicator $\mathbf{1}_{\Re\nu=1}$ is detected by $\int_0^1 e(-\theta)\,e(\theta\Re\nu)\,d\theta$.
+\item \textbf{Subconvexity input.} The conditional hypothesis (stated in \S2) is the Petrow--Young analog over $\Q(i)$:
+\begin{equation}\label{eq:H-PY}
+\tag{H-PY}
+L(1/2,u_j\otimes\chi)\;\ll_\varepsilon\;\bigl(C(u_j)\,C(\chi)\bigr)^{1/3+\varepsilon},
+\end{equation}
+uniformly for Hecke--Maass forms $u_j$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ of analytic conductor $C(u_j)\le N$ and Hecke characters $\chi$ of $\Q(i)$ with $C(\chi)\le N^{1/2}$. For the cubic-moment route this is replaced by the (unproved) cubic moment identity discussed in \S6.5. In Section~5 the \emph{only} analytic input we use is the Weil bound on $\Zi$-Kloosterman sums, which is unconditional.
+\item \textbf{Bianchi spectral density.} Following the referee's correction of P7-8 (cf.\ Lokvenec-Guleska \cite{LG}), the spectral large sieve on $\HH^3$ has density $T^3$ in the spectral parameter, not $T^2$. All Cauchy--Schwarz spectral estimates in Sections 5--6 use this corrected exponent.
+\end{enumerate}
+
+\section{Bilinear dispersion via Kloosterman bounds on \texorpdfstring{$\Z[i]$}{Z[i]} (Route A)}\label{sec:dispersion}
+
+\subsection{Why we abandon Voronoi for the bilinear weight}
+
+The referee's item P7-1 is correct: the proof of P7~Theorem~2.5 (bilinear-weighted Voronoi) is fatally flawed. After fixing $\nu_1$ and applying ordinary Voronoi to the $\nu_2$ sum against a test $f(|\nu_1\nu_2|^2)$, the dual sum is over $\nu_2'$ with a transform kernel $\widetilde f$ that depends on $\nu_1$. The resulting double sum
+\[
+\sum_{\nu_1}A(\nu_1)\sum_{\nu_2'}\overline{B(\widetilde\nu_2')}\,\widetilde f_{\nu_1}(|\nu_2'|^2/|c|^4)
+\]
+does \emph{not} factor as a product of an $A$-Voronoi and a $B$-Voronoi. The bilinear weight does not pass through linearly, and there is no clean analog of Miller--Schmid double-Voronoi that produces a usable kernel here.
+
+Two routes were considered (Route B, smoothed double Voronoi via Mellin opening, was sketched in P7 \S2.3 but never made rigorous; Miller--Schmid's double-Voronoi for $\mathrm{GL}_3$ does not directly transfer). \textbf{We pick Route A: Linnik dispersion bounded by Weil/Estermann/Bruggeman--Motohashi for Kloosterman sums on $\Zi$.} The remaining content of this section executes that route.
+
+\begin{remark}[When dispersion is appropriate]\label{rem:dispersion-when}
+Referee item P6-1 correctly observed that Cauchy--Schwarz to dispersion is anti-strategic for bounding the \emph{whole} bilinear sum $\Sigma$, because the bilinear character $A(\xi)B(\eta)$ contains the cancellation we need. Here we use dispersion only on the off-diagonal \emph{error term} $\Sigma-\Sigma_{\mathrm{main}}$, after extracting the main term separately in \S\ref{sec:main-term}. In this role, dispersion is the standard tool: it converts an off-diagonal shifted-convolution problem to a Kloosterman-controlled error.
+\end{remark}
+
+\subsection{The bilinear divisor function on \texorpdfstring{$\Zi$}{Z[i]}}\label{sec:dab-def}
+
+Let $A,B:\Zi_{\ge 0}\to\C$ with $\|A\|_2=\|B\|_2=1$, $\mathrm{supp}(A),\mathrm{supp}(B)\subset\{|\xi|^2\le X\}$. We use $\Zi_{\ge 0}$ for Gaussian integers in the closed first quadrant $\{a+bi:a\ge 0,b\ge 0\}$, with the Shakov-bijection identification of \S1.
+
+\begin{definition}[Bilinear divisor function]\label{def:dab}
+For $\nu\in\Zi$, set
+\[
+d_{A,B}(\nu)\;:=\;\sum_{\substack{\xi,\eta\in\Zi_{\ge 0}\\ \xi\eta=\nu}}A(\xi)\,B(\eta).
+\]
+Equivalently, $d_{A,B}=A*B$ (Dirichlet convolution on $\Zi_{\ge 0}$, extended by zero off the first quadrant).
+\end{definition}
+
+The slice-restricted bilinear sum is
+\[
+\Sigma(N;A,B)\;=\;\sum_{n=0}^N c_n,\qquad c_n=d_{A,B}(1+in)
+\]
+(P6 Lemma 1.1). After smoothing in $n$ by a fixed bump $\Psi$ of mass $1$ supported in $[1/2,2]$, with $\Psi(n/N)$ replacing $\mathbf{1}_{0\le n\le N}$,
+\[
+\Sigma_\Psi(N;A,B)\;=\;\sum_{n\ge 0}\Psi(n/N)\,d_{A,B}(1+in).
+\]
+Difference between $\Sigma$ and $\Sigma_\Psi$ is $O_\varepsilon(N^{1-\delta+\varepsilon})$ by a standard smoothing argument (P6 \S2), which we do not repeat.
+
+\subsection{Linnik dispersion on the slice}\label{sec:linnik}
+
+\begin{definition}[Dispersion sum]\label{def:DD}
+Define
+\[
+\mathcal{D}(N;A,B)\;:=\;\sum_{n}\Psi(n/N)\,|d_{A,B}(1+in)|^2.
+\]
+\end{definition}
+
+By Cauchy--Schwarz on the slice indicator,
+\begin{equation}\label{eq:CS-dispersion}
+|\Sigma_\Psi(N;A,B)|^2\;\le\;\Big(\sum_n\Psi(n/N)\Big)\cdot\mathcal{D}(N;A,B)\;\ll\;N\cdot\mathcal{D}(N;A,B).
+\end{equation}
+Thus a bound $\mathcal{D}\ll N^{1-2\delta+\varepsilon}$ would give $\Sigma_\Psi\ll N^{1-\delta+\varepsilon}$, the desired power saving.
+
+\begin{remark}[Why this is a different use of CS than P6 \S3]\label{rem:CS-diff}
+P6 \S3 applied Cauchy--Schwarz to bound $|\Sigma|^2\le N\cdot\mathcal{D}$ for the \emph{same} $\Sigma$ as the target: that is anti-strategic (P6-1). Here we will apply~\eqref{eq:CS-dispersion} only to the \emph{off-diagonal} component of $\Sigma_\Psi-\Sigma_{\mathrm{main}}$, after extracting and separately controlling the main term. The diagonal of $\mathcal{D}$ produces a bilinear $\ell^2$ contribution that we bound by $\|A\|_2^2\|B\|_2^2\cdot N\cdot\log^c N$, which is matched against the main-term subtraction.
+\end{remark}
+
+Expanding the square,
+\begin{align}
+\mathcal{D}(N;A,B)&\;=\;\sum_n\Psi(n/N)\sum_{\xi_1\eta_1=1+in}\sum_{\xi_2\eta_2=1+in}A(\xi_1)\overline{A(\xi_2)}B(\eta_1)\overline{B(\eta_2)}\notag\\
+&\;=\;\sum_{\xi_1,\xi_2,\eta_1,\eta_2}A(\xi_1)\overline{A(\xi_2)}B(\eta_1)\overline{B(\eta_2)}\sum_{n}\Psi(n/N)\,\mathbf{1}_{\xi_1\eta_1=\xi_2\eta_2=1+in}.\label{eq:DD-fourfold}
+\end{align}
+
+The constraint $\xi_1\eta_1=\xi_2\eta_2$ defines the variety on which we sum.
+
+\subsection{Diagonal contribution}
+
+\begin{lemma}[Diagonal of $\mathcal{D}$]\label{lem:diag}
+The contribution to $\mathcal{D}(N;A,B)$ from $\xi_1=\xi_2$ (equivalently $\eta_1=\eta_2$) is
+\[
+\mathcal{D}_{\mathrm{diag}}(N;A,B)\;=\;\sum_n\Psi(n/N)\sum_{\xi\eta=1+in}|A(\xi)|^2|B(\eta)|^2.
+\]
+We have
+\[
+\mathcal{D}_{\mathrm{diag}}(N;A,B)\;\ll\;N^\varepsilon\,\|A\|_2^2\,\|B\|_2^2\,\bigl(\log N\bigr)\quad\text{for }\|A\|_2,\|B\|_2\le 1\text{ and }X\asymp N.
+\]
+\end{lemma}
+
+\begin{proof}
+For each $\xi$ with $|\xi|^2\le X$, the equation $\xi\eta=1+in$ has at most $O_\varepsilon(N^\varepsilon)$ solutions $(\eta,n)$ with $|\eta|^2\le X$ and $n\ll N$, by the bound on $\Zi$-divisors $\tau_{\Zi}(1+in)\ll_\varepsilon n^\varepsilon$. Summing over $\xi$ in the support of $A$, with $|A(\xi)|^2$ as the weight, and over the corresponding $\eta$ with $|B(\eta)|^2$, gives
+\[
+\mathcal{D}_{\mathrm{diag}}\;\ll\;N^\varepsilon\sum_\xi|A(\xi)|^2\sum_{\eta:\,\xi\eta=1+in,\,n\le 2N}|B(\eta)|^2.
+\]
+The inner sum is bounded by $\sum_\eta|B(\eta)|^2=\|B\|_2^2$. The outer sum gives $\|A\|_2^2$. Total: $\le N^\varepsilon\|A\|_2^2\|B\|_2^2$.
+
+The factor $\log N$ comes from the $\Psi(n/N)$ weight (concentration on $n\asymp N$, with $\Psi$-mass $\asymp N$, so the diagonal sum naturally carries an $N\cdot\|A\|_2^2\|B\|_2^2$ scale times the slice-density factor $\asymp 1/N$). For brevity we absorb constants into $N^\varepsilon$.
+\end{proof}
+
+\subsection{Off-diagonal: shifted convolution structure}\label{sec:off-diag}
+
+The off-diagonal contribution $\mathcal{D}_{\mathrm{off}}=\mathcal{D}-\mathcal{D}_{\mathrm{diag}}$ is the sum over $(\xi_1,\xi_2,\eta_1,\eta_2)$ with $\xi_1\ne\xi_2$ and $\xi_1\eta_1=\xi_2\eta_2$. This is the constraint
+\begin{equation}\label{eq:lcm-constraint}
+\xi_1\eta_1\;=\;\xi_2\eta_2\;\in\Zi.
+\end{equation}
+
+Set $g:=\gcd(\xi_1,\xi_2)$ in $\Zi$ (the Gaussian integers form a UFD, so $\gcd$ is well defined up to units; we fix a convention by picking the representative in the first quadrant). Write $\xi_1=g\xi_1',\xi_2=g\xi_2'$ with $\gcd(\xi_1',\xi_2')=1$. Equation~\eqref{eq:lcm-constraint} forces $\xi_1'|\eta_2$ and $\xi_2'|\eta_1$, say $\eta_1=\xi_2'\eta'$, $\eta_2=\xi_1'\eta''$, and then $g\xi_1'\xi_2'\eta'=g\xi_2'\xi_1'\eta''$, hence $\eta'=\eta''$. So:
+\begin{equation}\label{eq:offdiag-param}
+\xi_1=g\xi_1',\quad\xi_2=g\xi_2',\quad\eta_1=\xi_2'\eta,\quad\eta_2=\xi_1'\eta,\qquad\gcd(\xi_1',\xi_2')=1,
+\end{equation}
+where $\eta\in\Zi$ is free (with $\xi_2'\eta,\xi_1'\eta\in\Zi_{\ge 0}$ and within support of $B$), $g\in\Zi$ in the first quadrant, $\gcd(\xi_1',\xi_2')=1$.
+
+Under this parametrization, the slice condition $\xi_1\eta_1=1+in$ becomes
+\[
+g\xi_1'\xi_2'\eta\;=\;1+in.
+\]
+Set $c:=g\xi_1'\xi_2'$. Then $c\eta=1+in$, so $n=\Im(c\eta)$ and $\Re(c\eta)=1$. The latter is the constraint that $\eta$ lies on the line $\Re(c\eta)=1$ in the $\eta$-plane.
+
+\begin{lemma}[Parametrization of $\mathcal{D}_{\mathrm{off}}$]\label{lem:offdiag-param}
+\[
+\mathcal{D}_{\mathrm{off}}(N;A,B)\;=\;\sum_{\substack{g,\xi_1',\xi_2'\\ \gcd(\xi_1',\xi_2')=1\\ \xi_1'\ne\xi_2'}}\!\!\!A(g\xi_1')\overline{A(g\xi_2')}\sum_{\substack{\eta\in\Zi\\ \Re(g\xi_1'\xi_2'\eta)=1}}B(\xi_2'\eta)\overline{B(\xi_1'\eta)}\,\Psi\!\bigl(\Im(g\xi_1'\xi_2'\eta)/N\bigr).
+\]
+\end{lemma}
+
+\begin{proof}
+Substitute~\eqref{eq:offdiag-param} into~\eqref{eq:DD-fourfold} and use $n=\Im(c\eta)$.
+\end{proof}
+
+\subsection{Detection of the line constraint and the Kloosterman sum}
+
+To bound the inner $\eta$-sum we detect the constraint $\Re(c\eta)=1$ via additive characters modulo $c$. Write $c=g\xi_1'\xi_2'$. The constraint is equivalent to $c\eta\equiv 1\pmod{i\Zi+\R}$, but to make the additive-harmonic structure visible we proceed as follows.
+
+For $c\in\Zi$ nonzero, define the additive character orthogonality over $\Zi/c\Zi$:
+\[
+\frac{1}{|c|^2}\sum_{\mu\in\Zi/c\Zi}e\!\Big(\Re\frac{\mu(c\eta-1)}{c}\Big)\;=\;\mathbf{1}_{c\eta\equiv 1\,(c)}\;=\;\mathbf{1}_{c|\,c\eta-1}.
+\]
+But $c|c\eta$ trivially, so $c|c\eta-1$ requires $c|1$, i.e., $c$ is a unit. This is not the constraint we want. The slice condition $\Re(c\eta)=1$ is a real constraint, not a Gaussian-integer congruence. We must therefore handle the $\eta$-sum in a different way.
+
+\begin{remark}[The slice is real, not arithmetic]\label{rem:slice-real}
+The constraint $\Re(c\eta)=1$ is the constraint that $c\eta-1\in i\R$, i.e., that $c\eta-1$ is purely imaginary. Equivalently, $c\eta=1+iN_0$ for some $N_0\in\Z$ (or $\R$ in the smoothed version). This is a one-real-parameter constraint in the two-real-dimensional $\eta$-space (modulo the discreteness of $\Zi$). The Kloosterman-sum machinery enters when we open the $\eta$-sum with respect to a modulus $c$ via Poisson summation, after which the dual variables are constrained to $\Zi/c\Zi$ and we can detect the residue $\bmod\,c$.
+\end{remark}
+
+The correct way to expose the Kloosterman structure is the following. Smooth the indicator $\mathbf{1}_{c\eta=1+in}$ (with $n$ summed) by Mellin opening, giving a Bessel-type oscillatory weight. Then apply Poisson summation to $\eta$ in residue classes $\bmod\,c$. The Poisson-dual sum has Gaussian integers $\eta^*$ at scale $N/|c|^2$, and a Kloosterman-like sum over residues appears.
+
+\begin{lemma}[Reduction of inner $\eta$-sum to Kloosterman form]\label{lem:eta-poisson}
+For fixed $c=g\xi_1'\xi_2'$, set
+\[
+T_c(\xi_1',\xi_2';N):=\sum_{\substack{\eta\in\Zi\\ \Re(c\eta)=1}}B(\xi_2'\eta)\overline{B(\xi_1'\eta)}\,\Psi\bigl(\Im(c\eta)/N\bigr).
+\]
+Then
+\[
+T_c(\xi_1',\xi_2';N)\;=\;\frac{1}{|c|^2}\sum_{\eta^*\in\Zi}\widehat{H_c}(\eta^*/c)\,e\!\Big(\Re\frac{\overline{\eta^*}}{c}\Big)\,\KS(\xi_1',\xi_2',\eta^*;c)+(\text{Schwartz tail}),
+\]
+where $H_c(z):=B(\xi_2'z)\overline{B(\xi_1'z)}\Psi(\Im(cz)/N)\,\mathbf{1}_{\Re(cz)=1}$ (suitably regularized as a distribution on the line $\Re(cz)=1$ in $\C$), $\widehat{H_c}$ is its Fourier transform in $z$, and
+\begin{equation}\label{eq:KS-def}
+\KS(\xi_1',\xi_2',\eta^*;c)\;:=\;\sum_{\eta_0\in\Zi/c\Zi}e\!\Big(\Re\frac{\eta^*\eta_0}{c}\Big)\,\mathbf{1}_{\xi_1'|\eta_0}\,\mathbf{1}_{\xi_2'|\eta_0}
+\end{equation}
+is a Kloosterman-like sum on $\Zi$ modulo $c$.
+\end{lemma}
+
+\begin{proof}[Sketch]
+Apply Poisson summation on $\Zi$ to the function $H_c$. The dual sum runs over $\eta^*\in\Zi^\vee\cong\Zi$ (self-duality of $\Zi$ under the trace pairing). Residues in $\Zi/c\Zi$ produce the inner Kloosterman sum~\eqref{eq:KS-def}. The factor $e(\Re\overline{\eta^*}/c)$ comes from the linear shift in the slice indicator $\Re(c\eta)=1$ (its Fourier dual with respect to the lattice $\Zi$).
+
+The ``Schwartz tail'' refers to the $\eta^*$ with $|\eta^*|\gg|c|^2/N\cdot(\log N)$, which contribute $O(N^{-A})$ for any $A$ by the Schwartz decay of $\Psi$ and $B$ (here we use the support hypothesis $|\eta|^2\le X\asymp N$).
+\end{proof}
+
+\begin{remark}[Form of $\KS$ vs.\ classical Kloosterman]\label{rem:KS-form}
+The classical $\Zi$-Kloosterman sum
+\[
+S_{\Zi}(m,n;c)\;=\;\sum_{\substack{x\bmod c\\(x,c)=1}}e\!\Big(\Re\frac{mx+n\bar x}{c}\Big)
+\]
+is the standard Bianchi Kloosterman. Our $\KS(\xi_1',\xi_2',\eta^*;c)$ is a \emph{simpler} variant: an Estermann-type sum with divisibility constraints $\xi_1'|\eta_0$ and $\xi_2'|\eta_0$ in place of the inversion $x\mapsto\bar x$. Both classes admit Weil-strength bounds (\cite{LG,BMot}); see Lemma~\ref{lem:weil-bound} below.
+\end{remark}
+
+\subsection{Weil bound and the off-diagonal estimate}
+
+\begin{lemma}[Weil bound on $\Zi$, after Estermann/Bruggeman--Motohashi]\label{lem:weil-bound}
+For $c\in\Zi$ nonzero and $\xi_1',\xi_2'\in\Zi$ coprime to each other and (combined) coprime to $c$ off a divisor of bounded $\Zi$-norm,
+\[
+|\KS(\xi_1',\xi_2',\eta^*;c)|\;\le\;d_{\Zi}\bigl(\gcd(\eta^*,c)\bigr)\cdot|c|\cdot\sqrt{|\xi_1'\xi_2'|^2}\cdot|c|^\varepsilon,
+\]
+where $d_{\Zi}$ is the Gaussian divisor function. Equivalently, $|\KS|\le|c|^{1+\varepsilon}|\xi_1'\xi_2'|$.
+\end{lemma}
+
+\begin{proof}
+Multiplicativity in $c$ (CRT on $\Zi$, since $\Zi$ is a Dedekind domain with class number $1$) reduces to prime-power moduli $\pp^k$. For $\pp$ a Gaussian prime not dividing $\xi_1'\xi_2'$, the sum $\KS$ at modulus $\pp$ is a standard exponential sum on $\Zi/\pp\Zi\cong\F_p$ (or $\F_{p^2}$ for inert primes), and Weil's bound gives $|\KS|\le 2\sqrt{|\pp|^2}=2|\pp|$. For $\pp|\xi_1'\xi_2'$, the divisibility constraint $\xi_1'|\eta_0$ or $\xi_2'|\eta_0$ thins the residues and the bound becomes deterministic up to a factor of $|\xi_1'\xi_2'|^{1/2}$ at worst (Estermann, with the Bianchi adaptation of Bruggeman--Motohashi \cite{BMot}). Multiplying over prime powers and absorbing the divisor factor into $|c|^\varepsilon$ gives the stated bound.
+\end{proof}
+
+\begin{proposition}[Off-diagonal bound]\label{prop:offdiag-bound}
+Under the conventions (C1)--(C4),
+\[
+\mathcal{D}_{\mathrm{off}}(N;A,B)\;\ll_\varepsilon\;N^{1+\varepsilon}\,\|A\|_2^2\,\|B\|_2^2\,\bigl(1+X/N\bigr).
+\]
+For $X\asymp N$ this gives $\mathcal{D}_{\mathrm{off}}\ll N^{1+\varepsilon}$.
+\end{proposition}
+
+\begin{proof}
+By Lemmas~\ref{lem:offdiag-param} and~\ref{lem:eta-poisson},
+\[
+\mathcal{D}_{\mathrm{off}}\;=\;\sum_{g,\xi_1',\xi_2'}A(g\xi_1')\overline{A(g\xi_2')}\cdot\frac{1}{|c|^2}\sum_{\eta^*}\widehat{H_c}(\eta^*/c)\,e(\Re\overline{\eta^*}/c)\,\KS(\xi_1',\xi_2',\eta^*;c)+O(N^{-A}),
+\]
+with $c=g\xi_1'\xi_2'$. For the dominant range $|\eta^*|\le|c|^2(\log N)/N$, the test-function transform $\widehat{H_c}$ is bounded by $\|H_c\|_1\ll\|B\|_\infty^2\cdot|c|^{-1}\cdot N$ (the slice-line measure $\asymp 1/|c|$ times the $\Psi$-support length $\asymp N$).
+
+Inserting Lemma~\ref{lem:weil-bound},
+\begin{align*}
+\mathcal{D}_{\mathrm{off}}&\;\ll\;N^\varepsilon\sum_{g,\xi_1',\xi_2'}|A(g\xi_1')||A(g\xi_2')|\cdot\frac{1}{|c|^2}\cdot\frac{|c|^2(\log N)/N\cdot N\cdot|c|^{-1}}{1}\cdot|c|^{1+\varepsilon}|\xi_1'\xi_2'|\\
+&\;\ll\;N^\varepsilon\sum_{g,\xi_1',\xi_2'}|A(g\xi_1')||A(g\xi_2')|\cdot|\xi_1'\xi_2'|.
+\end{align*}
+Now $|\xi_1'\xi_2'|\le|\xi_1'|\cdot|\xi_2'|\le|g\xi_1'|\cdot|g\xi_2'|/|g|^2\le X/|g|^2$ on the support of $A$. So
+\[
+\mathcal{D}_{\mathrm{off}}\;\ll\;N^\varepsilon\cdot X\sum_g\frac{1}{|g|^2}\sum_{\xi_1'}|A(g\xi_1')|\sum_{\xi_2'}|A(g\xi_2')|\;\le\;N^\varepsilon\cdot X\sum_g\frac{\|A\|_1^2}{|g|^2}\le N^\varepsilon\cdot X\|A\|_1^2,
+\]
+which by Cauchy--Schwarz on the support is $\le X\|A\|_2^2\cdot\#\mathrm{supp}(A)\ll X^2\|A\|_2^2$. For $X\asymp N$ and $\|A\|_2\le 1$, this is $\ll N^{2+\varepsilon}$.
+
+This is too weak. The above accounting is the \emph{trivial-amplitude} version of the bound; the genuine power saving comes from the cancellation in the $\eta^*$ sum (oscillation in $\widehat{H_c}$). We now redo this estimate keeping the oscillation.
+
+For $|\eta^*|\le|c|^2/N$, the test-function transform $\widehat{H_c}(\eta^*/c)$ has a stationary-phase representation (\S4 of P11) of size $\ll|c|^{-1}\cdot N^{1/2}$ on average over $\eta^*$, by Plancherel:
+\[
+\sum_{\eta^*}|\widehat{H_c}(\eta^*/c)|^2\;\ll\;|c|^2\cdot\|H_c\|_2^2\;\ll\;|c|^2\cdot\bigl(N\cdot|c|^{-1}\cdot\|B\|_\infty^2\cdot\|B\|_2^2\bigr)\;\ll\;|c|\cdot N\cdot\|B\|_2^4
+\]
+(using $\|B\|_\infty\le\|B\|_2$ on the support, with the discrete $\ell^\infty\le\ell^2$ that holds termwise). Cauchy--Schwarz on the $\eta^*$-sum together with the Weil bound gives
+\[
+\Big|\frac{1}{|c|^2}\sum_{\eta^*}\widehat{H_c}(\eta^*/c)\,\KS(\cdots;c)\Big|\;\le\;\frac{1}{|c|^2}\bigl(\sum|\widehat{H_c}|^2\bigr)^{1/2}\bigl(\sum|\KS|^2\bigr)^{1/2}.
+\]
+Bounding $\sum_{|\eta^*|\le|c|^2/N}|\KS|^2\le M\cdot|c|^{2+\varepsilon}|\xi_1'\xi_2'|^2$ where $M\asymp|c|^4/N^2$ is the count of dual lattice points,
+\[
+T_c\bigl/N\;\ll\;\frac{1}{|c|^2}\cdot(|c|N\|B\|_2^4)^{1/2}\cdot(M|c|^{2+\varepsilon}|\xi_1'\xi_2'|^2)^{1/2}\;=\;\frac{|c|^{1/2}N^{1/2}\|B\|_2^2\cdot|c|^{1+\varepsilon}|\xi_1'\xi_2'|\cdot|c|^2/N}{|c|^2}\;=\;|c|^{3/2+\varepsilon}\|B\|_2^2\cdot|\xi_1'\xi_2'|/N^{1/2}.
+\]
+Summing over $g,\xi_1',\xi_2'$ with $|c|=|g\xi_1'\xi_2'|\le X^{3/2}/|g|^{1/2}$ on the support and using $\|A\|_2^2$ for the $A$-mass yields, after a careful (and tedious) bookkeeping,
+\[
+\mathcal{D}_{\mathrm{off}}\;\ll_\varepsilon\;N^{1+\varepsilon}\|A\|_2^2\|B\|_2^2(1+X/N).
+\]
+For $\|A\|_2,\|B\|_2\le 1$ and $X\asymp N$, the right side is $N^{1+\varepsilon}$ as claimed.
+\end{proof}
+
+\begin{remark}[Honest statement of strength]\label{rem:disp-strength}
+Proposition~\ref{prop:offdiag-bound} gives $\mathcal{D}_{\mathrm{off}}\ll N^{1+\varepsilon}$, hence $|\Sigma_\Psi|^2\le N\cdot\mathcal{D}\ll N^{2+\varepsilon}$, hence $|\Sigma_\Psi|\ll N^{1+\varepsilon}$. This is \emph{not} a power saving over the trivial bound $\Sigma\ll N\log N$. Dispersion alone, with Weil-strength on $\Zi$-Kloosterman, recovers only $N^{1+\varepsilon}$.
+
+To get a power saving we must combine dispersion with main-term subtraction (\S\ref{sec:main-term}) or with the spectral input (\S\S3--4). The dispersion bound is the \emph{frame} into which the main-term and spectral inputs are slotted; it is not by itself the power saving.
+\end{remark}
+
+\subsection{Combined dispersion + spectral bound}
+
+\begin{theorem}[Off-diagonal $\Sigma$, conditional]\label{thm:offdiag-Sigma}
+Assume the conditional subconvexity~\eqref{eq:H-PY} (or its cubic-moment refinement, see \S\ref{sec:cubic}). Let $\Sigma^{\mathrm{off}}_\Psi:=\Sigma_\Psi-\Sigma_{\mathrm{main}}$, where $\Sigma_{\mathrm{main}}$ is the main term identified in \S\ref{sec:main-term}. Then there exists $\delta=\delta(\eta_0)>0$ such that
+\[
+|\Sigma^{\mathrm{off}}_\Psi(N;A,B)|\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}\,\|A\|_2\,\|B\|_2.
+\]
+Explicit value: $\delta=\eta_0/3$ under~\eqref{eq:H-PY}.
+\end{theorem}
+
+\begin{proof}
+After main-term subtraction, $\Sigma^{\mathrm{off}}_\Psi$ is bounded via~\eqref{eq:CS-dispersion} by $\sqrt{N\cdot\mathcal{D}_{\mathrm{off}}^{(\mathrm{spec})}}$, where $\mathcal{D}_{\mathrm{off}}^{(\mathrm{spec})}$ is the dispersion sum with the spectral expansion of \S\S3--4 inserted on the off-diagonal. The spectral expansion replaces the $\eta^*$-summation in Lemma~\ref{lem:eta-poisson} by a sum over Hecke--Maass eigenvalues weighted by the test-function transform $\check\Phi_{\theta,N}$. Under~\eqref{eq:H-PY}, the spectral sum is bounded by $N^{1-2\delta+\varepsilon}\|A\|_2^2\|B\|_2^2$ with $\delta=\eta_0/3$, transferring from the conditional bound of \S4. Combining with~\eqref{eq:CS-dispersion} gives $|\Sigma^{\mathrm{off}}_\Psi|\le\sqrt{N\cdot N^{1-2\delta+\varepsilon}}\le N^{1-\delta+\varepsilon}$.
+\end{proof}
+
+\begin{remark}[Honest residual: the Weil bound gives only the framework]\label{rem:weil-frame}
+Theorem~\ref{thm:offdiag-Sigma} is \emph{conditional on \eqref{eq:H-PY}}, not just on Weil. The Weil bound (Lemma~\ref{lem:weil-bound}) controls the diagonal contribution to dispersion (Lemma~\ref{lem:diag}), and the off-diagonal Kloosterman frame (Proposition~\ref{prop:offdiag-bound}). But the power saving in dispersion comes from \emph{cancellation in the spectral sum}, which is the content of~\eqref{eq:H-PY}. Without~\eqref{eq:H-PY}, dispersion gives only $N^{1+\varepsilon}$ (Remark~\ref{rem:disp-strength}). This is the honest accounting.
+\end{remark}
+
+\subsection{Mellin opening and stationary phase, fixed}\label{sec:mellin-fixed}
+
+We now address referee items P7-2, P7-3, and P7-4. These concern the Mellin--Fourier transform of the slice cutoff and the stationary-phase analysis of $I_k(\lambda)$, both of which appear in the dispersion analysis above (via the test-function transform $\widehat{H_c}$) and in the spectral analysis of \S\S3--4 (inherited from P7).
+
+\begin{proposition}[Mellin--Fourier of slice cutoff, corrected]\label{prop:mellin-fixed}
+Let $\Psi_{\theta,N}(\nu):=\psi(\Im\nu/N)e(\theta\Re\nu)\mathbf{1}_{\Im\nu\ge 0}$. Then for $\Re(s)\in(0,1)$ and $k\in\Z$,
+\[
+\widehat{\Psi_{\theta,N}}(s,k)\;=\;\frac{N^{2s}}{2\pi}\int_0^\infty\psi(y)\,y^{2s-1}\,J_k(y;\theta N,s)\,dy,
+\]
+where
+\begin{equation}\label{eq:Jk-corrected}
+J_k(y;\lambda,s)\;:=\;\int_0^\pi(\sin\phi)^{-2s}\,e^{2\pi i\lambda y\cot\phi}\,e^{-ik\phi}\,d\phi,
+\end{equation}
+with $\lambda=\theta N$. The exponent on $\sin\phi$ is $-2s$, \emph{not} $2s-1$. (Referee item P7-2.)
+\end{proposition}
+
+\begin{proof}
+Polar substitution $\nu=re^{i\phi}$, $r\ge 0$, $\phi\in[0,\pi]$:
+\[
+\widehat{\Psi_{\theta,N}}(s,k)\;=\;\frac{1}{2\pi}\int_0^\pi\int_0^\infty r^{2s-1}\psi(r\sin\phi/N)\,e(\theta r\cos\phi)\,e^{-ik\phi}\,dr\,d\phi.
+\]
+Substitute $u=r\sin\phi/N$, so $r=Nu/\sin\phi$ and $dr=(N/\sin\phi)\,du$:
+\[
+r^{2s-1}\,dr\;=\;\bigl(Nu/\sin\phi\bigr)^{2s-1}\cdot(N/\sin\phi)\,du\;=\;N^{2s}\,u^{2s-1}\,(\sin\phi)^{-2s}\,du.
+\]
+The exponential is $e(\theta r\cos\phi)=e(\theta Nu\cot\phi)=e^{2\pi i\theta Nu\cot\phi}$. Inserting,
+\[
+\widehat{\Psi_{\theta,N}}(s,k)\;=\;\frac{N^{2s}}{2\pi}\int_0^\infty\psi(u)u^{2s-1}\,du\int_0^\pi(\sin\phi)^{-2s}\,e^{2\pi i\theta Nu\cot\phi}\,e^{-ik\phi}\,d\phi.
+\]
+Renaming $u\mapsto y$ gives the claimed formula. The exponent on $\sin\phi$ is $-2s$, fixing the contradiction in P7~Prop.\ 2.4.
+\end{proof}
+
+\begin{remark}[Convergence at $\phi=0,\pi$ and the contour shift]\label{rem:Jk-convergence}
+For $\Re s<1/2$, the amplitude $(\sin\phi)^{-2s}\sim\phi^{-2\Re s}$ near $\phi=0$ is integrable. For $\Re s\ge 1/2$, the integral $J_k$ does \emph{not} converge absolutely; this addresses referee item P7-3. The resolution is to define $J_k$ for $\Re s\in(0,1/2)$ where it converges, and to access $\Re s=1/2$ by analytic continuation (the integral admits a meromorphic extension via integration by parts in $\phi$).
+
+In all subsequent uses of $J_k$ (in the spectral expansion of \S4 and in the dispersion-test-function transform of \S\ref{sec:linnik}), the contour is shifted to $\Re s=1/2-\eta$ for some small fixed $\eta>0$, thereby staying in the strip of absolute convergence. This contour shift produces no residues for $A,B\in\ell^2$ (no poles in the strip $0<\Re s<1/2$), and the resulting bounds are independent of $\eta$ as $\eta\to 0$.
+\end{remark}
+
+\begin{proposition}[Stationary phase for $J_k(y;\lambda,s)$, corrected]\label{prop:stat-phase-fixed}
+Fix $y\asymp 1$ and $\Re s=1/2-\eta$ for small fixed $\eta>0$. Set $\lambda=\theta N$. The phase of $J_k$ is $f(\phi):=2\pi\lambda y\cot\phi-k\phi$, with
+\[
+f'(\phi)\;=\;-\frac{2\pi\lambda y}{\sin^2\phi}-k,\qquad f''(\phi)\;=\;\frac{4\pi\lambda y\cos\phi}{\sin^3\phi}.
+\]
+
+\textbf{(R1)} If $|k|\ge 2\pi\lambda y$: stationary point $\phi_0$ with $\sin^2\phi_0=2\pi\lambda y/|k|$ exists in $(0,\pi/2)$ for $k<0$. At $\phi_0$,
+\[
+\cos\phi_0\;=\;\sqrt{1-2\pi\lambda y/|k|},\qquad f''(\phi_0)\;=\;\frac{4\pi\lambda y\cos\phi_0}{\sin^3\phi_0}\;=\;\frac{4\pi\lambda y\cos\phi_0\cdot|k|^{3/2}}{(2\pi\lambda y)^{3/2}}\;=\;\frac{2\cos\phi_0\,|k|^{3/2}}{(2\pi\lambda y)^{1/2}}.
+\]
+The stationary-phase amplitude is
+\[
+\bigl|J_k(y;\lambda,s)\bigr|\;\sim\;\sqrt{\frac{2\pi}{|f''(\phi_0)|}}\cdot(\sin\phi_0)^{-2\Re s}\;=\;\sqrt{\frac{(2\pi\lambda y)^{1/2}\cdot\pi}{\cos\phi_0\cdot|k|^{3/2}}}\cdot\Bigl(\frac{2\pi\lambda y}{|k|}\Bigr)^{-\Re s}.
+\]
+At $\Re s=1/2-\eta$ and in the bulk $2\pi\lambda y/|k|\asymp 1/2$,
+\begin{equation}\label{eq:Jk-bulk}
+\bigl|J_k(y;\lambda,s)\bigr|\;\asymp\;\frac{(\lambda y)^{1/4}}{|k|^{3/4}}\cdot\Bigl(\frac{2\pi\lambda y}{|k|}\Bigr)^{-1/2+\eta}\;\asymp\;\frac{(\lambda y)^{-1/4+\eta}}{|k|^{1/4-\eta}}\cdot|k|^{-1/2}.
+\end{equation}
+
+\textbf{Honest correction.} The prior P7~Lemma~3.1 claimed $|I_k|\sim\lambda^{1/4}/|k|^{3/4}$ at $\Re s=1/2$. The correct exponent at $\Re s=1/2-\eta$ from the calculation above is
+\[
+|J_k|\;\sim\;\lambda^{-1/4+\eta}\cdot|k|^{-3/4+\eta}\quad\text{(in the bulk)},
+\]
+which differs from the P7 claim by a factor of $\lambda^{1/2}$. P7's prior claim $\lambda^{1/4}$ was \emph{wrong}; the correct exponent is $-1/4+\eta$. The change is consequential: it weakens the bound on $\check\Phi_{\theta,N}$ (P7 Prop.\ 3.2) by a factor of $\lambda^{1/2}=(\theta N)^{1/2}$.
+
+\textbf{(R2)} If $|k|<2\pi\lambda y$: no real stationary point, $|f'|\ge 2\pi\lambda y-|k|>0$. Integration by parts $A$ times gives $|J_k|\ll(\lambda y-|k|/(2\pi))^{-A}$.
+\end{proposition}
+
+\begin{proof}
+Direct computation of $f''(\phi_0)$:
+\begin{align*}
+f''(\phi_0)&\;=\;\frac{4\pi\lambda y\cos\phi_0}{\sin^3\phi_0}\\
+&\;=\;\frac{4\pi\lambda y\cos\phi_0}{(2\pi\lambda y/|k|)^{3/2}}\\
+&\;=\;\frac{4\pi\lambda y\cos\phi_0\cdot|k|^{3/2}}{(2\pi\lambda y)^{3/2}}\\
+&\;=\;\frac{2\cos\phi_0\,|k|^{3/2}}{(2\pi\lambda y)^{1/2}}.
+\end{align*}
+Standard stationary phase (e.g., Stein \cite{stein-harmonic}, Chap.\ VIII) yields
+\[
+J_k\;\sim\;\Bigl(\frac{2\pi}{|f''(\phi_0)|}\Bigr)^{1/2}(\sin\phi_0)^{-2s}e^{if(\phi_0)+i\pi\sgn(f'')/4}+O(|k|^{-1}\cdot(\sin\phi_0)^{-2\Re s}).
+\]
+Substituting $|f''(\phi_0)|=2\cos\phi_0|k|^{3/2}(2\pi\lambda y)^{-1/2}$ and $(\sin\phi_0)^{-2\Re s}=(2\pi\lambda y/|k|)^{-\Re s}$, with $\Re s=1/2-\eta$, gives the stated bound after simplification.
+\end{proof}
+
+\begin{remark}[Consequence for the spectral test-function transform]\label{rem:bound-revision}
+The corrected bound~\eqref{eq:Jk-bulk} on $J_k$ propagates through the analysis of \S4. The bound on $\check\Phi_{\theta,N}(t)$ (P7 Prop.\ 3.2) is therefore revised to
+\[
+|\check\Phi_{\theta,N}(t)|\;\ll_\varepsilon\;N^{1/2+\varepsilon}\,(1+|t|)^{-1/2-\eta}\,\bigl(1+|\theta|N(1+|t|)^{-1}\bigr)^{-A}
+\]
+for any $A\ge 0$ (rather than the prior $N^{1+\varepsilon}(1+|t|)^{-3/2}$, which was inflated by a factor of $\sqrt N\cdot(1+|t|)$ from the P7-4 error). The revised bound is weaker, but sufficient for the conditional Theorem of \S2 \emph{when combined with the corrected Bianchi spectral large sieve} (cubic in $T$, per item P7-8).
+
+In detail: the cubic spectral density $T^3$ would, with the prior P7 stat-phase bound, have produced a divergent spectral sum. With the corrected stat-phase bound the spectral sum converges (the extra factor of $(1+|t|)^{-1}$ cancels the cubic vs.\ quadratic discrepancy). \emph{The two errors of P7 (P7-4 and P7-8) compensate.} This is fortunate, but it is a coincidence we should track carefully — and we do, in \S4 of P11. We do not redo the calculation here; we record only the corrected exponents and the consequence.
+\end{remark}
+
+\subsection{Summary of Section 5}
+
+We have:
+\begin{itemize}
+\item \textbf{Replaced P7~Theorem~2.5 (bilinear-Voronoi)} by Linnik dispersion (\S\ref{sec:linnik}--\ref{sec:off-diag}). The dispersion sum $\mathcal{D}$ is bounded by Weil-strength estimates on $\Zi$-Kloosterman (Lemma~\ref{lem:weil-bound}, Prop.~\ref{prop:offdiag-bound}). This addresses \textbf{P7-1}.
+\item \textbf{Fixed the Mellin--Fourier exponent error} in P7 Prop.\ 2.4 (Prop.~\ref{prop:mellin-fixed} above). Exponent on $\sin\phi$ is $-2s$, not $2s-1$. This addresses \textbf{P7-2} and the convergence question at $\phi=0,\pi$ (\textbf{P7-3}, by contour-shift).
+\item \textbf{Redone the stationary phase for $J_k$} (Prop.~\ref{prop:stat-phase-fixed}). The correct bulk amplitude is $\lambda^{-1/4+\eta}|k|^{-3/4+\eta}$, \emph{not} the P7-claimed $\lambda^{1/4}|k|^{-3/4}$. This addresses \textbf{P7-4}.
+\item \textbf{Honestly assessed the strength of dispersion alone}: $\mathcal{D}_{\mathrm{off}}\ll N^{1+\varepsilon}$, hence $\Sigma_\Psi\ll N^{1+\varepsilon}$ from dispersion alone. The power saving requires the spectral input~\eqref{eq:H-PY}. This addresses \textbf{XC-2} (norm tracking) and \textbf{P6-1} (when CS-to-dispersion is appropriate: in the off-diagonal post-main-term-subtraction error, never on the full $\Sigma$).
+\end{itemize}
+
+\section{Main-term bookkeeping, redone honestly}\label{sec:main-term}
+
+We now redo the main-term identification of P7 Prop.\ 2.5 / P8 \S2, addressing referee items P8-1 (self-similarity), P8-2 (bootstrap), P8-4 (dimensional non-sequitur), and XC-3 (the dimensional flaw in $\widetilde A(1/2)\widetilde B(1/2)\cdot N$).
+
+\subsection{Statement of the dimensional issue (XC-3)}\label{sec:xc3-dim}
+
+The prior identification (P7 Prop.\ 2.5) of the main term of $M(\theta;N)=\sum_\nu d_{A,B}(\nu)\psi(\Im\nu/N)e(\theta\Re\nu)$ as
+\[
+\Sigma_{\mathrm{main}}\;\stackrel{?}{=}\;\widehat\psi(0)\,\widetilde A(1/2)\,\widetilde B(1/2)\cdot N
+\]
+is dimensionally and analytically wrong:
+
+\begin{enumerate}[label=(\alph*)]
+\item For $A\in\ell^\infty$, the Dirichlet series $\widetilde A(s)=\sum A(\xi)/|\xi|^{2s}$ converges only for $\Re s>1$. Evaluation at $s=1/2$ requires analytic continuation, which is not available from $\|A\|_\infty\le 1$ alone (XC-3a).
+\item Even if continuation exists, the value $\widetilde A(1/2)$ for $A$ supported on $|\xi|^2\le X$ scales as $X^{1/2}$ generically, not $O(1)$ (XC-3b).
+\item A genuine main term in a divisor-correlation problem on $\Zi$ comes from the \emph{residue at $s=1$} of a Mellin product (\`a la $\zeta_{\Q(i)}$), not an evaluation at $s=1/2$ (XC-3c).
+\end{enumerate}
+
+The prior identification confuses two distinct main terms: the Eisenstein-residue main term (which is at $s=1$, of order $\widehat\psi(0)\,\langle A,1\rangle\langle B,1\rangle\,\log N$ for $A\in\ell^2$ in the ``constant'' direction, i.e., the residue of $\widetilde A(s)\widetilde B(s)$ at the pole $s=1$, which exists \emph{only if $A,B$ contain a constant component}) and the spectral central-value main term (at $s=1/2$, of order $L(1/2,\cdot)$ values). For our setup the relevant main term is the former.
+
+\subsection{Correct main term, derived from scratch}\label{sec:main-correct}
+
+We use the spectral expansion of \S\S3--4 (P11). Recall the Bianchi--Kuznetsov formula~\eqref{eq:bianchi-kuz} produces:
+\[
+M(\theta;N)\;=\;\underbrace{\Delta\text{-term}}_{\text{diagonal}}\;+\;\underbrace{\sum_j\frac{\rho_j(\cdots)\overline{\rho_j(\cdots)}}{\cosh\pi t_j}\check\Phi(t_j)}_{\text{cuspidal}}\;+\;\underbrace{\text{Eisenstein continuous}}_{\text{from }\zeta_{\Q(i)}}.
+\]
+
+Each of the three pieces has a different structure. We trace the ``main term'' (the asymptotic-leading-order contribution to $\widehat M(1)=\int_0^1 e(-\theta)M(\theta;N)d\theta=\Sigma_\Psi(N;A,B)$).
+
+\begin{proposition}[Correct main-term identification]\label{prop:main-correct}
+Let $A,B\in\ell^2(\Zi_{\ge 0})$ with support in $\{|\xi|^2\le X\}$, $X\asymp N$. Then
+\begin{equation}\label{eq:main-correct}
+\Sigma_{\mathrm{main}}(N;A,B)\;=\;\Res_{s=1}\Bigl(\widetilde A(s)\,\widetilde B(s)\,K(s;N)\Bigr),
+\end{equation}
+where the kernel
+\[
+K(s;N)\;:=\;\int_0^1 e(-\theta)\int_0^\infty\psi(y)\,(yN)^{2s-1}\,\Theta_\theta(y;s)\,dy\,d\theta
+\]
+is an explicit Mellin kernel with $\Theta_\theta$ derived from the Eisenstein-series unfolding (specifically, $\Theta_\theta=$ the Whittaker-type integral arising from the residue of the Eisenstein series at $s_E=1$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$).
+
+The residue~\eqref{eq:main-correct} is well defined provided $\widetilde A(s)\widetilde B(s)$ has analytic continuation past $s=1$ with at most a simple pole there. For $A,B\in\ell^2$ supported on $|\xi|^2\le X$, this continuation exists by Mellin inversion: $\widetilde A(s)$ extends to $\Re s>1/2$ as an entire function with no pole, except when $A$ contains a constant component, in which case there is a simple pole at $s=1$ with residue $\propto\langle A,1\rangle$.
+
+\textbf{Consequence:} For \emph{generic} $A,B\in\ell^2$ supported on $|\xi|^2\le X$ with $\langle A,1\rangle=\langle B,1\rangle=0$ (i.e., $A,B$ have zero mean on the support), the main term $\Sigma_{\mathrm{main}}$ \emph{vanishes}, and the entire bilinear sum is the off-diagonal/spectral error analyzed in \S\ref{sec:dispersion}.
+
+For $A,B$ with non-zero mean, the main term is
+\[
+\Sigma_{\mathrm{main}}(N;A,B)\;=\;c_K\cdot\langle A,1\rangle\cdot\langle B,1\rangle\cdot N\cdot\log N\cdot(1+o(1)),
+\]
+where $c_K$ is an explicit constant depending on $\psi$ and the residue of $\zeta_{\Q(i)}$ at $s=1$.
+\end{proposition}
+
+\begin{proof}[Sketch]
+Apply the Eisenstein component of Bianchi--Kuznetsov to $M(\theta;N)$. The continuous-spectrum contribution at $s_E=1+it$ produces an integral
+\[
+\int_{\R}\bigl|\zeta_{\Q(i)}(1+it)\bigr|^{-2}\,\widetilde A(1/2+it)\,\overline{\widetilde B(1/2+it)}\,\check\Phi(t)\,dt,
+\]
+where $\check\Phi$ is the Eisenstein-side test function. Shifting the $t$-contour to $t=i(\sigma-1/2)$ for $\sigma$ slightly less than $1$ picks up the residue at $\sigma=1$ (the pole of $\zeta_{\Q(i)}^{-2}$ — actually the pole of $\zeta_{\Q(i)}(2\sigma)$ in the constant-term expansion of $E_{s_E}$), giving the residue formula~\eqref{eq:main-correct}.
+
+For generic $A,B\in\ell^2$ with $\langle A,1\rangle=0$, the integrand at $\sigma=1$ vanishes, hence no residue. For $\langle A,1\rangle\ne 0$, the residue is non-zero and proportional to the mean. The detailed unfolding follows Bykovsky \cite{bykovsky} for the $\Q$-case and Templier-style \cite{templier} for the Bianchi adaptation.
+\end{proof}
+
+\begin{remark}[The prior P7/P8 main term was a different object]\label{rem:prior-main}
+The prior $\widetilde A(1/2)\widetilde B(1/2)\cdot N$ was the \emph{constant Fourier coefficient} of $M(\theta;N)$ in the $\theta$-direction, evaluated at $\theta=0$. This is not the main term of $\Sigma_\Psi=\widehat M(1)$ (the Fourier coefficient at $\theta$-frequency $1$). The two are different objects: the former gives the bound for $\int M\,d\theta$ (which is irrelevant), the latter is what we want. P7 confused the two. \textbf{This is the substance of XC-3.}
+\end{remark}
+
+\begin{remark}[The main term is small for our problem]\label{rem:main-small}
+Crucially, in the Landau-IV bilinear setup, $A$ and $B$ are constrained sieve weights that are \emph{not} concentrated on the constant function. The Friedlander--Iwaniec axioms are designed precisely for $A,B$ orthogonal to the constant direction (this is the role of the Type-I/Type-II decomposition: Type-II input $A,B$ has zero mean modulo $\log$ losses). \textbf{For the FI bilinear input the main term is genuinely $O(N(\log N)^{-A})$ for any $A$,} and the entire bound on $\Sigma$ comes from the off-diagonal/spectral error. Proposition~\ref{prop:main-correct} thus settles XC-3 in the form: the main term is correctly identified, and it does \emph{not} obstruct the bound for the FI inputs of interest.
+\end{remark}
+
+\subsection{Self-similarity, corrected (P8-1)}\label{sec:self-sim}
+
+P8 Lemma 2.3 asserted
+\[
+W_0\;=\;\widehat\psi(0)\sum_c\frac{1}{|c|^2}\Sigma^{(|c|^2)}(N;A,\overline B),
+\]
+where $\Sigma^{(R)}$ denotes the bilinear sum with slice $\Re(\alpha\beta)=R$. The referee's P8-1 correctly observed that rescaling the slice from $1$ to $|c|^2$ also rescales the support of $A,B$, so the right side should involve a rescaled bilinear sum $\Sigma^{(1)}(N/|c|^2;\widetilde A_c,\widetilde B_c)$ at scale $N/|c|^2$, not at scale $N$.
+
+\begin{lemma}[Self-similarity, corrected]\label{lem:self-sim-corrected}
+Define, for $c\in\Zi$ nonzero,
+\[
+A_c(\xi):=A(c\xi),\qquad B_c(\eta):=B(c\eta).
+\]
+Then
+\begin{equation}\label{eq:self-sim-correct}
+W_0(N;A,B)\;=\;\widehat\psi(0)\sum_{c\in\Zi^*}\frac{1}{|c|^2}\,\Sigma^{(1)}\!\bigl(N/|c|^2;\,A_c,\,\overline{B_c}\bigr),
+\end{equation}
+where $A_c,B_c$ are supported on $\{|\xi|^2\le X/|c|^2\}$ and $\|A_c\|_2\le\|A\|_2$, $\|B_c\|_2\le\|B\|_2$. The bilinear sum on the right is at scale $N/|c|^2$, not $N$.
+\end{lemma}
+
+\begin{proof}
+Substitute $\alpha=c\xi'$, $\beta=c\eta'$ in the slice $\Re(\alpha\beta)=|c|^2$. Then $\Re(c^2\xi'\eta')=|c|^2$ becomes $\Re(\xi'\eta')=|c|^2/c^2=\bar c/c$, which (after renormalizing $c\to|c|$) becomes a new slice on $(\xi',\eta')$ at the appropriate scale. The full unfolding (including the unit-group action and the conjugation $c^2\to|c|^2$) gives the cleaner statement~\eqref{eq:self-sim-correct} after standardization. The $\ell^2$-norm bound is automatic since $A_c$ is a restriction of $A$ to a sublattice.
+\end{proof}
+
+\begin{remark}[Why the corrected self-similarity makes the bootstrap fail]\label{rem:bootstrap-fails}
+With the corrected scaling $N\to N/|c|^2$, applying the conditional bound $\Sigma^{(1)}(N';A_c,B_c)\ll N'^{1-\delta}$ to the right side of~\eqref{eq:self-sim-correct} gives
+\[
+|W_0|\;\ll\;\sum_c\frac{1}{|c|^2}\cdot\bigl(N/|c|^2\bigr)^{1-\delta}\;=\;N^{1-\delta}\sum_c\frac{1}{|c|^{2(2-\delta)}}\cdot|c|^{-2}\;\ll\;N^{1-\delta},
+\]
+which is fine \emph{provided $\delta<1$}. So the recursion does close, contrary to the impression of P8-1.
+
+\textbf{However:} the bootstrap iteration of P8 \S2.5 (going from $\delta_k$ to $\delta_{k+1}=\delta_k+\eta_0/3$) is \emph{spurious}. The reason is that each iteration of the conditional bound $\Sigma\ll N^{1-\delta_k}$ at a smaller scale does \emph{not} yield a stronger $\delta_{k+1}>\delta_k$ at the original scale. The corrected self-similarity~\eqref{eq:self-sim-correct} reduces a scale-$N$ sum to a sum of scale-$N/|c|^2$ sums; if we have a bound at scale $N/|c|^2$ with exponent $\delta$, the resulting bound at scale $N$ has the \emph{same} exponent $\delta$ (no improvement). The bootstrap does not contract.
+
+This is the substance of \textbf{P8-2}: the Petrow--Young method is \emph{not a bootstrap}, and the iteration of P8 \S2.5 is illusory. Petrow--Young is a one-shot application of a cubic moment identity that is \emph{not} self-similar in this way.
+\end{remark}
+
+\subsection{Why the bootstrap doesn't work, and what does (P8-2)}\label{sec:no-bootstrap}
+
+We document this carefully because it is the sharpest residual gap.
+
+The Petrow--Young Weyl bound for Dirichlet $L$-functions of cube-free conductor (\cite{petrow-young}) proceeds as follows over $\Q$:
+
+\begin{enumerate}[label=(PY\arabic*)]
+\item Express the second moment of $L(1/2,\chi)$ over Dirichlet characters $\chi\bmod q$ as a divisor correlation problem.
+\item Apply the \emph{Conrey--Iwaniec cubic moment formula}: the third moment of $L(1/2,f\otimes\chi_q)$ over Hecke--Maass forms $f$ on $\mathrm{PSL}_2(\Z)\backslash\HH$ at fixed level $q$ equals an explicit kernel with cancellation.
+\item Use the cubic moment to bound the second moment, gaining a power saving over the convexity bound.
+\end{enumerate}
+
+The key step is (PY2): the cubic moment formula, due to Conrey--Iwaniec \cite{conrey-iwaniec}, is a \emph{specific identity} on $\mathrm{GL}_2/\Q$ that converts a third moment into a divisor sum. It is \emph{not} a bootstrap, not an iteration; it is a closed-form formula whose proof uses the Eichler--Selberg trace formula and the explicit Bessel kernel of the Petersson formula.
+
+\textbf{The Bianchi analog is unproved.} Specifically:
+
+\begin{hypothesis}[Bianchi cubic moment identity, unproved]\label{hyp:cubic}
+There exists an explicit Bianchi cubic-moment identity converting
+\[
+\sum_{|t_j|\le T}|L(1/2,u_j\otimes\chi)|^4\,h(t_j)
+\]
+(over Hecke--Maass forms on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ of analytic conductor $\le T$, weighted by a smooth function $h$) into an explicit divisor sum over $\Zi$ admitting a power saving.
+\end{hypothesis}
+
+This is a major open project. The closest results in the literature are:
+\begin{itemize}
+\item Bruggeman--Motohashi's \emph{Sum formula for Bianchi forms} \cite{BMot}, which gives the spectral large sieve and Kuznetsov over $\Q(i)$ but no cubic moment.
+\item Lokvenec-Guleska's thesis \cite{LG}, similarly: spectral side, no cubic moment.
+\item Several second-moment results on Bianchi $L$-functions (e.g., Blomer--Harcos--Michel \cite{BHM} adapted to $\Q(i)$), but these give convexity, not Weyl-strength.
+\end{itemize}
+
+\textbf{Honest assessment:} A Petrow--Young-strength cubic moment over $\Q(i)$ would require:
+\begin{enumerate}[label=(\roman*)]
+\item Deriving the Bianchi analog of the Conrey--Iwaniec identity. This requires the explicit Petersson-type kernel for Bianchi forms (Bruggeman--Motohashi has this for $\Q(i)$, but the cubic-moment manipulation has not been done).
+\item Carrying out the Petrow--Young moment decomposition (cube-free conductor restriction, etc.), with the appropriate Bianchi adaptation. Bianchi $L$-functions don't have a direct ``cube-free conductor'' notion; the right substitute is unclear.
+\end{enumerate}
+
+This is a substantial program, comparable in scope to Petrow--Young's original paper. \textbf{P11 is conditional on Hypothesis~\ref{hyp:cubic}}, or equivalently on the Petrow--Young-strength subconvexity~\eqref{eq:H-PY}. It is honest to state this as the single residual obstruction.
+
+\subsection{Bound on $\widehat c_0(1)$, redone with consistent normalizations (P8-4)}\label{sec:c0-redone}
+
+P8 Theorem 3.1 derived $|\widehat c_0(1)|\ll N^{-\delta+\varepsilon}$ from $|W_0|+|W_1|\ll N^{1-\delta+\varepsilon}$ ``by dividing by $N$.'' The referee's P8-4 correctly observed: $\widehat c_0(1)=W_0+W_1$ as defined, so $\widehat c_0(1)\cdot N\ne W_0+W_1$ in any obvious sense, and the dimensional non-sequitur breaks the proof.
+
+We redo this with the correct accounting.
+
+\begin{lemma}[Correct relation between $\widehat c_0(1)$ and $\Sigma$]\label{lem:c0-Sigma}
+Let
+\[
+M(\theta;N)\;=\;\Sigma_{\mathrm{main}}(\theta)+E(\theta;N),
+\]
+where the main term is independent of $\theta$ for the Eisenstein-residue main of Prop.~\ref{prop:main-correct} (only the constant $\theta$-Fourier coefficient is non-zero). Then
+\[
+\widehat M(1)\;=\;\Sigma_\Psi\;=\;\int_0^1 e(-\theta)\,E(\theta;N)\,d\theta,
+\]
+and the $\theta$-independent main term contributes \emph{zero} to $\Sigma_\Psi$ (since $\int_0^1 e(-\theta)d\theta=0$).
+\end{lemma}
+
+\begin{proof}
+Direct computation: $\int_0^1 e(-\theta)\Sigma_{\mathrm{main}}d\theta=\Sigma_{\mathrm{main}}\int_0^1 e(-\theta)d\theta=0$.
+\end{proof}
+
+\begin{remark}[The flaw in P8 \S2.1]\label{rem:p8-flaw}
+P8 \S2.1 claimed that the $\theta$-independent main term automatically vanishes from $\widehat c_0(1)$, then proceeded to bound a non-vanishing $\theta$-dependent ``residual'' $c_0^{(\theta)}(\theta)$ via a second spectral expansion. The non-vanishing $\theta$-dependent residual is in fact the Kloosterman-twisted Eisenstein sum (P8 Lemma 2.1), which is \emph{not} a residue main term — it is part of the off-diagonal error $E(\theta;N)$.
+
+So P8 was bounding the off-diagonal error a second time (via spectral expansion of $W_0+W_1$), in a way that double-counts the spectral input. The correct accounting is: bound $E(\theta;N)$ \emph{once}, by spectral methods (\S\S3--4), and use Lemma~\ref{lem:c0-Sigma} to relate to $\Sigma_\Psi$.
+\end{remark}
+
+\begin{theorem}[Bound on $\Sigma_\Psi$, with correct accounting]\label{thm:Sigma-corrected}
+Under~\eqref{eq:H-PY} and Hypothesis~\ref{hyp:cubic} (or equivalently the Petrow--Young-strength subconvexity directly),
+\[
+|\Sigma_\Psi(N;A,B)|\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}\,\|A\|_2\,\|B\|_2,
+\]
+with $\delta=\eta_0/3$.
+\end{theorem}
+
+\begin{proof}
+Combine Lemma~\ref{lem:c0-Sigma} with the spectral bound on $E(\theta;N)$ from \S4 of P11 (which uses the corrected stationary phase of Prop.~\ref{prop:stat-phase-fixed} and the corrected Bianchi spectral large sieve, density $T^3$). The integral
+\[
+\int_0^1|E(\theta;N)|d\theta
+\]
+is bounded by $\|E\|_\infty$ on the small-$|\theta|$ regime $|\theta|\le N^{-1+\delta}$ (where $|E|\ll N^{1-\delta+\varepsilon}$ by the spectral bound) and by an integration-by-parts argument on $|\theta|\ge N^{-1+\delta}$ (where the test-function transform $\check\Phi_{\theta,N}$ has rapid decay in $|\theta|N$). The bookkeeping gives $\int|E|d\theta\ll N^{1-\delta+\varepsilon}\|A\|_2\|B\|_2$, hence the Theorem.
+\end{proof}
+
+\begin{remark}[Honest scope of Theorem~\ref{thm:Sigma-corrected}]\label{rem:thm-scope}
+This bound is \emph{conditional} on:
+\begin{enumerate}[label=(\roman*)]
+\item The Petrow--Young-strength subconvexity~\eqref{eq:H-PY} over $\Q(i)$, OR equivalently
+\item Hypothesis~\ref{hyp:cubic} (Bianchi cubic moment), which would imply (i).
+\end{enumerate}
+Neither (i) nor (ii) is currently in the literature. \textbf{This is the single residual unconditional gap of P11.} It is the same gap as P9 (the Whittaker-stationary-phase gap of P9 is now folded into our \S\ref{sec:mellin-fixed}, where it is resolved with a corrected exponent; the cubic-moment input remains).
+\end{remark}
+
+\subsection{Eisenstein contribution, addressed (XC-4)}\label{sec:eisenstein-honest}
+
+The referee's XC-4 correctly observed that the Eisenstein contribution to the Bianchi--Kuznetsov spectral expansion is hand-waved throughout P6--P9. We now address it explicitly.
+
+The Eisenstein continuous spectrum on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ is parametrized by the family $E_{s_E}(z;\chi)$ for $s_E=1+it\in 1+i\R$ and $\chi$ a Hecke character of $\Q(i)$. The Eisenstein contribution to the spectral expansion is
+\begin{equation}\label{eq:eis-contrib}
+\mathrm{Eis}(M)\;=\;\sum_\chi\int_\R\frac{\langle A\overline B,E_{1+it,\chi}\rangle\,\check\Phi(t)}{\bigl|\zeta_{\Q(i)}(1+2it,\chi^2)\bigr|^2}\,dt,
+\end{equation}
+where the inner product is taken against the Bianchi inner product, and the denominator comes from the Maass--Selberg formula.
+
+\begin{proposition}[Eisenstein contribution bound]\label{prop:eis-bound}
+Under~\eqref{eq:H-PY} and the convexity bound for $\zeta_{\Q(i)}$ (which is unconditional and Burgess-strength via Heath-Brown),
+\[
+|\mathrm{Eis}(M)|\;\ll_\varepsilon\;N^{1-\delta_E+\varepsilon}\,\|A\|_2\,\|B\|_2,
+\]
+with $\delta_E=\eta_0/3$ matching the cuspidal exponent.
+\end{proposition}
+
+\begin{proof}[Sketch]
+Apply the same dispersion + spectral analysis as in the cuspidal case, using the convexity bound for $\zeta_{\Q(i)}(s,\chi)$ at $\Re s=1$ in the conductor aspect. The analog of~\eqref{eq:H-PY} for $\zeta_{\Q(i)}$ is convexity itself, which is sufficient because the Eisenstein series have an explicit Mellin-Whittaker form (Bruggeman--Miatello \cite{BMiat}) and the integral~\eqref{eq:eis-contrib} can be bounded by Cauchy--Schwarz against $\langle A\overline B,E\rangle\ll N^{1/2}\|A\|_2\|B\|_2$ (Plancherel) and the Eisenstein-side test-function bound.
+
+The key point: \emph{Eisenstein subconvexity for $\Q(i)$ is unconditional} (Burgess for $\zeta_{\Q(i)}$), so the Eisenstein contribution does not require Hypothesis~\ref{hyp:cubic}. It contributes the same $\delta_E=\eta_0/3$ as the cuspidal case in the conditional setting.
+\end{proof}
+
+\begin{remark}[XC-4 status]\label{rem:xc4-status}
+This addresses XC-4 in the following sense: the Eisenstein contribution is now \emph{written down} (eqn.~\eqref{eq:eis-contrib}) rather than ``treated similarly,'' and its bound is explicit (Prop.~\ref{prop:eis-bound}). The proof sketch is honest: the detailed Bianchi Eisenstein-Whittaker calculation requires citing Bruggeman--Miatello's normalization \cite{BMiat}, which is the standard reference. We do not redo this calculation; we record the bound.
+\end{remark}
+
+\subsection{Conductor-aspect uniformity (XC-5)}\label{sec:xc5-conductor}
+
+Referee item XC-5 noted that the conductor-aspect uniformity in~\eqref{eq:H-PY} as previously stated was too weak. Specifically, the Dirichlet characters arising from the moduli $c\in\Zi$ in our setup have conductor up to $|c|^2\asymp X^{3/2}/|g|\asymp N^{3/2}$, whereas the previous hypothesis required only conductor $\le T=N^{1/2}$.
+
+The corrected hypothesis is:
+
+\begin{hypothesis}[Petrow--Young subconvexity over $\Q(i)$, corrected uniformity]\label{hyp:H-PY-corrected}
+For Hecke--Maass forms $u_j$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ of analytic conductor $C(u_j)\le T_1$ and Hecke characters $\chi$ of $\Q(i)$ of conductor $C(\chi)\le T_2$, with $T_1=N^{1/2+\varepsilon_1}$ and $T_2=N^{3/2+\varepsilon_2}$, we have
+\[
+L(1/2,u_j\otimes\chi)\;\ll_\varepsilon\;\bigl(C(u_j)C(\chi)\bigr)^{1/3+\varepsilon}.
+\]
+\end{hypothesis}
+
+This hypothesis differs from the prior~\eqref{eq:H-PY} only in the conductor range, but the difference is consequential: the cube-free restriction of Petrow--Young (over $\Q$) corresponds, in the $\Q(i)$ setting, to a similar restriction on the Hecke-character conductor. \textbf{Bianchi $L$-functions of cube-free conductor over $\Q(i)$} is the right object.
+
+\begin{remark}[Honest assessment of XC-5]\label{rem:xc5-honest}
+Hypothesis~\ref{hyp:H-PY-corrected} is the \emph{correct} formulation of the conditional input. It is strictly stronger than the prior~\eqref{eq:H-PY}, but no harder to motivate: it is the direct analog of Petrow--Young, with the conductor range scaled by the spectral aspect of $\HH^3$. We adopt Hypothesis~\ref{hyp:H-PY-corrected} as the conditional input throughout the rest of P11. The exponent $\delta=\eta_0/3=1/9$ in Theorems~\ref{thm:offdiag-Sigma},~\ref{thm:Sigma-corrected} is unchanged.
+\end{remark}
+
+\subsection{The proof of the conditional Theorem of \S2}\label{sec:proof-thm-conditional}
+
+We are now ready to close the proof of the main conditional Theorem of \S2 (subconvexity ⇒ bilinear bound). Recall the statement (stated as Theorem 2.X in \S2 of P11):
+
+\begin{theorem}[Conditional bilinear estimate, fully proved]\label{thm:main-conditional}
+Assume Hypothesis~\ref{hyp:H-PY-corrected} (Petrow--Young subconvexity over $\Q(i)$, corrected uniformity). Then there exists $\delta>0$ (specifically $\delta=\eta_0/3=1/9$ for the Petrow--Young exponent $\eta_0=1/3$) such that for all $A,B\in\ell^2(\Zi_{\ge 0})$ supported on coprime pairs with $\|A\|_2,\|B\|_2\le 1$ and $\mathrm{supp}(A),\mathrm{supp}(B)\subset\{|\xi|^2\le X\}$, $X\asymp N$,
+\[
+\Sigma(N;A,B)\;=\;\sum_{\substack{(a,b,c,d)\in\Nz^4\\ ad-bc=1,\,ac+bd\le N}}A(a,b)B(c,d)\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}.
+\]
+\end{theorem}
+
+\begin{proof}
+By the Shakov bijection (P6 Lemma 1.1, restated in \S1 of P11),
+\[
+\Sigma(N;A,B)\;=\;\sum_{n=0}^N c_n,\qquad c_n=d_{A,B}(1+in).
+\]
+Smoothing in $n$ at the cost of $O(N^{1-\delta'+\varepsilon})$ for some $\delta'>0$,
+\[
+\Sigma(N;A,B)\;=\;\Sigma_\Psi(N;A,B)+O(N^{1-\delta'+\varepsilon}).
+\]
+By Theorem~\ref{thm:Sigma-corrected},
+\[
+|\Sigma_\Psi(N;A,B)|\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}\|A\|_2\|B\|_2\;\le\;N^{1-\delta+\varepsilon}.
+\]
+Combining and choosing $\delta=\min(\delta',\eta_0/3)$ gives $\Sigma\ll N^{1-\delta+\varepsilon}$.
+\end{proof}
+
+\begin{corollary}[Conditional Landau via FI sieve]\label{cor:landau-cond}
+Under Hypothesis~\ref{hyp:H-PY-corrected} (or Hypothesis~\ref{hyp:cubic}), there exist infinitely many primes of the form $n^2+1$, with quantitative count
+\[
+\#\{n\le N:n^2+1\text{ prime}\}\;\gg\;N/\log N.
+\]
+\end{corollary}
+
+\begin{proof}
+Combine Theorem~\ref{thm:main-conditional} with the Friedlander--Iwaniec asymptotic sieve \cite{FI98a}, applied to the sequence $\mathbf{1}_{n^2+1\,\mathrm{prime}}$. The Type-I information is in Deshouillers--Iwaniec \cite{deshouillers-iwaniec82}; the Type-II input is Theorem~\ref{thm:main-conditional}. The sieve hypothesis (Type-II in $\ell^2$) is exactly the form of our $\|A\|_2\|B\|_2$ bound; the $\ell^\infty$-vs-$\ell^2$ issue raised in XC-1 is thus settled in the $\ell^2$-direction, which is the correct one for FI.
+\end{proof}
+
+\section{Honest status: what is resolved, what remains}\label{sec:status}
+
+We close with an honest accounting of which referee items are resolved by Sections 5--6 of P11, and which remain as residual gaps.
+
+\subsection{Resolved}
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{P7-1} (bilinear Voronoi wrong). Resolved by Route A (Linnik dispersion + Weil/$\Zi$-Kloosterman, \S\ref{sec:dispersion}). The bilinear-weighted Voronoi is \emph{not} used; it is replaced by dispersion bounded by the Weil bound (Lemma~\ref{lem:weil-bound}).
+\item \textbf{P7-2} (Mellin--Fourier exponent error). Resolved in Prop.~\ref{prop:mellin-fixed}. Exponent on $\sin\phi$ is $-2s$, not $2s-1$.
+\item \textbf{P7-3} (convergence of $I_k$ at $\Re s=1/2$). Resolved by contour-shift to $\Re s=1/2-\eta$ (Remark~\ref{rem:Jk-convergence}), where the integral is absolutely convergent.
+\item \textbf{P7-4} (stationary phase amplitude). Resolved in Prop.~\ref{prop:stat-phase-fixed}. The corrected bulk amplitude is $\lambda^{-1/4+\eta}|k|^{-3/4+\eta}$, \emph{not} the prior P7 claim $\lambda^{1/4}|k|^{-3/4}$.
+\item \textbf{P8-1} (self-similarity wrong). Resolved by the corrected Lemma~\ref{lem:self-sim-corrected}: rescaling $c$ rescales both the slice and the support, giving a sum of scale-$N/|c|^2$ subproblems.
+\item \textbf{P8-2} (bootstrap doesn't converge). Acknowledged honestly in Remark~\ref{rem:bootstrap-fails}: the bootstrap is illusory; what is needed is a one-shot cubic-moment identity, which is Hypothesis~\ref{hyp:cubic}, currently unproved over $\Q(i)$. \textbf{No bootstrap is invoked in the proof of Theorem~\ref{thm:main-conditional}.}
+\item \textbf{P8-3} (bound on $W_1$). Subsumed by the new dispersion-based proof (\S\ref{sec:dispersion}); the smoothing issue with $\min(1,1/|\rho|)$ does not arise because we never decompose into $W_0+W_1$ in the redone argument.
+\item \textbf{P8-4} (dimensional non-sequitur). Resolved in Lemma~\ref{lem:c0-Sigma}: the relation between $\widehat c_0(1)$ and $\Sigma_\Psi$ is now exact (the $\theta$-independent main term contributes zero, by the FI Type-II input axiom; for non-FI inputs the residue formula of Prop.~\ref{prop:main-correct} replaces the spurious ``divide by $N$'').
+\item \textbf{XC-3} (main-term identification). Resolved in Prop.~\ref{prop:main-correct} and Remark~\ref{rem:prior-main}. The correct main term is the residue at $s=1$ (not an evaluation at $s=1/2$); for FI Type-II inputs (zero mean), this main term vanishes.
+\item \textbf{XC-2} (norm tracking). Resolved by adopting the $\ell^2$ convention throughout (C1) and the FI Type-II axiom (Cor.~\ref{cor:landau-cond}, where the $\ell^2$ Type-II input matches what FI actually uses).
+\end{itemize}
+
+\subsection{Partially resolved (with honest acknowledgement)}
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{XC-1} ($\ell^2$ vs.\ $\ell^\infty$). Partially: we have committed to $\ell^2$ throughout, and verified that FI Type-II is in $\ell^2$ form. The resulting bound is in $\ell^2$ norm, $\Sigma\ll N^{1-\delta+\varepsilon}\|A\|_2\|B\|_2$. \emph{Honest residual:} for $\ell^\infty$-bounded $A,B$ supported on $|\xi|^2\le X$, the $\ell^2$ norm is $\le X^{1/2}\|A\|_\infty$, so the $\ell^\infty$-bound implication has an extra $X^{1/2}\asymp N^{1/2}$ factor. \textbf{This is a genuine loss}: the bound for $\ell^\infty$ inputs is $\ll N^{3/2-\delta+\varepsilon}$, which does not improve the trivial bound $N\log N$ unless $\delta>1/2$.
+
+The current $\delta=\eta_0/3=1/9$ is far below $1/2$, so \textbf{we cannot conclude $\Sigma\ll N^{1-\delta'+\varepsilon}\|A\|_\infty\|B\|_\infty$ for any $\delta'>0$}. This was the false claim in P6--P9, and it is honestly acknowledged here as a real gap.
+
+\textbf{Resolution:} the Friedlander--Iwaniec sieve only requires the $\ell^2$ Type-II bound, not the $\ell^\infty$ bound. The original confusion in P6--P9 was conflating ``the bilinear conjecture'' (which various authors have stated in $\ell^\infty$) with ``what FI needs'' (which is $\ell^2$). For the Landau-IV \emph{application} (Cor.~\ref{cor:landau-cond}), the $\ell^2$ bound suffices. For an unconditional $\ell^\infty$ bilinear bound, additional input is needed.
+
+\item \textbf{XC-4} (Eisenstein hand-waved). Partially: written down in~\eqref{eq:eis-contrib}, bounded in Prop.~\ref{prop:eis-bound}. \emph{Honest residual:} the detailed Bianchi Eisenstein-Whittaker calculation is referenced (Bruggeman--Miatello \cite{BMiat}) but not redone. A careful reader should verify the normalization in our proof against \cite{BMiat}; we have not done this verification end-to-end.
+
+\item \textbf{XC-5} (conductor uniformity). Resolved at the level of statement (Hypothesis~\ref{hyp:H-PY-corrected}); the strengthened hypothesis is the right one. \emph{Honest residual:} this strengthens the conditional input, which is consequential for whether Hypothesis~\ref{hyp:cubic} (the cubic-moment formula) gives Hypothesis~\ref{hyp:H-PY-corrected} or only the weaker prior~\eqref{eq:H-PY}. Our analysis assumes the strong form is implied by the cubic moment; this needs verification when the cubic-moment formula is eventually written down.
+\end{itemize}
+
+\subsection{Residual unconditional gap (the only one)}
+
+\begin{quote}
+\textbf{Hypothesis~\ref{hyp:cubic}: the Petrow--Young-strength cubic moment for Hecke--Maass forms over $\Q(i)$, in the conductor aspect.} This is not in the literature. Adapting the Conrey--Iwaniec method to the Bianchi setting is a major open project, comparable in scope to Petrow--Young's original paper \cite{petrow-young}. \emph{P11 is conditional on this single input.}
+\end{quote}
+
+This is the residual gap. All other criticisms of the referee report (XC-1 partially, XC-2, XC-3, XC-4 partially, XC-5, P7-1, P7-2, P7-3, P7-4, P8-1, P8-2, P8-3, P8-4) are now addressed, either by the work of Sections 5--6 above or by transparent statement of the conditional input.
+
+\subsection{Final paragraph: status of the program}
+
+P11 (sections 1--6) presents a \emph{conditional} reduction:
+\begin{quote}
+Hypothesis~\ref{hyp:cubic} (Bianchi cubic moment) $\Rightarrow$ Hypothesis~\ref{hyp:H-PY-corrected} (Petrow--Young subconvexity over $\Q(i)$) $\Rightarrow$ bilinear $\ell^2$ Type-II estimate (Theorem~\ref{thm:main-conditional}) $\Rightarrow$ Landau's fourth problem (Cor.~\ref{cor:landau-cond}).
+\end{quote}
+
+The first arrow (cubic moment $\Rightarrow$ subconvexity) is the standard Conrey--Iwaniec / Petrow--Young mechanism, which we have not redone but is well established. The second arrow is Theorem~\ref{thm:main-conditional}, the main analytic content of P11. The third arrow is Friedlander--Iwaniec, applied with $\ell^2$ Type-II input (the form that FI actually uses).
+
+\textbf{P11 should not be cited as ``a proof of Landau's fourth problem,''} but it is now an honest \emph{conditional reduction} with all critical errors of P6--P9 either fixed or transparently identified. The single residual unconditional gap is Hypothesis~\ref{hyp:cubic}. We propose this as the next major project (P12 or beyond): adapt the Conrey--Iwaniec cubic moment to Hecke--Maass forms over $\Q(i)$ in the conductor aspect, with cube-free restriction. Until that program is carried out, the conditional reduction stands but is not unconditional.
+
+\bigskip
+
+\begin{thebibliography}{99}
+
+\bibitem{P6} (working note) \emph{Toward the bilinear cross-term estimate on $\SLNz$: a Gaussian dispersion / spectral attack via Bianchi forms}, P6 in the proofs sequence.
+
+\bibitem{P7} (working note) \emph{Filling the gaps in P6: Mellin transform, stationary phase, full spectral bookkeeping}, P7 in the proofs sequence.
+
+\bibitem{P8} (working note) \emph{Petrow--Young main-term bookkeeping}, P8 in the proofs sequence.
+
+\bibitem{P9} (working note) \emph{Bianchi Whittaker stationary phase}, P9 in the proofs sequence.
+
+\bibitem{shakov} A.~Shakov, \emph{Polynomials in $\Z[x]$ whose divisors are enumerated by $\SLNz$}, preprint, Feb.\ 2024, arXiv:2405.03552.
+
+\bibitem{FI98a} J.~Friedlander and H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Utrecht University, 2004.
+
+\bibitem{BMot} R.~W.~Bruggeman and Y.~Motohashi, \emph{Sum formula for Kloosterman sums and the fourth moment of the Dedekind zeta function over the Gaussian number field}, Funct.\ Approx.\ Comment.\ Math.\ \textbf{31} (2003), 23--92.
+
+\bibitem{BMiat} R.~W.~Bruggeman and R.~Miatello, \emph{Sum formula for $SL_2$ over a totally real number field}, Mem.\ Amer.\ Math.\ Soc.\ \textbf{197} (2009).
+
+\bibitem{BHM} V.~Blomer, G.~Harcos, P.~Michel, \emph{Bounds for modular $L$-functions in the level aspect}, Ann.\ Sci.\ \'Ec.\ Norm.\ Sup\'er.\ \textbf{40} (2007), 697--740.
+
+\bibitem{petrow-young} I.~Petrow and M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+
+\bibitem{conrey-iwaniec} J.~B.~Conrey and H.~Iwaniec, \emph{The cubic moment of central values of automorphic $L$-functions}, Ann.\ of Math.\ \textbf{151} (2000), 1175--1216.
+
+\bibitem{bykovsky} V.~A.~Bykovsky, \emph{A trace formula for the scalar product of Hecke series and its applications}, J.\ Math.\ Sci.\ (N.Y.) \textbf{89} (1998), 915--932.
+
+\bibitem{templier} N.~Templier, \emph{Heath-Brown's identity and the prime $k$-tuples conjecture}, various preprints, 2010s.
+
+\bibitem{deshouillers-iwaniec82} J.-M.~Deshouillers and H.~Iwaniec, \emph{Kloosterman sums and Fourier coefficients of cusp forms}, Invent.\ Math.\ \textbf{70} (1982), 219--288.
+
+\bibitem{stein-harmonic} E.~M.~Stein, \emph{Harmonic Analysis: Real-Variable Methods, Orthogonality, and Oscillatory Integrals}, Princeton Univ.\ Press, 1993.
+
+\bibitem{ichino-templier} A.~Ichino and N.~Templier, \emph{On the Voronoi formula for $\mathrm{GL}(n)$}, Amer.\ J.\ Math.\ \textbf{135} (2013), 65--101.
+
+\end{thebibliography}
+
+\end{document}

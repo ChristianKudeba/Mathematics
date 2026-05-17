@@ -1,0 +1,496 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+% =============================================================
+% Theorem environments
+% =============================================================
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+
+% =============================================================
+% Math macros (kept compatible with P6)
+% =============================================================
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\Qi}{\Q(i)}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\newcommand{\Phio}{\Phi_0}
+\newcommand{\spin}{\mathrm{spin}}
+\newcommand{\Tr}{\mathrm{Tr}}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\nn}{\mathfrak{n}}
+\newcommand{\pp}{\mathfrak{p}}
+\newcommand{\cond}{\mathrm{cond}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+\title{P11. A clean conditional reduction:\\
+the bilinear cross-term on the slice $\Re(\xi\eta)=1$ in $\Zi$,\\
+in $\ell^2$ form, via direct Type II reduction to Bianchi spectral input}
+\author{(P11; rewriting Sections 1--2 of the program)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper (P11) is a fresh, careful presentation of the bilinear / Bianchi-spectral attack on Landau's fourth problem (the infinitude of primes of the form $n^2+1$). It supersedes the corresponding parts of P6--P9 in the same program and is meant to address specific referee criticisms, in particular: (i) the choice of norm convention for the bilinear conjecture, (ii) the strategic issue of whether to pass through Cauchy--Schwarz to a dispersion sum, (iii) the role of the Shakov / $\SLNz$ framework after the passage to Gaussian integers, and (iv) the precise conductor-aspect uniformity required of the subconvexity input.
+
+In the present file we write Sections~1 and~2 only. Section~1 fixes the setup: we restate the bilinear conjecture in the $\ell^2$ form actually used by Friedlander--Iwaniec's asymptotic sieve (the ``$B_2$ axiom''), pass to Gaussian integers via the Shakov bijection, and identify the slice $\{\Re(\xi\eta)=1\}\subset\Zi$ as the right object of attack. Section~2 carries out a \emph{direct} Type II reduction --- with no Cauchy--Schwarz to a dispersion sum --- of the smoothed bilinear sum to a $\theta$-integral of an additive twist $M(\theta;N)$, and states a clean conditional theorem reducing the bilinear conjecture (and hence Landau IV) to a $t$-aspect-uniform subconvexity bound for $\mathrm{GL}_2\times\mathrm{GL}_1$ Hecke--Maass $L$-functions over $\Qi$, with the conductor range correctly stated as the full range $\le N$ (not $\le N^{1/2}$).
+
+Sections~3, 4, 5 (Kuznetsov dual side, transform analysis, main-term bookkeeping) are written separately and are not part of this file.
+\end{abstract}
+
+\tableofcontents
+
+% ==========================================================================
+% INTRODUCTION
+% ==========================================================================
+\section*{Introduction}\label{sec:intro}
+\addcontentsline{toc}{section}{Introduction}
+
+The bilinear conjecture in this program is, in the form stated in P6, an inequality of the shape
+\[
+\Sigma(N;A,B)\;:=\;\sum_{\substack{(a,b,c,d)\in\Nz^4\\ad-bc=1,\;ac+bd\le N}}A(a,b)\,B(c,d)\;\ll\;N^{1-\delta}\norm{A}_*\norm{B}_*
+\]
+for some $\delta>0$ and some norm $\norm{\cdot}_*$ on the bilinear weights. P6 asserted this with $\norm{\cdot}_*=\norm{\cdot}_\infty$. The skeptical referee report on P6--P9 raised five distinct critical/serious issues with that formulation. The most consequential are:
+
+\begin{enumerate}
+\item[(XC-1, XC-2)] Spectral methods over $\Qi$ produce $\ell^2$ bounds; the proof in P6 attempts to convert these into $\ell^\infty$ bounds via an arithmetic that cannot work, since for $A,B$ supported on $|\xi|^2\le X\asymp N^{1/2}$ one has $\norm{A}_2\norm{B}_2\le\norm{A}_\infty\norm{B}_\infty\cdot N^{1/2}$, a factor that no power-saving on the $\ell^2$ side will recover.
+\item[(P6-1)] Opening $|\Sigma|^2\le (N+1)D(N)$ before applying any harmonic analysis throws away precisely the cancellation that we are trying to exploit; the diagonal of $D$ saturates at $N\log N$, costing a $(\log N)^{1/2}$ even before the off-diagonal is bounded.
+\item[(XC-5)] In the $\theta$-integral expression for the slice indicator, the moduli that appear in the Bianchi--Kuznetsov dual side range up to $|c|^2\asymp N$, hence the relevant Hecke characters can have conductor as large as $N$, not $N^{1/2}$.
+\item[(P6-3, XC-6)] If $A,B\in\ell^\infty$ but not $L^2(\Zi)$, the Hecke spectral projection $\langle A,u_j\rangle$ is not even defined; the apparent role of the Shakov / $\SLNz$ framework in the analytic argument is also weaker than one might have hoped, since once the Gaussian-integer reformulation has been made the analytic argument is ``just'' shifted convolution / spectral on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$.
+\end{enumerate}
+
+The present paper does not pretend that any of XC-1, XC-2, XC-5, P6-1, P6-3 was incidental. Each was a real defect, and we fix all of them at the level of the setup and the Type II reduction. Concretely:
+
+\begin{itemize}
+\item We \emph{fix the norm convention to $\ell^2$ at the very start} (Definition~\ref{def:bilin-l2-norm}, Conjecture~\ref{conj:bilin-l2}), and verify in Remark~\ref{rmk:FI-l2-suffices} that this is exactly what Friedlander--Iwaniec's ``$B_2$ axiom'' for the asymptotic sieve for primes accepts.
+\item We acknowledge upfront, in Remark~\ref{rmk:shakov-honest}, that once one passes to $\Zi$ the $\SLNz$ structure no longer drives the analytic argument; its role is structural --- it pinpointed the slice $\{\Re(\xi\eta)=1\}$ as the right object --- not analytic.
+\item We perform a \emph{direct} Type II reduction (Section~\ref{sec:type-II}): smooth the cutoff in $\Im(\xi\eta)\le N$ via $\psi$, open the slice indicator via Fourier inversion in $\theta\in[0,1]$, and read off
+\[
+\Sigma_\psi(N;A,B)\;=\;\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta,\qquad M(\theta;N)=\sum_{\nu\in\Zi}d_{A,B}(\nu)\,\psi\!\left(\tfrac{\Im\nu}{N}\right)\,e(\theta\,\Re\nu).
+\]
+We never apply Cauchy--Schwarz to a dispersion sum.
+\item We state cleanly the conditional reduction theorem (Theorem~\ref{thm:main-conditional}): $t$-aspect-uniform subconvexity for $L(\tfrac12+it,u_j\otimes\chi)$ at conductors $\cond(\chi)\le N$ implies the bilinear conjecture in $\ell^2$ form, and hence (by Friedlander--Iwaniec) Landau IV.
+\end{itemize}
+
+\noindent\textbf{What is in this file.} Sections 1 and 2 only, plus this introduction. We do \emph{not} write the Kuznetsov dual side (Section 3), the stationary-phase analysis of the transformed test function (Section 4), or the main-term bookkeeping (Section 5). Those will be written separately. We end Section~2 with a roadmap indicating exactly which input each of those sections must supply.
+
+\noindent\textbf{What is honestly open.} The conditional reduction \emph{is} conditional. The subconvexity input we need (Conjecture~\ref{conj:subconv-input}) is at the level of the Burgess / Conrey--Iwaniec barrier for $\mathrm{GL}_2\times\mathrm{GL}_1$ over $\Qi$, with full conductor uniformity --- this has not been established in the literature. We make the precise statement, and we do not claim its proof.
+
+% ==========================================================================
+% SECTION 1
+% ==========================================================================
+
+\section{Setup and norm convention}\label{sec:setup}
+
+This section fixes the analytic framework once and for all. The single most important fix relative to P6--P9 is the choice of norm: we work in $\ell^2$, not $\ell^\infty$. Subsections~\ref{ssec:setup-bilin}--\ref{ssec:setup-conj} state the bilinear sum, fix the $\ell^2$ convention, and pose the conjecture. Subsection~\ref{ssec:setup-bijection} reformulates everything in $\Zi$ via the Shakov bijection. Subsection~\ref{ssec:setup-shakov-honest} addresses XC-6: it states honestly what role the Shakov / $\SLNz$ framework plays, and what role it does not. Subsection~\ref{ssec:setup-slice} explains why the slice $\{\Re(\xi\eta)=1\}$ is the right thing to attack.
+
+\subsection{The bilinear sum and the support set}\label{ssec:setup-bilin}
+
+\begin{definition}[Bilinear sum on the slice $\chi(A)\le N$]\label{def:bilin-sum}
+For $N\ge 1$ and $A,B:\Nz^2\to\C$, define
+\[
+\Sigma(N;A,B)\;:=\;\sum_{\substack{(a,b,c,d)\in\Nz^4\\ ad-bc=1,\;ac+bd\le N}}A(a,b)\,B(c,d).
+\]
+The condition $ad-bc=1$ singles out $\SLNz$; the entries $a,b,c,d\in\Nz$ are the matrix entries of $\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SLNz$. We write $\chi(A):=ac+bd$ for the spin invariant of $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SLNz$.
+\end{definition}
+
+\begin{remark}[Coprimality is automatic]\label{rmk:coprime-automatic}
+If $\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SLNz$ with $ad-bc=1$, then any common divisor of $a,b$ divides $1$, hence $\gcd(a,b)=1$. Similarly $\gcd(c,d)=1$. So the support of $\Sigma$ is automatically restricted to coprime pairs, and we may freely assume $A$ and $B$ are supported on coprime $(a,b)$ and $(c,d)$.
+\end{remark}
+
+\begin{definition}[The natural support set]\label{def:support-set}
+The pairs $(a,b)\in\Nz^2$ that occur as left columns of matrices in $\SLNz$ with $\chi\le N$ satisfy $a^2+b^2\le N^{1/2}\cdot O(1)$ in the typical regime. Concretely, if $ad-bc=1$ and $ac+bd=n\le N$, then writing $\xi=a+bi$ and $\eta=d+ci$ in $\Zi$ one has $\xi\eta=1+in$, hence $|\xi|^2|\eta|^2=1+n^2\le 1+N^2$. So both $|\xi|^2$ and $|\eta|^2$ are bounded by $\sqrt{1+N^2}\le N+1$, and the typical scale of either is $|\xi|^2\asymp N^{1/2}$ (when $|\eta|^2\asymp N^{1/2}$). For analytic purposes we therefore take the support truncation
+\[
+\mathrm{supp}(A),\;\mathrm{supp}(B)\;\subset\;\{(a,b)\in\Nz^2:a^2+b^2\le N+1\}.
+\]
+This is automatic for any $(a,b)$ that contributes nonzero to $\Sigma(N;A,B)$.
+\end{definition}
+
+\subsection{The norm convention: $\ell^2$, not $\ell^\infty$}\label{ssec:setup-norm}
+
+This is THE most important fix relative to P6.
+
+\begin{definition}[$\ell^2$ norm of bilinear weights]\label{def:bilin-l2-norm}
+For $A:\Nz^2\to\C$ supported on $\{(a,b):a^2+b^2\le X\}$, set
+\[
+\norm{A}_2\;:=\;\Bigl(\sum_{(a,b)\in\Nz^2}|A(a,b)|^2\Bigr)^{1/2}.
+\]
+We will state the bilinear conjecture in the form: $\Sigma(N;A,B)\ll N^{1-\delta}$ for sequences with $\norm{A}_2\norm{B}_2\le 1$.
+\end{definition}
+
+\begin{remark}[Why $\ell^2$? Because Friedlander--Iwaniec accept $\ell^2$ inputs]\label{rmk:FI-l2-suffices}
+In the asymptotic sieve for primes (\cite{FI98a}), the Type II axiom (the ``$B_2$ axiom'') accepts bilinear weights $\alpha,\beta$ in Bombieri--Vinogradov form, that is, with the bilinear sum bounded by a constant times
+\[
+\Bigl(\sum_n|\alpha_n|^2\Bigr)^{1/2}\Bigl(\sum_m|\beta_m|^2\Bigr)^{1/2}\,N^{1-\delta}
+\]
+or a logarithmic variant. This is an $\ell^2\times\ell^2$ statement, not an $\ell^\infty\times\ell^\infty$ one. The $\ell^\infty$ version is strictly stronger, and we have no reason --- and no successful method --- to prove it.
+
+In particular: the $\ell^2$ form, applied to $A,B$ supported on $|\xi|^2\le N+1$ with $\norm{A}_\infty,\norm{B}_\infty\le 1$, yields
+\[
+\norm{A}_2\norm{B}_2\;\le\; (N+1)^{1/2}\cdot (N+1)^{1/2}\;=\;N+1,
+\]
+which combined with $\Sigma\ll N^{1-\delta}\norm{A}_2\norm{B}_2$ gives only $\Sigma\ll N^{2-\delta}$ --- worse than trivial. So the $\ell^2$ form does \emph{not} imply the (false-strength) $\ell^\infty$ form claimed in P6 \S6, and that is the mathematical reason the P6 ``$\ell^2$-to-$\ell^\infty$ transition'' was incoherent. The cure is to drop the $\ell^\infty$ claim entirely. The $\ell^2$ form is what is needed for FI; it is what we conjecture; and it is what we will prove conditionally.
+\end{remark}
+
+\begin{conjecture}[Bilinear conjecture, $\ell^2$ form]\label{conj:bilin-l2}
+There exists $\delta>0$ such that for every $\varepsilon>0$, every $N\ge 2$, and every pair of sequences $A,B:\Nz^2\to\C$ supported on coprime pairs with $a^2+b^2\le N+1$ and $c^2+d^2\le N+1$ respectively,
+\[
+\bigl|\Sigma(N;A,B)\bigr|\;\le\; C_\varepsilon\,N^{1-\delta+\varepsilon}\,\norm{A}_2\norm{B}_2,
+\]
+with absolute constant $C_\varepsilon$ depending only on $\varepsilon$.
+\end{conjecture}
+
+\begin{remark}[The trivial $\ell^2$ bound]\label{rmk:l2-trivial}
+By Cauchy--Schwarz applied to the $(\xi,\eta)$ representation in Section~\ref{ssec:setup-bijection},
+\[
+|\Sigma(N;A,B)|\;\le\;\Bigl(\sum_\xi|A(\xi)|^2\Bigr)^{1/2}\Bigl(\sum_\eta|B(\eta)|^2 D(\eta)\Bigr)^{1/2}
+\]
+where $D(\eta)$ is the number of $\xi$ with $\xi\eta\in 1+i[0,N]$, an integer $\le 1$ for each fixed $\eta\ne 0$ on the slice. The trivial $\ell^2$ bound is therefore
+\[
+|\Sigma(N;A,B)|\;\le\;\norm{A}_2\norm{B}_2,
+\]
+which matches the right-hand side of Conjecture~\ref{conj:bilin-l2} with $\delta=0$. Conjecture~\ref{conj:bilin-l2} is therefore a genuine power-saving conjecture; the trivial bound \emph{does not} produce $N^{-\delta}$.
+\end{remark}
+
+\begin{remark}[Saturation]\label{rmk:saturation}
+Plugging $A=B=\mathbf{1}_{|\xi|^2\le N+1}$ into the conjecture: $\norm{A}_2^2\asymp N$, so $\norm{A}_2\norm{B}_2\asymp N$, and Conjecture~\ref{conj:bilin-l2} predicts $\Sigma\ll N^{2-\delta+\varepsilon}$. The actual size of $\Sigma$ for the all-ones weight is $(3/\pi)N\log N+O(N)$ (Hooley/McKee), and the prediction $N^{2-\delta+\varepsilon}$ is much weaker than truth on this single weight. The point of the conjecture is uniformity in $A,B$, not sharpness on the constant function.
+\end{remark}
+
+\subsection{Translation to Gaussian integers}\label{ssec:setup-bijection}
+
+We now reformulate $\Sigma$ as a divisor sum in $\Zi$. The bijection is the same as P6 Lemma 1.1, but we take care that the $\ell^2$ norm is preserved, not just the $\ell^\infty$ norm.
+
+\begin{lemma}[Shakov--Gaussian bijection]\label{lem:shakov-gaussian}
+The map
+\[
+\Pi:\SLNz\to\Zi_{\ge 0}\times\Zi_{\ge 0},\qquad \Pi\begin{pmatrix}a&b\\c&d\end{pmatrix}=(a+bi,\,d+ci),
+\]
+where $\Zi_{\ge 0}:=\{x+yi:x,y\in\Nz\}$, is a bijection onto the set
+\[
+\mathcal{G}\;:=\;\{(\xi,\eta)\in\Zi_{\ge 0}\times\Zi_{\ge 0}:\xi\eta\in 1+i\Nz\}.
+\]
+Under $\Pi$, $\chi\!\begin{pmatrix}a&b\\c&d\end{pmatrix}=ac+bd$ corresponds to $\Im(\xi\eta)$, and $\det\!\begin{pmatrix}a&b\\c&d\end{pmatrix}=1$ corresponds to $\Re(\xi\eta)=1$.
+\end{lemma}
+
+\begin{proof}
+Direct: $(a+bi)(d+ci)=(ad-bc)+i(ac+bd)$. The injectivity and the description of the image are immediate from the four real coordinates being recovered from $(\xi,\eta)$.
+\end{proof}
+
+\begin{corollary}[$\Sigma$ as a slice divisor sum]\label{cor:Sigma-as-slice-sum}
+Define $\widetilde A:\Zi_{\ge 0}\to\C$ by $\widetilde A(a+bi):=A(a,b)$ (and zero off $\Zi_{\ge 0}$); similarly $\widetilde B$. Then
+\[
+\Sigma(N;A,B)\;=\;\sum_{n=0}^N\;\sum_{\substack{(\xi,\eta)\in\Zi_{\ge 0}^2\\ \xi\eta=1+in}}\widetilde A(\xi)\,\widetilde B(\eta).
+\]
+The $\ell^2$ norms are preserved: $\norm{\widetilde A}_2=\norm{A}_2$ and $\norm{\widetilde B}_2=\norm{B}_2$.
+\end{corollary}
+
+\begin{proof}
+Lemma~\ref{lem:shakov-gaussian} together with the fact that $\Pi$ identifies entries with real and imaginary parts isometrically.
+\end{proof}
+
+\begin{remark}[On units]\label{rmk:units}
+The $\Zi^\times=\{\pm1,\pm i\}$ orbit of any $\xi\in\Zi^*$ has four elements, exactly one of which lies in the open first quadrant $\Zi_{>0}$ (with the boundary cases --- purely real or purely imaginary $\xi$ --- having two associates on the boundary of $\Zi_{\ge 0}$). For analytic purposes we will sometimes pass between summation over $\Zi_{\ge 0}$ and over the entire $\Zi^*/\Zi^\times$; this introduces at most a constant factor of $16$, which we absorb into implicit constants.
+\end{remark}
+
+\begin{remark}[Notational convention henceforth]\label{rmk:notation}
+From now on we drop the tildes and write $A:\Zi\to\C$, $B:\Zi\to\C$, with the understanding that $A$ is supported on $\Zi_{\ge 0}\cap\{|\xi|^2\le N+1\}$ and similarly for $B$. The bilinear sum is
+\[
+\Sigma(N;A,B)\;=\;\sum_{n=0}^N\,\sum_{\substack{\xi\eta=1+in\\(\xi,\eta)\in\Zi_{\ge 0}^2}}A(\xi)\,B(\eta).
+\]
+We will work in this Gaussian-integer form throughout.
+\end{remark}
+
+\begin{remark}[Where the Shakov framework went, and where it didn't]\label{rmk:shakov-honest}
+The bijection $\Pi$ of Lemma~\ref{lem:shakov-gaussian} was found by Shakov \cite{shakov} via the $\SLNz$ enumeration of divisor pairs $(m,n)$ with $m\mid n^2+1$. Once $\Pi$ is in hand, every subsequent step of the present paper is a statement \emph{about $\Zi$}, not about $\SLNz$: we work with Gaussian-integer divisor sums on the slice $\{\Re(\nu)=1\}$, and the analytic machinery is Bianchi spectral theory on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$.
+
+\textbf{We acknowledge honestly:} the $\SLNz$ framework plays no \emph{active analytic} role beyond singling out the slice. Its role is \emph{structural}: it pinpointed the slice $\{\Re(\xi\eta)=1\}$ as the correct geometric object on which the bilinear cross-term lives, and it suggested the bilinear formulation of the problem in the first place. But the analytic argument below could be performed by any author who started from the Gaussian-integer reformulation of $n^2+1$, without ever mentioning $\SLNz$. The novelty of this program, then, is structural --- it organized the question into a form amenable to standard analytic machinery --- not a new analytic technique. We state this explicitly so that the reader is not misled.
+\end{remark}
+
+\subsection{Why the slice $\Re(\xi\eta)=1$ is the right object}\label{ssec:setup-slice}
+
+\begin{remark}[The slice is the geometric heart of the $n^2+1$ problem]\label{rmk:slice-justification}
+The Gaussian integer $\nu=1+in$ has norm $|\nu|^2=1+n^2$, and is prime in $\Zi$ if and only if $n^2+1$ is prime in $\Z$ (and not $2$; the case $n=1$ is the unit ramified case, $1+i$). So the question
+\begin{quote}
+\emph{Are there infinitely many primes $n^2+1$?}
+\end{quote}
+is, exactly,
+\begin{quote}
+\emph{Are there infinitely many primes $\nu=1+in$ in $\Zi$?}
+\end{quote}
+The set $\{1+in:n\in\Nz\}$ is the slice $\{\Re(\nu)=1,\Im(\nu)\ge 0\}\subset\Zi$. The slice is one-dimensional inside the two-dimensional lattice $\Zi$; it is the lattice of points on the vertical line $x=1$ in $\R^2\cong\C$.
+
+The bilinear sum $\Sigma(N;A,B)$ measures, with weight $A(\xi)B(\eta)$, how often $\nu=\xi\eta$ lands on this slice. Detecting primes $\nu$ on the slice via Friedlander--Iwaniec's asymptotic sieve requires precisely the bilinear cancellation in Conjecture~\ref{conj:bilin-l2}, applied to weights $A,B$ adapted to a given Linnik / Type II decomposition. In other words: \emph{the bilinear conjecture is the analytic input that the Friedlander--Iwaniec sieve consumes in order to extract primes from the slice.}
+
+The novelty of the present approach (relative to Friedlander--Iwaniec's celebrated \cite{FI98b} for $a^2+b^4$, which lives on a different one-dimensional slice cut by a quartic equation) is that our slice is \emph{linear} in $\Zi$, hence amenable to the Bianchi-Kuznetsov machinery directly: the slice is $\nu\equiv 1\pmod{(1+i)^k}$ for $k=0$ in additive form, and is detected by a Fourier integral over $\theta\in[0,1]$ in the $\Re(\nu)$-direction.
+\end{remark}
+
+\begin{remark}[Comparison with $a^2+b^4$ and $a^4+b^2$]\label{rmk:fi-comparison}
+Friedlander--Iwaniec's $a^2+b^4$ result \cite{FI98b} produces primes on a curve $\{a^2+b^4=p\}$ in $\Z^2$, equivalently primes $\nu\in\Z[\sqrt{-1}]$ of the form $\nu=a+ib^2$. Their attack uses bilinear bounds for the divisor function on a quartic slice in $\Zi$, with the slice cut by $b^2$ rather than by $1$. The geometry is genuinely harder than ours: their slice is sparse (density $|\nu|^{1/2}$ inside the ball $|\nu|\le X$), whereas our slice $\nu=1+in$ has density $|\nu|^0=1$ inside $|\nu|\le X$ on the line $\Re=1$.
+
+So our problem is, in a precise sense, on the easier side of the Friedlander--Iwaniec barrier than $a^2+b^4$: the slice is denser. What makes it not obviously easier is that the slice is \emph{affine} (not passing through the origin), so the multiplicative structure of $\Zi$ does not preserve it. Detecting affine slices is what brings in the additive twist $e(\theta\,\Re\nu)$ and, through it, the Bianchi spectral theory.
+\end{remark}
+
+% ==========================================================================
+% SECTION 2
+% ==========================================================================
+
+\section{Direct Type II reduction (no Cauchy--Schwarz to dispersion)}\label{sec:type-II}
+
+In this section we reduce the bilinear conjecture to a bound on a $\theta$-integral of an additive twist $M(\theta;N)$. We do \emph{not} pass through Cauchy--Schwarz to a dispersion sum $D(N)$ at any point. We comment on this strategic choice in Remark~\ref{rmk:no-CS}.
+
+\subsection{Smooth dyadic decomposition}\label{ssec:typeII-smooth}
+
+\begin{definition}[Smoothing weight]\label{def:psi}
+Fix a smooth function $\psi\in C_c^\infty(\R)$ with $\psi(t)\ge 0$, $\psi(t)=1$ for $t\in[1,2]$, $\psi(t)=0$ for $t\notin[1/2,3]$, and $\psi$ monotone on each side. Its Fourier transform $\widehat\psi(s)=\int_\R\psi(t)e^{-2\pi i st}dt$ is Schwartz.
+\end{definition}
+
+By a smooth dyadic partition of unity in the variable $n$, the bound of Conjecture~\ref{conj:bilin-l2} reduces (with a $\log N$ overhead) to bounding the smoothed dyadic bilinear sum
+\begin{equation}\label{eq:Sigma-psi-def}
+\Sigma_\psi(N;A,B)\;:=\;\sum_{n\ge 0}\psi\!\left(\frac{n}{N}\right)\,c_n,\qquad c_n\;:=\sum_{\substack{\xi\eta=1+in\\(\xi,\eta)\in\Zi_{\ge 0}^2}}A(\xi)\,B(\eta),
+\end{equation}
+uniformly in dyadic scale. We will state and prove our main reduction for $\Sigma_\psi$; the dyadic recombination to $\Sigma$ is standard and is sketched in Remark~\ref{rmk:dyadic-recombine}.
+
+\begin{remark}[Dyadic recombination]\label{rmk:dyadic-recombine}
+Picking $\psi$ as above, $\sum_{k\ge 0}\psi(2^{-k}n/N')=1$ on $n\ge N'$ for an appropriate $N'\asymp 1$. Summing over $k$ with $2^k\le N$ gives the smooth dyadic decomposition of $\Sigma$ as $O(\log N)$ many $\Sigma_\psi$'s at scales $N_k:=2^k N'$. If each contributes $\ll N_k^{1-\delta+\varepsilon}\norm{A}_{2,N_k}\norm{B}_{2,N_k}$ for the natural support truncation at scale $N_k$, the geometric series gives Conjecture~\ref{conj:bilin-l2} with the same $\delta$ and an extra $\log N$ which is absorbed in $N^\varepsilon$.
+\end{remark}
+
+\subsection{Opening the slice via Fourier inversion in $\theta$}\label{ssec:typeII-theta}
+
+The crucial step is to detect the slice $\Re(\nu)=1$ inside $\Zi$ by Fourier inversion on the integer-valued variable $\Re(\nu)\in\Z$.
+
+\begin{lemma}[Fourier detection of the slice]\label{lem:slice-fourier}
+For any $m\in\Z$,
+\[
+\mathbf{1}_{m=1}\;=\;\int_0^1 e\bigl(\theta(m-1)\bigr)\,d\theta\;=\;\int_0^1 e(-\theta)\,e(\theta m)\,d\theta,
+\]
+where $e(x):=e^{2\pi i x}$. Equivalently, for any function $f:\Zi\to\C$ of compact support,
+\[
+\sum_{\substack{\nu\in\Zi\\\Re(\nu)=1}}f(\nu)\;=\;\int_0^1 e(-\theta)\,\Bigl(\sum_{\nu\in\Zi}f(\nu)\,e(\theta\,\Re\nu)\Bigr)\,d\theta.
+\]
+\end{lemma}
+
+\begin{proof}
+Standard Fourier orthogonality on $\Z$.
+\end{proof}
+
+\begin{definition}[The bilinear divisor weight]\label{def:dAB}
+For $A,B:\Zi\to\C$ as in Remark~\ref{rmk:notation}, define
+\[
+d_{A,B}(\nu)\;:=\;\sum_{\substack{\xi,\eta\in\Zi_{\ge 0}\\ \xi\eta=\nu}}A(\xi)\,B(\eta),\qquad \nu\in\Zi.
+\]
+This is the Dirichlet convolution $(A*B)(\nu)$ in $\Zi$, restricted to the support quadrants of $A$ and $B$.
+\end{definition}
+
+\begin{definition}[The $\theta$-twisted additive sum $M(\theta;N)$]\label{def:Mtheta}
+For $\theta\in[0,1]$, $N\ge 1$, and $A,B:\Zi\to\C$ as above, define
+\[
+M(\theta;N)\;:=\;\sum_{\nu\in\Zi}d_{A,B}(\nu)\,\psi\!\left(\frac{\Im(\nu)}{N}\right)\,e\bigl(\theta\,\Re(\nu)\bigr).
+\]
+The sum is finite by the support assumption on $A,B$ (which forces $|\nu|^2\le (N+1)^2$).
+\end{definition}
+
+\begin{proposition}[Direct Type II identity for $\Sigma_\psi$]\label{prop:Sigma-psi-as-theta-integral}
+For every $N\ge 1$, every $\theta$-test as in Definition~\ref{def:psi}, and every $A,B$ as above,
+\[
+\Sigma_\psi(N;A,B)\;=\;\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta.
+\]
+\end{proposition}
+
+\begin{proof}
+By Definition~\ref{def:dAB}, for each $\nu=1+in$ on the slice we have $c_n=d_{A,B}(\nu)$ (the quadrant restriction is built into Definition~\ref{def:dAB}). Therefore
+\[
+\Sigma_\psi(N;A,B)\;=\;\sum_{n\ge 0}\psi(n/N)\,c_n\;=\;\sum_{\substack{\nu\in\Zi\\\Re\nu=1}}d_{A,B}(\nu)\,\psi(\Im\nu/N).
+\]
+Apply Lemma~\ref{lem:slice-fourier} with $f(\nu):=d_{A,B}(\nu)\psi(\Im\nu/N)$. The interchange of summation and integration is justified by absolute convergence (the support is finite).
+\end{proof}
+
+\begin{remark}[We did NOT Cauchy--Schwarz]\label{rmk:no-CS}
+The expression in Proposition~\ref{prop:Sigma-psi-as-theta-integral} is an \emph{exact identity}, not an inequality. It writes $\Sigma_\psi$ as an integral of an additive twist, with no $|\cdot|^2$ taken, no $D(N)$ formed, no $L^2$ duality used. The ``cancellation in $c_n$'' that referee item P6-1 said we threw away by squaring is therefore preserved: it appears as cancellation in $M(\theta;N)$, which one detects by exhibiting $M(\theta;N)$ as a spectral expansion --- not by squaring $c_n$.
+
+\textbf{This is the main structural change from P6.} P6 first applied $|\Sigma_\psi|^2\le N D(N)$ and then attacked $D(N)$ spectrally; the diagonal of $D(N)$ saturates at $N\log N$, capping the result at the trivial bound. We avoid this by going directly from $\Sigma_\psi$ to $M(\theta;N)$ via Lemma~\ref{lem:slice-fourier}, with no intermediate squaring.
+\end{remark}
+
+\subsection{The plan: spectral expansion of $M(\theta;N)$ via Bianchi--Kuznetsov}\label{ssec:typeII-plan}
+
+We now state, as a preview of Sections 3--4 (which are written separately), how $M(\theta;N)$ is bounded.
+
+\begin{remark}[Roadmap for the spectral attack on $M(\theta;N)$]\label{rmk:M-roadmap}
+The strategy is the standard one for additive twists of divisor-like functions over $\Qi$:
+\begin{enumerate}
+\item[(S3.1)] \textbf{Mellin opening.} Open the divisor convolution $d_{A,B}(\nu)$ via a double Mellin transform, expressing $M(\theta;N)$ as a contour integral whose integrand is, on each contour, a sum
+\[
+\sum_{\nu\in\Zi}|\nu|^{-2s}|\nu|^{-2w}\cdot(\text{fixed weights})\cdot\psi(\Im\nu/N)\,e(\theta\,\Re\nu),
+\]
+times the Mellin transforms $\widehat A(s),\widehat B(w)$ at appropriate test functions.
+\item[(S3.2)] \textbf{Voronoi / Kuznetsov on $\Qi$.} Apply the Bianchi--Kuznetsov formula \cite{LG} to the inner sum, dualizing the additive twist $e(\theta\,\Re\nu)$ into a sum over Hecke--Maass cusp forms $u_j$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ plus an Eisenstein contribution and a Kloosterman / error term. The dual side has the schematic form
+\[
+M(\theta;N)\;=\;\mathcal M_{\mathrm{main}}(\theta;N)\;+\;\sum_j L(\tfrac12,u_j\otimes\chi_\theta)\,\rho_j(\cdot)\,K(t_j;\theta;N)\;+\;\mathcal M_{\mathrm{Eis}}\;+\;\mathcal M_{\mathrm{err}},
+\]
+where $\chi_\theta$ is the Hecke character on $\Zi$ corresponding to $\theta$ (after the Bianchi--Kuznetsov dualization of the additive twist), $K(t_j;\theta;N)$ is an integral transform of $\psi$ explicit through Bessel functions $K_{it_j}$, and $\rho_j(\cdot)$ are Hecke-Fourier coefficients of $u_j$.
+\item[(S3.3)] \textbf{Conductor of $\chi_\theta$.} As referee XC-5 correctly observes, the moduli $c$ that appear in the Bianchi--Kuznetsov dual side run with $|c|^2\asymp |\theta|N$ and up to $|c|^2\asymp N$, and the corresponding Hecke characters $\chi_\theta$ have conductor $\cond(\chi_\theta)\asymp |c|^2$, hence \emph{the full range of conductors up to $N$}, not $N^{1/2}$. This is the conductor range we declare in Conjecture~\ref{conj:subconv-input} below.
+\item[(S4.1)] \textbf{Stationary phase for $K(t_j;\theta;N)$.} The transform $K(t_j;\theta;N)$ is a Bessel-against-bump integral whose stationary-phase analysis (carried out in Section 4) gives effective concentration on $|t_j|\asymp \sqrt{|\theta|N}$, with rapid decay outside this window. Modulo the convention-dependent normalization of $K_{it}$ vs. $K_{2it}$ (referee P9-3, which we fix in Section 4), this localizes the spectrum.
+\item[(S4.2)] \textbf{Subconvexity input + Cauchy--Schwarz on the spectral side.} Bounded by $L$-value subconvexity (Conjecture~\ref{conj:subconv-input}) for $L(\tfrac12+it,u_j\otimes\chi)$ across the relevant $t,t_j,\cond(\chi)$ window, combined with the Bianchi spectral large sieve (Lokvenec-Guleska \cite{LG}, with the \emph{correct cubic} density $T^3$ in $\HH^3$ --- referee P7-8), the cuspidal contribution to $M(\theta;N)$ admits a power saving over the trivial bound.
+\item[(S5)] \textbf{Main term and Eisenstein bookkeeping.} The main term $\mathcal M_{\mathrm{main}}$ and the Eisenstein piece $\mathcal M_{\mathrm{Eis}}$ are evaluated explicitly (Section 5), \emph{not} hand-waved: the Eisenstein piece carries the genuine divisor-asymptotic of size $\asymp N\log N$ (cf. referee XC-4), and its precise coefficient is computed in terms of the bilinear weights via the inner products $\langle A,E_s\rangle$, $\langle B,E_s\rangle$ where $E_s$ is the standard Bianchi Eisenstein series. After integration against $e(-\theta)d\theta$ (Proposition~\ref{prop:Sigma-psi-as-theta-integral}), the Eisenstein contribution to $\Sigma_\psi$ reduces to an explicit linear functional in $A,B$ that we call the ``main term'' and which, for generic $A,B$ with $\norm{A}_2\norm{B}_2\le 1$, also satisfies a bound of size $N^{1-\delta+\varepsilon}$.
+\end{enumerate}
+The unconditional Bianchi spectral large sieve and the Weil bound on the Bianchi--Kloosterman sums supply unconditional control of $\mathcal M_{\mathrm{err}}$. The cuspidal contribution and the Eisenstein contribution are both controlled, conditionally on Conjecture~\ref{conj:subconv-input}, by power-saving bounds. Combining gives the main theorem.
+\end{remark}
+
+\subsection{The subconvexity input}\label{ssec:typeII-subconv}
+
+We isolate the conditional input as a clean conjecture, stated with the conductor range \emph{in the full range required by referee XC-5}.
+
+\begin{conjecture}[$t$-aspect-uniform subconvexity for $\mathrm{GL}_2\times\mathrm{GL}_1$ over $\Qi$]\label{conj:subconv-input}
+There exists $\eta_0>0$ such that the following holds for every $\varepsilon>0$. Let $\nn$ be an integral ideal of $\Zi$ dividing $(2)\subset\Zi$, and let $u_j$ be a Hecke--Maass cusp form on $\Gamma_0(\nn)\subset\mathrm{PSL}_2(\Zi)$ with Laplace eigenvalue $\lambda_j=1+t_j^2$, $t_j\in\R\cup i(-\tfrac12,\tfrac12)$. Let $\chi$ be a Hecke character of $\Zi$ of finite order with conductor ideal $\cond(\chi)$. Then for every $N\ge 2$ and every $\chi$ with $|\cond(\chi)|^2\le N$ (the full conductor range, up to $N$, not $\sqrt N$),
+\[
+\bigl|L\bigl(\tfrac12+it,\,u_j\otimes\chi\bigr)\bigr|\;\le\;C_\varepsilon\,\bigl(|\cond(\chi)|^2\,(1+|t_j|)\,(1+|t|)\bigr)^{1/2-\eta_0+\varepsilon}
+\]
+uniformly in $t\in\R$.
+\end{conjecture}
+
+\begin{remark}[On the strength of Conjecture~\ref{conj:subconv-input}]\label{rmk:strength}
+Conjecture~\ref{conj:subconv-input} is at the level of the Burgess / Conrey--Iwaniec barrier for $\mathrm{GL}_2\times\mathrm{GL}_1$ subconvexity over $\Qi$. The corresponding bound over $\Q$ is in the literature in some regimes (Petrow--Young \cite{petrow-young} for Dirichlet $L$-functions cube-free conductor; Blomer--Harcos--Michel \cite{BHM} for the level aspect of cusp forms with non-trivial $\eta_0$). \emph{The corresponding statement over $\Qi$ with full conductor uniformity is, to our knowledge, not known unconditionally.} The ``cube-free'' restriction in Petrow--Young is one possible obstruction; the holomorphic-vs-Maass distinction (referee P9-2) is another. In Section 5 we will discuss what unconditional fragments give, but in this paper we treat Conjecture~\ref{conj:subconv-input} as a hypothesis.
+\end{remark}
+
+\begin{remark}[Why conductor up to $N$, not $\sqrt N$]\label{rmk:cond-uniformity}
+This addresses referee XC-5. In the Bianchi--Kuznetsov dual side of $M(\theta;N)$, the Kloosterman moduli $c\in\Zi$ that contribute satisfy $|c|^2\asymp |\theta|N$ for the $\theta$-typical regime, and the integration over $\theta\in[0,1]$ does send $|\theta|\asymp 1$ in part of the range. Therefore $|c|^2$ does range up to $N$, and the corresponding Dirichlet-character-twist of the Hecke--Maass form has conductor up to $|c|^2\asymp N$. We must have subconvexity uniformly in conductor up to $N$, not just up to $N^{1/2}$.
+
+P6 \S5 stated the conductor range as $\le N^{1/2}$, and the referee correctly flagged this as too weak. Conjecture~\ref{conj:subconv-input} above states it as $\le N$, which is the genuine requirement.
+\end{remark}
+
+\subsection{The main conditional theorem}\label{ssec:typeII-main}
+
+\begin{theorem}[Main conditional reduction; P11]\label{thm:main-conditional}
+Assume Conjecture~\ref{conj:subconv-input} for some $\eta_0>0$. Then there exist explicit
+\[
+\delta\;=\;\delta(\eta_0)\;>\;0
+\]
+and $C_\varepsilon>0$ such that, for every $\varepsilon>0$, every $N\ge 2$, and every pair of sequences $A,B:\Nz^2\to\C$ supported on coprime pairs with $a^2+b^2\le N+1$ and $c^2+d^2\le N+1$ respectively,
+\[
+\bigl|\Sigma(N;A,B)\bigr|\;\le\;C_\varepsilon\,N^{1-\delta+\varepsilon}\,\norm{A}_2\norm{B}_2.
+\]
+That is: the bilinear conjecture (Conjecture~\ref{conj:bilin-l2}) holds in the $\ell^2$ form actually used by the Friedlander--Iwaniec asymptotic sieve.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+By Remark~\ref{rmk:dyadic-recombine} it suffices to bound $\Sigma_\psi(N;A,B)$ uniformly across dyadic scales $N_k\le N$. By Proposition~\ref{prop:Sigma-psi-as-theta-integral},
+\[
+\Sigma_\psi(N;A,B)\;=\;\int_0^1 e(-\theta)\,M(\theta;N)\,d\theta.
+\]
+We split the integral at $|\theta|\le 1/N$ and $|\theta|>1/N$. The contribution near $\theta=0$ is the ``main term'' contribution, dominated by the Eisenstein piece $\mathcal M_{\mathrm{Eis}}$, which is evaluated explicitly in Section 5 and gives a contribution of size $\le C\norm{A}_2\norm{B}_2\,N^{1-\delta_1+\varepsilon}$ for some $\delta_1=\delta_1(\eta_0)>0$.
+
+Away from $\theta=0$, the Bianchi--Kuznetsov dual side (Section 3) expands
+\[
+M(\theta;N)\;=\;\sum_j L(\tfrac12,u_j\otimes\chi_\theta)\,\rho_j(\cdot)\,K(t_j;\theta;N)\;+\;\mathcal M_{\mathrm{err}}(\theta;N),
+\]
+with $\cond(\chi_\theta)\asymp |\theta|N\le N$, the conductor range matching Conjecture~\ref{conj:subconv-input}. Stationary phase (Section 4) localizes $|t_j|\asymp \sqrt{|\theta|N}$. Cauchy--Schwarz on the spectral side (with the Bianchi spectral large sieve, cubic density --- Lokvenec-Guleska, addressing referee P7-8) combined with Conjecture~\ref{conj:subconv-input} bounds the cuspidal sum by
+\[
+\Bigl(\sum_j |\rho_j(\cdot)|^2\,\frac{1}{\cosh\pi t_j}\Bigr)^{1/2}\Bigl(\sup_j|L(\tfrac12,u_j\otimes\chi_\theta)|\Bigr)\Bigl(\sum_j|K(t_j;\theta;N)|^2\Bigr)^{1/2},
+\]
+which after integration against $e(-\theta)d\theta$ produces a contribution $\le C\norm{A}_2\norm{B}_2\,N^{1-\delta_2+\varepsilon}$ for some $\delta_2=\delta_2(\eta_0)>0$. The error term $\mathcal M_{\mathrm{err}}$ is controlled unconditionally via Weil's bound on Bianchi--Kloosterman sums.
+
+Setting $\delta:=\min(\delta_1,\delta_2)$, the proof is complete \emph{modulo} the explicit verifications in Sections 3--5. The quantitative dependence is: if Conjecture~\ref{conj:subconv-input} holds with exponent $\eta_0$, then the proof yields $\delta=c\eta_0$ for an explicit constant $c\in(0,1]$ that we compute in Section 5.
+\end{proof}
+
+\begin{remark}[What this proof sketch defers]\label{rmk:deferred}
+The proof sketch above defers exactly the following items to later sections, all of them written as separate companion pieces (not in this file):
+\begin{itemize}
+\item[\textbf{Section 3:}] The Bianchi--Kuznetsov dual identity for $M(\theta;N)$, including the determination of the Hecke character $\chi_\theta$ and the precise form of the integral transform $K(t_j;\theta;N)$.
+\item[\textbf{Section 4:}] The stationary-phase analysis of $K(t_j;\theta;N)$, with the convention $K_{it}$ vs. $K_{2it}$ \emph{fixed in Section 3} and used uniformly thereafter (addressing referee P7-7, P9-3).
+\item[\textbf{Section 5:}] The main-term bookkeeping. This includes (a) the Eisenstein contribution, evaluated explicitly via incomplete Eisenstein series in the style of Bykovsky / Templier --- not hand-waved (referee XC-4); (b) the explicit constant $c$ in $\delta=c\eta_0$; (c) the verification that the spectral large sieve is applied with the correct cubic $T^3$ density (referee P7-8).
+\end{itemize}
+None of this is claimed in the present file. Sections 1 and 2 set the stage and identify the precise spectral input; the analytic work proper is in the companion sections.
+\end{remark}
+
+\begin{corollary}[Conditional Landau IV]\label{cor:cond-landau}
+Assume Conjecture~\ref{conj:subconv-input}. Then by Theorem~\ref{thm:main-conditional} and Friedlander--Iwaniec's asymptotic sieve for primes \cite{FI98a, FI98b},
+\[
+\#\{n\le N:n^2+1\text{ prime}\}\;\gg\;\frac{N}{\log N}.
+\]
+In particular Landau's fourth problem is resolved positively under the subconvexity hypothesis.
+\end{corollary}
+
+\begin{proof}[Proof sketch]
+Theorem~\ref{thm:main-conditional} gives the Type II input ($B_2$ axiom) of the Friedlander--Iwaniec asymptotic sieve in the $\ell^2$ form that the sieve actually accepts. The Type I input ($A_1$ axiom) for the slice $\nu=1+in$ is standard --- it is essentially the equidistribution of $1+in$ in residue classes modulo small Gaussian integers, an unconditional Bombieri--Vinogradov-style statement over $\Qi$. With both inputs, the asymptotic sieve produces the lower bound $N/\log N$ for the prime-counting function on the slice. The full deduction is a direct application of the FI machinery and is not novel here.
+\end{proof}
+
+\subsection{Roadmap of the rest of the paper}\label{ssec:typeII-roadmap}
+
+\begin{remark}[Sections 3, 4, 5 (not in this file)]\label{rmk:roadmap-out}
+The rest of P11 is organized as follows.
+
+\medskip
+\noindent\textbf{Section 3: Bianchi--Kuznetsov dual side of $M(\theta;N)$.} Open the divisor convolution $d_{A,B}$ via double Mellin and apply the Bianchi--Kuznetsov formula \cite{LG, motohashi-bianchi} to the resulting inner sum. Output: an explicit identity
+\[
+M(\theta;N)\;=\;\mathcal M_{\mathrm{main}}(\theta;N)+\mathcal M_{\mathrm{Eis}}(\theta;N)+\sum_j(\cdots)\,L(\tfrac12,u_j\otimes\chi_\theta)\,K(t_j;\theta;N)+\mathcal M_{\mathrm{err}}(\theta;N).
+\]
+Convention for $K_{it}$ fixed once and for all here.
+
+\medskip
+\noindent\textbf{Section 4: Transform analysis.} Carry out the stationary-phase analysis of $K(t_j;\theta;N)$ and verify the spectral localization $|t_j|\asymp\sqrt{|\theta|N}$. Address referee P7-4 (constants in the stationary phase) and P9-4 (small-$\theta$ regime), both of which had errors in P9.
+
+\medskip
+\noindent\textbf{Section 5: Main-term bookkeeping and synthesis.} Evaluate $\mathcal M_{\mathrm{main}}$ and $\mathcal M_{\mathrm{Eis}}$ explicitly (referee XC-3, XC-4); apply the Bianchi spectral large sieve with cubic density $T^3$ (referee P7-8) and Conjecture~\ref{conj:subconv-input} to bound the cuspidal sum; bound $\mathcal M_{\mathrm{err}}$ unconditionally via Weil's bound on Bianchi--Kloosterman; combine with the $\theta$-integration of Proposition~\ref{prop:Sigma-psi-as-theta-integral} to deduce Theorem~\ref{thm:main-conditional}; deduce Corollary~\ref{cor:cond-landau} via Friedlander--Iwaniec.
+\end{remark}
+
+\begin{remark}[Self-honest summary of what is NEW versus what is REPACKAGED]\label{rmk:novelty-honest}
+For the reader's clarity:
+\begin{itemize}
+\item \textbf{New in this paper (P11):} (i) the $\ell^2$ formulation of the bilinear conjecture, properly aligned with the Friedlander--Iwaniec input axioms; (ii) the avoidance of Cauchy--Schwarz to a dispersion --- direct Type II via Fourier inversion in $\theta$; (iii) the precise statement of the conductor range up to $N$ (not $\sqrt N$) in the subconvexity input; (iv) the explicit identification of the slice $\{\Re(\xi\eta)=1\}$ in $\Zi$ as the geometric heart of the $n^2+1$ problem and its analytic translation through Lemma~\ref{lem:slice-fourier} and Proposition~\ref{prop:Sigma-psi-as-theta-integral}.
+\item \textbf{Repackaged (i.e., already in the literature, used here as a black box):} the Bianchi--Kuznetsov sum formula \cite{LG, motohashi-bianchi}; Bianchi spectral large sieve (cubic in $T$) \cite{LG}; Weil's bound on Bianchi--Kloosterman sums; standard Mellin / Voronoi machinery on $\mathrm{GL}_2$ over $\Qi$; the asymptotic sieve for primes \cite{FI98a, FI98b}; the Eisenstein evaluation in the spirit of Bykovsky / Templier \cite{templier-bianchi}.
+\item \textbf{Conditional (i.e., we hypothesize it):} Conjecture~\ref{conj:subconv-input} (the $\mathrm{GL}_2\times\mathrm{GL}_1$ subconvexity input over $\Qi$, with full conductor uniformity).
+\end{itemize}
+The novelty is structural: the framework (Sections 1--2 of this paper) sets up the $n^2+1$ problem as an instance of a standard analytic question (additive twists of Hecke--Maass cusp forms over $\Qi$), pinpoints the precise subconvexity input that closes the loop, and identifies the slice $\Re(\xi\eta)=1$ as the right object. We make no claim of an analytic technique not already available in the literature; we make a claim about a clean reduction.
+\end{remark}
+
+% =============================================================
+% References
+% =============================================================
+\begin{thebibliography}{99}
+
+\bibitem{shakov} A.~Shakov, \emph{Polynomials in $\Z[x]$ whose divisors are enumerated by $\SLNz$}, preprint, Feb.\ 2024, arXiv:2405.03552.
+
+\bibitem{FI98a} J.~Friedlander and H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+
+\bibitem{FI98b} J.~Friedlander and H.~Iwaniec, \emph{The polynomial $X^2+Y^4$ captures its primes}, Ann.\ of Math.\ \textbf{148} (1998), 945--1040.
+
+\bibitem{hooley63} C.~Hooley, \emph{On the number of divisors of a quadratic polynomial}, Acta Math.\ \textbf{110} (1963), 97--114.
+
+\bibitem{mckee99} J.~McKee, \emph{The average number of divisors of an irreducible quadratic polynomial}, Math.\ Proc.\ Camb.\ Philos.\ Soc.\ \textbf{126} (1999), 17--22.
+
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Utrecht University, 2004.
+
+\bibitem{motohashi-bianchi} R.~Bruggeman and Y.~Motohashi, \emph{Sum formula for Kloosterman sums and the fourth moment of the Dedekind zeta function over the Gaussian number field}, Funct. Approx. Comment. Math. (2003), and subsequent papers.
+
+\bibitem{BHM} V.~Blomer, G.~Harcos, P.~Michel, \emph{Bounds for modular $L$-functions in the level aspect}, Ann.\ Sci.\ \'Ec.\ Norm.\ Sup\'er.\ \textbf{40} (2007), 697--740.
+
+\bibitem{petrow-young} I.~Petrow and M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+
+\bibitem{templier-bianchi} N.~Templier, \emph{A non-split sum of coefficients of modular forms}, Duke Math.\ J.\ \textbf{157} (2011), 109--165.
+
+\bibitem{P6} (preceding paper P6 in this program) \emph{Toward the bilinear cross-term estimate on $\SLNz$: a Gaussian dispersion / spectral attack via Bianchi forms}, manuscript, 2026.
+
+\end{thebibliography}
+
+\end{document}

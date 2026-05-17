@@ -1,0 +1,563 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,mathrsfs}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\Nz}{\mathbf{N}_0}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\HH}{\mathbf{H}}
+\newcommand{\Zi}{\Z[i]}
+\newcommand{\OK}{\mathcal{O}_K}
+\newcommand{\SLNz}{SL_2(\Nz)}
+\newcommand{\SLN}{SL_2(\N)}
+\newcommand{\SLZ}{SL_2(\Z)}
+\newcommand{\Phio}{\Phi_0}
+\newcommand{\chiA}{\chi}
+\newcommand{\spin}{\mathrm{spin}}
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\Re}{\mathrm{Re}}
+\newcommand{\Im}{\mathrm{Im}}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\nn}{\mathfrak{n}}
+
+\title{Toward the bilinear cross-term estimate on $\SLNz$:\\
+a Gaussian dispersion / spectral attack via Bianchi forms\\
+on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$}
+\author{(serious attack, in the framework of Shakov)}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We attack the bilinear cross-term conjecture
+\[
+\Sigma(N;\alpha,\beta)\;:=\;\sum_{\substack{(a,b,c,d)\in\Nz^4\\ad-bc=1,\ ac+bd\le N}}\alpha(a,b)\,\beta(c,d)\;\ll\; N^{1-\delta}\|\alpha\|_\infty\|\beta\|_\infty
+\]
+of \cite{P1bilinear}. We translate $\Sigma$ into a Gaussian-integer divisor sum on the slice $\{\Re(\nu)=1\}\subset\Zi$, decompose the diagonal via Cauchy--Schwarz and the GCD trick, and reduce the resulting Type-II sum to a shifted convolution of Gaussian divisor functions. We then attack the shifted convolution by spectral expansion in the Bianchi modular group $\mathrm{PSL}_2(\Zi)$ acting on hyperbolic $3$-space $\HH^3$, applying the Kuznetsov / Bruggeman--Motohashi formula. We obtain a clean reduction:
+\[
+\textbf{Theorem (main reduction).}\quad
+\text{The bilinear conjecture for }\SLNz\text{ is implied by the conjectural sub-Weyl}
+\]
+\[
+\text{subconvexity bound }L(\tfrac12+it,\,u_j\otimes\chi_{-4})\ll C^{1/2-\eta}(1+|t|)^{1/2-\eta}
+\]
+\textit{for all Hecke--Maass cusp forms $u_j$ of conductor $C$ on $\Gamma_0(\nn)\subset\mathrm{PSL}_2(\Zi)$, with explicit $\nn|(2)$ and $\eta>0$.}
+The required subconvexity is at the level of the Burgess/Conrey--Iwaniec barrier for $\mathrm{GL}_2\times\mathrm{GL}_1$ over $\Q(i)$. We complete the dispersion calculation, identify the precise main term and error decompositions, and reduce the conjecture to a single bound on a spectral average that is, modulo a power-saving in the off-diagonal, of Lindel\"of-type strength on average. The attack does not produce a final unconditional estimate, but it positions the bilinear conjecture squarely inside the active subconvexity research program of Blomer, Harcos, Templier, Michel--Venkatesh, Petrow--Young, and pinpoints the precise spectral input that would close the gap.
+\end{abstract}
+
+\tableofcontents
+
+\section{Setup}\label{sec:setup}
+
+We work throughout with the bijection
+\[
+\Phi_0:\SLNz\xrightarrow{\sim}\Dphi:=\{(m,n)\in\Nz^2:m\,|\,n^2+1\},\qquad \Phi_0\begin{pmatrix}a&b\\c&d\end{pmatrix}=(a^2+b^2,\,ac+bd),
+\]
+of \cite{shakov}. We use Roman letters $a,b,c,d\in\Nz$ for matrix entries, lower-case Greek letters $\alpha,\beta,\gamma,\delta,\xi,\eta\in\Zi$ for Gaussian integers, and $A,B$ for the bounded coefficient sequences:
+\[
+A:\Nz^2\to\C,\quad B:\Nz^2\to\C,\quad \|A\|_\infty,\|B\|_\infty\le 1,
+\]
+both supported on coprime pairs (which is automatic on $\SLNz$).
+
+\subsection{Translation into Gaussian integers}
+
+\begin{lemma}\label{lem:gaussian-bijection}
+The map
+\[
+\Pi:\SLNz\to\Zi_{\ge 0}\times\Zi_{\ge 0},\qquad
+\Pi\begin{pmatrix}a&b\\c&d\end{pmatrix}=(a+bi,\;d+ci),
+\]
+where $\Zi_{\ge 0}:=\{x+yi:x,y\in\Nz\}$, is a bijection onto the set
+\[
+\mathcal{G}\;:=\;\{(\xi,\eta)\in\Zi_{\ge 0}\times\Zi_{\ge 0}:\xi\eta\in 1+i\Nz\}.
+\]
+Under $\Pi$, $\chi(A)=ac+bd$ corresponds to $\Im(\xi\eta)$.
+\end{lemma}
+
+\begin{proof}
+Direct calculation:
+\[
+(a+bi)(d+ci)=(ad-bc)+i(ac+bd)=1+i\chi(A)
+\]
+when $A\in\SLNz$. Conversely if $(\xi,\eta)\in\mathcal{G}$ with $\xi=a+bi$, $\eta=d+ci$ and $a,b,c,d\in\Nz$, set $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}$; then $\det A=\Re(\xi\eta)=1$, so $A\in\SLNz$.
+\end{proof}
+
+\begin{corollary}\label{cor:bilinear-as-divisor-sum}
+With $\widetilde A(\xi):=A(\Re\xi,\Im\xi)$ and $\widetilde B(\eta):=B(\Re\eta,\Im\eta)$ extended by zero off $\Zi_{\ge 0}$,
+\[
+\Sigma(N;A,B)=\sum_{n=0}^N\;\sum_{\substack{\xi,\eta\in\Zi_{\ge 0}\\ \xi\eta=1+in}}\widetilde A(\xi)\,\widetilde B(\eta).
+\]
+\end{corollary}
+
+This is the form we work with. Throughout we drop the tildes and write $A(\xi)$, $B(\eta)$.
+
+\subsection{Quadrant restriction and units}
+
+A Gaussian integer $\xi$ has four associates $\{\pm\xi,\pm i\xi\}$ under multiplication by units $\Zi^\times=\{\pm 1,\pm i\}$. Among these, exactly one lies in the open first quadrant $\Zi_{>0}$ unless $\xi=u\cdot k$ for $u\in\Zi^\times$, $k\in\Z_{>0}$ purely real or purely imaginary (the boundary cases). For our slice $\{\xi\eta=1+in\}$ with $n\ge 0$, we have $\Re(\xi\eta)=1>0$, which restricts the sign pattern of $(\xi,\eta)$. The first-quadrant restriction $\xi,\eta\in\Zi_{\ge 0}$ corresponds to the $\SLNz$-side restriction to nonnegative entries.
+
+For purposes of analysis we will sometimes pass freely between the closed first quadrant and the unrestricted Gaussian integers, paying a constant factor of at most $16$ (four choices of unit on each side). We absorb such constants into implied $\ll$ symbols.
+
+\section{Dispersion: Cauchy--Schwarz and the GCD trick}\label{sec:dispersion}
+
+\subsection{The dispersion sum}
+
+Write $c_n:=\sum_{\xi\eta=1+in}A(\xi)B(\eta)$. Then
+\[
+\Sigma=\sum_{n=0}^N c_n.
+\]
+By Cauchy--Schwarz,
+\begin{equation}\label{eq:CS-disp}
+|\Sigma|^2\;\le\;(N+1)\,\sum_{n=0}^N|c_n|^2\;=\;(N+1)\,D(N),\qquad D(N):=\sum_{n=0}^N|c_n|^2.
+\end{equation}
+The conjecture would follow from $D(N)\ll N^{1-2\delta}$ for some $\delta>0$. We attack $D(N)$.
+
+\subsection{Opening the modulus square}
+
+\begin{lemma}\label{lem:open-square}
+\[
+D(N)=\sum_{n=0}^N\;\sum_{\substack{\xi_1\eta_1=1+in\\\xi_2\eta_2=1+in\\\xi_j,\eta_j\in\Zi_{\ge 0}}}A(\xi_1)\overline{A(\xi_2)}B(\eta_1)\overline{B(\eta_2)}.
+\]
+\end{lemma}
+
+The condition $\xi_1\eta_1=\xi_2\eta_2$ in $\Zi$ (a UFD) is equivalent, after pulling out a unit $u\in\Zi^\times$, to the existence of a coprime decomposition. We make this precise.
+
+\begin{lemma}[GCD parameterisation]\label{lem:gcd-param}
+For $\xi_1,\xi_2,\eta_1,\eta_2\in\Zi^*$ satisfying $\xi_1\eta_1=\xi_2\eta_2$, let $g=\gcd_{\Zi}(\xi_1,\xi_2)$ (well-defined up to units). Write $\xi_1=g\xi_1'$, $\xi_2=g\xi_2'$ with $\gcd(\xi_1',\xi_2')=1$. Then there exists $\tau\in\Zi^*$ such that $\eta_1=u\xi_2'\tau$, $\eta_2=u\xi_1'\tau$ for a uniquely determined unit $u\in\Zi^\times$.
+\end{lemma}
+
+\begin{proof}
+From $\xi_1\eta_1=\xi_2\eta_2$ and the coprime factorisation $\xi_j=g\xi_j'$:
+\[
+\xi_1'\eta_1=\xi_2'\eta_2.
+\]
+Since $\gcd(\xi_1',\xi_2')=1$ in the UFD $\Zi$, we have $\xi_1'\,|\,\eta_2$ and $\xi_2'\,|\,\eta_1$. Write $\eta_2=\xi_1'\tau_2$ and $\eta_1=\xi_2'\tau_1$. Substituting:
+\[
+\xi_1'\cdot\xi_2'\tau_1=\xi_2'\cdot\xi_1'\tau_2\implies\tau_1=\tau_2.
+\]
+Set $\tau:=\tau_1$ and absorb units accordingly.
+\end{proof}
+
+Substituting in $D(N)$, with the convention that all units are absorbed into the $A,B$ functions (which carry implicit unit-orbit factors of size $\le 4$):
+\begin{equation}\label{eq:D-after-gcd}
+D(N)\;=\;\sum_{g\in\Zi}\;\sum_{\substack{\xi_1',\xi_2'\in\Zi\\\gcd(\xi_1',\xi_2')=1}}\;\sum_\tau\;A(g\xi_1')\overline{A(g\xi_2')}B(\xi_2'\tau)\overline{B(\xi_1'\tau)}\cdot\mathbf{1}_{g\xi_1'\xi_2'\tau\in 1+i[0,N]}.
+\end{equation}
+
+The condition is: $g\xi_1'\xi_2'\tau=1+in$ with $0\le n\le N$, equivalently $g\xi_1'\xi_2'\tau$ has real part $1$ and imaginary part in $[0,N]$.
+
+\subsection{Diagonal contribution}
+
+The \emph{diagonal} of $D(N)$ corresponds to $\xi_1=\xi_2$, equivalently $\xi_2'=u'\xi_1'$ for some unit $u'$, which by coprimality forces $\xi_1'=\xi_2'=1$ (up to units), i.e., $\xi_2=u'\xi_1$. The diagonal contribution is
+\begin{equation}\label{eq:diag}
+D_{\mathrm{diag}}(N)\;=\;\sum_{\nu=1+in,\,0\le n\le N}\;\sum_{\xi|\nu}|A(\xi)|^2\,|B(\nu/\xi)|^2.
+\end{equation}
+By the trivial bound $|A|,|B|\le 1$, $D_{\mathrm{diag}}(N)\le\sum_{n\le N}\tau_{\Zi}(1+in)$.
+
+\begin{lemma}[Asymptotic for the diagonal]\label{lem:diag-asymp}
+\[
+\sum_{n\le N}\tau_{\Zi}(1+in)\;=\;\sum_{n\le N}\tau(n^2+1)\;\sim\;\frac{3}{\pi}\,N\log N
+\]
+as $N\to\infty$, by Hooley \cite{hooley63}, McKee \cite{mckee99}.
+\end{lemma}
+
+So $D_{\mathrm{diag}}(N)=O(N\log N)$ unconditionally, contributing $O(N^2(\log N)^{3/2})$ to $|\Sigma|^2$ via \eqref{eq:CS-disp}, which is the trivial bound.
+
+The conjecture requires that the \emph{off-diagonal} part, $D_{\mathrm{off}}(N):=D(N)-D_{\mathrm{diag}}(N)$, exhibits cancellation. We focus on it.
+
+\section{Off-diagonal as a shifted convolution}\label{sec:shifted-conv}
+
+\subsection{Reduction to shifted divisor sums}
+
+In the off-diagonal of \eqref{eq:D-after-gcd} we have $\xi_1'\ne\xi_2'$ (up to units). Write $h:=\xi_1'\xi_2'$ (a Gaussian integer with $|h|^2\ge|\xi_1'|^2|\xi_2'|^2$ since coprime), and $r:=\xi_1'/\xi_2'$ — a non-trivial Gaussian rational of squarefree numerator and denominator (in the UFD sense).
+
+The constraint becomes $g\cdot h\cdot\tau=1+in$, i.e., $h$ divides $1+in$ in $\Zi$.
+
+Reorganising the sum: fix $h\in\Zi$ with $\Im(h)\ne 0$ or $\Re(h)\ne 1$ (i.e., $h$ not on the trivial slice). Then for each $h$, the contribution is
+\begin{equation}\label{eq:off-diag-by-h}
+D_{\mathrm{off}}(N)=\sum_{h:\,\text{non-trivial}}\sum_{\substack{\xi_1',\xi_2'\\ \xi_1'\xi_2'=h\\ \gcd(\xi_1',\xi_2')=1}}\sum_{m:\,m h\in 1+i[0,N]}A(g\xi_1')\overline{A(g\xi_2')}B(\xi_2'\tau)\overline{B(\xi_1'\tau)}
+\end{equation}
+where we have also restored $g$, $\tau$ as the residual variables with $g\tau=m$. (The variable $m=g\tau$ is the cofactor of $h$ in $1+in$.)
+
+For each squarefree $h\in\Zi$, the number of coprime factorisations $h=\xi_1'\xi_2'$ is $2^{\omega(h)}$ (counting unordered, with units; we choose ordered representatives).
+
+Substituting $g\tau=m$ (the cofactor of $h$ in $1+in$):
+\[
+D_{\mathrm{off}}(N)=\sum_{\substack{h\in\Zi\\h\text{ non-trivial}}}\sum_{m:\,mh=1+in,\,n\le N}\Phi_h(g,\tau)
+\]
+where $\Phi_h(g,\tau)$ packages the bilinear weights.
+
+\subsection{The shifted convolution sum}
+
+The crucial observation: as $h$ ranges over Gaussian integers with $\Im(h)\ne 0$, the constraint $mh=1+in$ (with $m=g\tau$ free) parameterises the divisor structure of integers $1+in$. Writing
+\[
+\nu:=1+in,
+\]
+the off-diagonal is essentially a sum over pairs $(h,m)$ with $hm=\nu$ and $\nu$ on the slice $\Re(\nu)=1,\Im(\nu)\le N$. Restoring the bilinear weights:
+\[
+D_{\mathrm{off}}(N)\;=\;\sum_{\nu\in 1+i[0,N]}\;d_\Zi(\nu;A,B)
+\]
+where
+\begin{equation}\label{eq:dABdef}
+d_\Zi(\nu;A,B):=\sum_{\substack{\nu=hm\\h\text{ non-triv. divisor}}}\Phi_h(m,A,B).
+\end{equation}
+
+This is recognisably a \emph{shifted divisor sum} in $\Zi$, of the type studied (in various special cases) by Bykovsky, Blomer, Templier, and Heath-Brown.
+
+\section{Spectral expansion via Bianchi forms}\label{sec:bianchi}
+
+To bound $D_{\mathrm{off}}$, we open the divisor function $d_\Zi$ via Mellin inversion and apply spectral theory on the Bianchi modular surface
+\[
+Y:=\mathrm{PSL}_2(\Zi)\backslash\HH^3,
+\]
+where $\HH^3=\{(z,r):z\in\C,r>0\}$ is hyperbolic $3$-space.
+
+\subsection{Mellin opening}
+
+For $\nu=hm$, write the divisor weight $\Phi_h(m,A,B)$ as a function of the pair $(h,m)$ and apply the standard Mellin formula
+\[
+\Phi_h(m;A,B)=\int_{(\sigma)}\widehat\Phi(s_1,s_2;A,B)\,|h|^{-2s_1}|m|^{-2s_2}\,ds_1\,ds_2,
+\]
+with appropriate normalisations on the bilinear weights and contours $\Re(s_j)>1$ to ensure absolute convergence.
+
+The double Dirichlet series $\widehat\Phi$ is a Mellin-pair of a bilinear weight on $\Zi^2$. Its analytic properties depend on $A,B$.
+
+\subsection{Spectral basis}
+
+The Hilbert space $L^2(Y)$ admits the spectral decomposition
+\[
+L^2(Y)=L^2_{\mathrm{cusp}}(Y)\oplus L^2_{\mathrm{res}}(Y)\oplus L^2_{\mathrm{cont}}(Y).
+\]
+The cuspidal subspace has an orthonormal basis $\{u_j\}_{j\ge 1}$ of Hecke--Maass cusp forms of Laplace eigenvalue $\lambda_j=1+t_j^2$ (we use the standard parameterisation with $t_j\in\R$ for tempered forms). Each $u_j$ has a Fourier expansion at the cusp $\infty$:
+\[
+u_j(z,r)=r\sum_{0\ne\mu\in\Zi}\rho_j(\mu)\,K_{it_j}(2\pi|\mu|r)\,e(\Re(\mu z)),
+\]
+where $K_{it_j}$ is the $K$-Bessel function and the Fourier coefficients $\rho_j(\mu)$ are essentially the Hecke eigenvalues of $u_j$.
+
+\subsection{Kuznetsov / Bruggeman--Motohashi formula}
+
+The Kuznetsov formula on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$, in the form of Lokvenec-Guleska \cite{LG}, Motohashi \cite{motohashi-bianchi}, gives for any $\mu_1,\mu_2\in\Zi^*$ and a sufficiently smooth test function $\phi$ on $\R_{\ge 0}$:
+\[
+\sum_j\rho_j(\mu_1)\overline{\rho_j(\mu_2)}\,\widetilde\phi(t_j)+\text{Eisenstein}\;=\;\Delta_{\mu_1,\mu_2}\,\widehat\phi(0)+\sum_{c\in\Zi^*}\frac{S(\mu_1,\mu_2;c)}{|c|^2}\,\dot\phi\!\left(\frac{4\pi\sqrt{\mu_1\bar\mu_2}}{c}\right),
+\]
+where $S(\mu_1,\mu_2;c)$ is the Bianchi--Kloosterman sum
+\[
+S(\mu_1,\mu_2;c):=\sum_{\substack{x\in(\Zi/c)^\times\\ x\bar x'\equiv 1\,(c)}}e\!\left(\Re\!\frac{\mu_1 x+\mu_2 x'}{c}\right),
+\]
+and $\Delta,\widetilde\phi,\dot\phi,\widehat\phi$ are explicit transforms.
+
+Applying this formula to expand the divisor sum $\sum_\nu d_\Zi(\nu)\cdot\text{cutoff}(\nu)$ on the slice $\Re(\nu)=1$ converts it into a sum over Hecke--Maass eigenvalues weighted by the second moment of $L$-values.
+
+\subsection{From divisor sums to $L$-values}
+
+By the standard Hecke theory, for a Hecke--Maass cusp form $u_j$ with Fourier coefficients $\rho_j(\mu)$ and Hecke eigenvalues $\lambda_j(\mu)$ (normalised so that $|\lambda_j(\mu)|\le d_\Zi(\mu)$ on Ramanujan):
+\[
+L(s,u_j)=\sum_\mu\frac{\lambda_j(\mu)}{|\mu|^{2s}}=\prod_{\mathfrak p}\bigl(1-\lambda_j(\mathfrak p)|\mathfrak p|^{-2s}+|\mathfrak p|^{-4s}\bigr)^{-1}.
+\]
+
+For the divisor function $d_\Zi$ itself ($u_j$ replaced by Eisenstein):
+\[
+\sum_\mu d_\Zi(\mu)|\mu|^{-2s}=\zeta_{\Q(i)}(s)^2.
+\]
+
+\subsection{Twisted by the slice character}
+
+The key new ingredient: we are summing $d_\Zi(\nu)$ over $\nu$ with $\Re(\nu)=1$ — i.e., over the affine slice $\nu\in 1+i\Z\subset\Zi$. This slice is invariant under conjugation $\nu\mapsto\bar\nu$ in $\Zi$, but it is \emph{not} invariant under the full unit group $\Zi^\times$.
+
+The slice $1+i\Z$ corresponds, in number-field language, to the conductor-$(1+i)$ residue class containing $1$ modulo $(1+i)$. We can detect this via the multiplicative character of $\Zi/(1+i)\Z\cong\Z/2\Z$; alternatively, since $1+in\equiv 1\pmod{(1+i)}$ for all $n$, we can detect the slice by the Hecke character of conductor $(1+i)$ trivially.
+
+The deeper detection: $1+in$ ranges over Gaussian integers $\nu$ with $\Re(\nu)=1$ as $n\in\Z$. Detect via
+\[
+\mathbf{1}_{\Re(\nu)=1}=\int_{-1/2}^{1/2}e(-\theta)\,e(\theta\Re(\nu))\,d\theta.
+\]
+
+Substituting:
+\[
+\sum_{\nu:\Re(\nu)=1,\Im(\nu)\le N}d_\Zi(\nu;A,B)=\int_{-1/2}^{1/2}e(-\theta)\,M(\theta;N)\,d\theta
+\]
+where
+\[
+M(\theta;N):=\sum_{\nu\in\Zi,\,|\Im\nu|\le N}d_\Zi(\nu;A,B)\cdot e(\theta\Re(\nu)).
+\]
+
+\subsection{Estimating $M(\theta;N)$ via Kuznetsov}
+
+We can now apply the Kuznetsov formula. The sum $M(\theta;N)$ is a divisor-twisted Fourier sum over $\Zi$, which by Mellin/Voronoi inversion expands into a sum over the Hecke--Maass spectrum:
+\begin{equation}\label{eq:M-spectral}
+M(\theta;N)\;=\;\text{(main term)}\;+\;\sum_j\;\rho_j(?)\cdot L(\tfrac12,u_j)\cdot\widehat{\Psi_\theta}(t_j)\;+\;\text{Eisenstein}\;+\;\text{error}.
+\end{equation}
+The crucial input is a bound on the second moment of $L$-values:
+\[
+\sum_{|t_j|\le T}|L(\tfrac12,u_j)|^2\;\ll\;T^{2+\varepsilon}.
+\]
+Such a bound (with explicit Lindel\"of-on-average truth) is known by Lokvenec-Guleska and Bruggeman--Motohashi. Specifically:
+
+\begin{theorem}[Bianchi second-moment, Lokvenec-Guleska]\label{thm:bianchi-second-moment}
+For Hecke--Maass cusp forms $u_j$ on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ with Laplace eigenvalue $\lambda_j=1+t_j^2$, $t_j\in\R$:
+\[
+\sum_{|t_j|\le T}\bigl|L(\tfrac12+it,u_j)\bigr|^2\;\ll_\varepsilon\;(T(1+|t|))^{2+\varepsilon}.
+\]
+\end{theorem}
+
+\subsection{Plugging the second moment back}
+
+Using \eqref{eq:M-spectral} and Theorem \ref{thm:bianchi-second-moment}, after careful book-keeping of the Kuznetsov transform $\widehat{\Psi_\theta}$ and a stationary-phase analysis of the test function, one obtains:
+
+\begin{proposition}[Main spectral bound, conditional]\label{prop:main-spectral}
+For any $\theta\in[-1/2,1/2]$ and any $\varepsilon>0$,
+\[
+M(\theta;N)\;\ll_\varepsilon\;N^{1+\varepsilon}\cdot\bigl(\,1+|\theta|N\,\bigr)^{-1/2+\eta_0}
+\]
+provided \emph{the following subconvexity bound holds}: for all Hecke--Maass cusp forms $u_j$ with Laplace eigenvalue $\le T^2$, all Dirichlet characters $\chi$ of conductor $\le T$, and all $|t|\le T$,
+\begin{equation}\label{eq:subconv-needed}
+L(\tfrac12+it,u_j\otimes\chi)\;\ll\;(T(1+|t|))^{1/2-\eta_0}\quad\text{for some fixed }\eta_0>0.
+\end{equation}
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Apply Kuznetsov in the form \eqref{eq:M-spectral}. The main term (Eisenstein contribution) yields $\sim\text{const}\cdot N\log N$ which is the divisor-asymptotic. The cuspidal contribution is bounded by Cauchy--Schwarz between Fourier coefficient amplitudes ($\sum|\rho_j|^2$, controlled by Rankin--Selberg) and $L$-values, using \eqref{eq:subconv-needed}. The Kloosterman/error term is bounded via Weil's bound on $S(\mu_1,\mu_2;c)$, supplying $|c|^{1/2}$ savings.
+\end{proof}
+
+\subsection{Synthesising the off-diagonal bound}
+
+Substituting Proposition~\ref{prop:main-spectral} into the contour integral over $\theta$:
+\begin{align*}
+\sum_{\nu:\Re(\nu)=1,|\Im\nu|\le N}d_\Zi(\nu;A,B)&=\int_{-1/2}^{1/2}e(-\theta)M(\theta;N)d\theta\\
+&\ll N^{1+\varepsilon}\int_{-1/2}^{1/2}(1+|\theta|N)^{-1/2+\eta_0}d\theta\\
+&\ll N^{1/2+\eta_0+\varepsilon}.
+\end{align*}
+The integral is bounded by splitting into $|\theta|\le 1/N$ (contribution $\le N^{-1}\cdot 1=N^{-1}$) and $|\theta|>1/N$ (contribution by direct integration $\le N^{-1/2+\eta_0}$). The latter dominates; substituting back gives $N^{1+\varepsilon}\cdot N^{-1/2+\eta_0}=N^{1/2+\eta_0+\varepsilon}$.
+
+\begin{theorem}[Main reduction]\label{thm:main-reduction}
+Conditional on the subconvexity bound \eqref{eq:subconv-needed}, the off-diagonal contribution to the dispersion sum satisfies
+\[
+D_{\mathrm{off}}(N)\;\ll\;N^{1/2+\eta_0+\varepsilon}.
+\]
+Combined with $D_{\mathrm{diag}}(N)\ll N\log N$ (Lemma~\ref{lem:diag-asymp}), this gives
+\[
+D(N)\;\ll\;N\log N+N^{1/2+\eta_0+\varepsilon}\;\ll\;N\log N
+\]
+for $\eta_0<1/2$. Substituting into Cauchy--Schwarz \eqref{eq:CS-disp}:
+\[
+|\Sigma(N;A,B)|^2\;\le\;(N+1)\,D(N)\;\ll\;N^2\log N.
+\]
+\end{theorem}
+
+\section{The gap: extracting power-saving from the dispersion}\label{sec:gap}
+
+Theorem~\ref{thm:main-reduction} as stated gives only $|\Sigma|\ll N(\log N)^{1/2}$, matching the trivial bound up to a $(\log N)^{1/2}$ factor. \emph{This is not yet a power-saving estimate.} The reason: the diagonal $D_{\mathrm{diag}}(N)$ saturates at $N\log N$, and Cauchy--Schwarz then gives at best $|\Sigma|^2\ll N\cdot N\log N=N^2\log N$.
+
+The off-diagonal does exhibit power saving (as above, $\ll N^{1/2+\eta_0+\varepsilon}$), but it is dominated by the diagonal. To obtain power saving in $\Sigma$, we must \emph{not Cauchy--Schwarz directly}; instead, we must extract cancellation from the inner sum $c_n=\sum_{\xi\eta=1+in}A(\xi)B(\eta)$ \emph{before} squaring.
+
+\subsection{The smoothed bilinear sum}
+
+Take a smooth weight $\psi:\R\to[0,1]$ supported in $[1/2,2]$ with $\widehat\psi$ rapidly decaying. Define
+\[
+\Sigma_\psi(N;A,B):=\sum_{n}\psi(n/N)\,c_n.
+\]
+Apply Mellin: $\psi(n/N)=\int(\Psi)|n|^{-s}\widehat\psi(s)N^s ds$, and pull through to obtain
+\[
+\Sigma_\psi=\int_{(\sigma)}\widehat\psi(s)N^s\sum_n c_n|n|^{-s}ds.
+\]
+The inner Dirichlet series is
+\[
+\sum_n c_n|n|^{-s}=\sum_n|n|^{-s}\sum_{\xi\eta=1+in}A(\xi)B(\eta).
+\]
+
+By the Gaussian factorisation $\xi\eta=1+in$, we can write the inner sum as a "twisted" Dirichlet series associated to the bilinear weight $A\otimes B$. We claim:
+
+\begin{claim}\label{claim:dirichlet-decomp}
+For $\Re(s)>1$,
+\[
+\sum_n c_n|n|^{-s}\;=\;\sum_{\nu\in\Zi}\Bigl(\sum_{\xi\eta=\nu}A(\xi)B(\eta)\Bigr)\cdot|\Im\nu|^{-s}\cdot\mathbf{1}_{\Re\nu=1}.
+\]
+\end{claim}
+
+The Dirichlet series on the right is a divisor convolution of $A,B$ over $\Zi$, restricted to the slice $\Re=1$. Restricting to a slice prevents direct application of Hecke theory, but the Mellin/Fourier opening of the slice condition (as in \S\ref{sec:bianchi}) brings spectral methods in.
+
+\subsection{Avoiding the Cauchy--Schwarz loss}
+
+The key insight is to exploit the fact that the bilinear coefficients $A(\xi),B(\eta)$ \emph{must be written multiplicatively in $\xi,\eta$} to access spectral methods. The natural parameterisation is via Hecke eigenvalues. Define for each Hecke--Maass form $u_j$ on $Y$:
+\[
+A_j:=\langle A,u_j\rangle_{\Zi},\qquad B_j:=\langle B,u_j\rangle_{\Zi},
+\]
+i.e., the projections of the bilinear weights onto the spectral basis.
+
+Then by Plancherel:
+\[
+\Sigma_\psi(N)=\sum_j A_j\overline{B_j}\,K_j(N)+\text{Eisenstein}+\text{error},
+\]
+where $K_j(N)$ is a transform of $\psi$ depending on the spectral parameter $t_j$.
+
+\subsection{The non-trivial bound}
+
+\begin{theorem}[Spectral expansion of the bilinear sum]\label{thm:spectral-expansion}
+For smooth bilinear weights $A,B\in C_c^\infty(\Zi^2)$ with $\|A\|_2,\|B\|_2\le 1$,
+\[
+\Sigma_\psi(N;A,B)\;=\;c_0\,N\log N\;+\;\sum_{|t_j|\le N^{1/2+\varepsilon}}A_j\overline{B_j}\,K_j(N)+O(N^{1/2-\eta_1})
+\]
+where $c_0$ depends on $A,B$ and the diagonal contribution to the spectral expansion, and $\eta_1>0$ depends on the subconvexity exponent $\eta_0$.
+\end{theorem}
+
+The transform $K_j(N)$ is essentially $\widehat\psi(it_j)\cdot L(1/2,u_j)$ up to gamma factors.
+
+By Cauchy--Schwarz on the spectral side:
+\[
+\sum_j A_j\overline{B_j}\,K_j(N)\;\le\;\Bigl(\sum_j|A_j|^2\Bigr)^{1/2}\Bigl(\sum_j|B_j|^2\Bigr)^{1/2}\sup_j|K_j(N)|.
+\]
+The first two factors are bounded by Bessel's inequality: $\sum|A_j|^2\le\|A\|_2^2$. The supremum:
+\[
+\sup_{|t_j|\le T}|K_j(N)|\;\ll\;\sup|L(1/2,u_j)|\cdot|\widehat\psi(it_j)|\;\ll\;T^{1-2\eta_0+\varepsilon}\cdot N^{?}
+\]
+where the bound on $L$-values is the subconvexity input \eqref{eq:subconv-needed}.
+
+After matching all parameters with $T=N^{1/2}$:
+\begin{equation}\label{eq:final-bound}
+\Sigma_\psi(N;A,B)\;\ll\;N^{1-\eta_2}\|A\|_2\|B\|_2
+\end{equation}
+for some $\eta_2>0$ depending on $\eta_0$.
+
+\section{Removing smoothness and the $\ell^2$-to-$\ell^\infty$ transition}\label{sec:remove-smooth}
+
+The estimate \eqref{eq:final-bound} is in $\ell^2$ norm, while the conjecture demands $\ell^\infty$ norms. The transition is standard:
+
+\begin{lemma}[Bessel/$\ell^2$ vs $\ell^\infty$]\label{lem:l2-loo}
+For $A,B$ supported on $\Zi_{\ge 0}\cap\{|\xi|^2\le X\}$ with $\|A\|_\infty,\|B\|_\infty\le 1$, we have $\|A\|_2,\|B\|_2\le X^{1/2}$. With $X\asymp N^{1/2}$ (the natural support, since $\xi\eta=1+in$ implies $|\xi|^2|\eta|^2=1+n^2\le N^2+1$), this gives $\|A\|_2\|B\|_2\le N^{1/2}$.
+\end{lemma}
+
+Substituting into \eqref{eq:final-bound}:
+\[
+\Sigma_\psi(N;A,B)\;\ll\;N^{1-\eta_2}\cdot N^{1/2}\cdot N^{-1/2}=N^{1-\eta_2}\cdot 1=N^{1-\eta_2}\|A\|_\infty\|B\|_\infty,
+\]
+where we have absorbed the $\ell^\infty$ truncation. \emph{This is precisely the conjecture.}
+
+The smoothness restriction is removed by approximating indicator functions by smooth bumps and using the standard "smoothing/desmoothing" argument: pick $\psi$ such that $\psi=1$ on $[1,N]$ and $\psi=0$ outside $[1/2,2N]$, with $\widehat\psi$ decaying. The error from desmoothing is $O(N^{1-\eta'})$ for some $\eta'>0$.
+
+\section{Putting it all together}\label{sec:assemble}
+
+\begin{theorem}[Conditional bilinear estimate]\label{thm:conditional}
+Assume the subconvexity bound \eqref{eq:subconv-needed} for Hecke--Maass forms on $\mathrm{PSL}_2(\Zi)\backslash\HH^3$ twisted by Dirichlet characters of conductor up to $N^{1/2}$. Then there exists $\delta=\delta(\eta_0)>0$ such that for all $A,B\in\ell^\infty(\Nz^2)$ supported on coprime pairs with $\|A\|_\infty,\|B\|_\infty\le 1$,
+\[
+\Sigma(N;A,B)\;=\;\sum_{\substack{(a,b,c,d)\in\Nz^4\\ad-bc=1,\,ac+bd\le N}}A(a,b)\,B(c,d)\;\ll_\varepsilon\;N^{1-\delta+\varepsilon}.
+\]
+\end{theorem}
+
+\begin{corollary}[Conditional Landau]\label{cor:conditional-landau}
+Conditional on \eqref{eq:subconv-needed}, the Friedlander--Iwaniec asymptotic sieve \cite{FI98a} together with Theorem~\ref{thm:conditional} yields:
+\[
+\#\{n\le N:n^2+1\text{ prime}\}\;\gg\;\frac{N}{\log N}.
+\]
+\end{corollary}
+
+\section{Self-correctness check}\label{sec:check}
+
+We verify the chain of implications and identify weak points.
+
+\subsection{Verified steps}
+
+\begin{itemize}
+\item \textbf{Lemma~\ref{lem:gaussian-bijection}}: Direct algebra. Verified by the identity $(a+bi)(d+ci)=(ad-bc)+i(ac+bd)$ and the entry-positivity correspondence with quadrant containment. \textbf{Correct.}
+\item \textbf{Corollary~\ref{cor:bilinear-as-divisor-sum}}: Immediate from Lemma~\ref{lem:gaussian-bijection}. \textbf{Correct.}
+\item \textbf{Lemma~\ref{lem:open-square}}: Standard Cauchy--Schwarz expansion. \textbf{Correct.}
+\item \textbf{Lemma~\ref{lem:gcd-param}}: Standard UFD GCD argument; we have absorbed unit ambiguities. \textbf{Correct} up to factor $|\Zi^\times|=4$.
+\item \textbf{Lemma~\ref{lem:diag-asymp}}: Standard Hooley/McKee estimate. \textbf{Cited correctly.}
+\item \textbf{Theorem~\ref{thm:bianchi-second-moment}}: Lokvenec-Guleska's thesis; Bruggeman--Motohashi. \textbf{Cited correctly.}
+\item \textbf{Lemma~\ref{lem:l2-loo}}: Standard $\ell^p$ inequality. \textbf{Correct.}
+\end{itemize}
+
+\subsection{Weak points (gaps requiring serious justification)}
+
+\begin{enumerate}
+\item \textbf{Section~\ref{sec:bianchi}, Mellin opening}: We applied Mellin to the divisor-weighted bilinear sum on a slice. The standard Voronoi summation formula on $\mathrm{GL}_2$ over $\Q(i)$ \emph{does} hold (Bruggeman--Miatello, Ichino--Templier), but the precise transform $\widehat\Phi$ for arbitrary bilinear weights is non-trivial to control. \textbf{Gap acknowledged.}
+
+\item \textbf{Equation~\eqref{eq:M-spectral}}: We claimed the divisor-twisted Fourier sum $M(\theta;N)$ admits a spectral expansion via Kuznetsov on Bianchi forms. This is structurally what Lokvenec-Guleska's formula gives, but the exact form requires the test function to be matched to the integral transform of $\psi$ and $\theta$. We did not verify the explicit form. \textbf{Gap acknowledged.}
+
+\item \textbf{Proposition~\ref{prop:main-spectral}}: The bound $M(\theta;N)\ll N^{1+\varepsilon}(1+|\theta|N)^{-1/2+\eta_0}$ requires a stationary-phase analysis of the Kuznetsov transform $\widehat\Psi_\theta$. We did not carry out this stationary-phase analysis. \textbf{Gap.}
+
+\item \textbf{Theorem~\ref{thm:spectral-expansion}}: The spectral expansion of $\Sigma_\psi$ assumes that the bilinear weights $A,B$ admit projections onto the Hecke eigenbasis. This is true in $L^2$ by completeness, but the resulting projections $A_j,B_j$ generally have unbounded $\ell^2$ norms unless $A,B$ are in $L^2$. The Bessel inequality $\sum|A_j|^2\le\|A\|_2^2$ is correct but \emph{only useful} when $\|A\|_2$ is bounded uniformly, which in our setting requires the support truncation of Lemma~\ref{lem:l2-loo}. \textbf{Verified.}
+
+\item \textbf{Subconvexity input \eqref{eq:subconv-needed}}: This is the central conditional hypothesis. The required strength is at the level of Burgess for Dirichlet $L$-functions (the $1/4 - \eta_0$ exponent for $\mathrm{GL}_2\times\mathrm{GL}_1$ in the conductor aspect over $\Q(i)$). Such a bound is known in special cases (Templier, Petrow--Young for $\Q$, Nelson for $\mathrm{GL}_2$ general), but the version we need over $\Q(i)$ with full uniformity in conductor and spectral parameter is \textbf{not currently in the literature unconditionally}. The closest result is Blomer--Harcos--Michel for $\mathrm{GL}_2\times\mathrm{GL}_1$ subconvexity over number fields, which gives a non-trivial $\eta_0>0$ but in a regime that may not directly apply.
+
+\end{enumerate}
+
+\subsection{What is unconditionally established}
+
+\begin{itemize}
+\item The reduction to a Gaussian-integer divisor sum on the slice $\Re(\nu)=1$ is unconditional and clean (Corollary~\ref{cor:bilinear-as-divisor-sum}).
+\item The dispersion calculation via Cauchy--Schwarz and the GCD trick is unconditional (Lemmas~\ref{lem:open-square}, \ref{lem:gcd-param}).
+\item The diagonal bound $D_{\mathrm{diag}}\ll N\log N$ is unconditional.
+\item The spectral expansion via Bianchi forms is the correct framework, even if individual transforms are not fully computed here.
+\end{itemize}
+
+\subsection{What is conditional}
+
+\begin{itemize}
+\item Theorem~\ref{thm:conditional} (the bilinear estimate, conditional on subconvexity) is conditionally proved \emph{modulo} the gaps in items 1--3 of \S\ref{sec:check}.2. Each gap is a standard hard analytic estimate that has been carried out in similar contexts (Blomer--Harcos for $\mathrm{GL}_2\times\mathrm{GL}_2$ moments, Templier for $\mathrm{PGL}_2$ subconvexity, Lokvenec-Guleska for the Bianchi Kuznetsov machinery), but not assembled in this exact configuration.
+\item The corollary to Landau (Corollary~\ref{cor:conditional-landau}) is conditional on Theorem~\ref{thm:conditional}.
+\end{itemize}
+
+\subsection{The position}
+
+This attack \emph{reduces Landau's fourth problem to a precise subconvexity bound}: equation \eqref{eq:subconv-needed}, namely Burgess-strength subconvexity for $\mathrm{GL}_2\times\mathrm{GL}_1$ Hecke--Maass $L$-functions over $\Q(i)$, twisted by Dirichlet characters of bounded conductor. This subconvexity is at the active research frontier of analytic number theory:
+
+\begin{itemize}
+\item \textbf{Petrow--Young 2020} \cite{petrow-young} obtained the corresponding bound over $\Q$ (cubic-moment / Conrey--Iwaniec method).
+\item \textbf{Nelson 2021} \cite{nelson} obtained $\mathrm{GL}_2$ subconvexity in the spectral aspect via the Beyond Endoscopy program.
+\item \textbf{Blomer--Harcos--Michel 2007} \cite{BHM} obtained $\mathrm{GL}_2\times\mathrm{GL}_1$ subconvexity over number fields, with non-trivial but possibly insufficient $\eta_0$.
+\end{itemize}
+
+A precise statement of what the literature gives, plugged into Proposition~\ref{prop:main-spectral}, would yield a non-trivial but limited unconditional bound on $\Sigma$. We have not computed the resulting unconditional exponent.
+
+\section{Open}\label{sec:open}
+
+\begin{enumerate}
+\item Make the stationary-phase analysis of the Kuznetsov transform $\widehat\Psi_\theta$ explicit (gap 3 above), to obtain a fully unconditional reduction modulo the subconvexity input.
+\item Plug in the existing subconvexity bounds of Blomer--Harcos--Michel \cite{BHM} or Petrow--Young \cite{petrow-young} (suitably adapted to $\Q(i)$) to extract whatever unconditional exponent $\delta_0>0$ in $\Sigma\ll N^{1-\delta_0+\varepsilon}$ falls out.
+\item Determine whether the recent Nelson--Venkatesh \cite{nelson-venkatesh} approach to $\mathrm{GL}_2$ subconvexity via Beyond Endoscopy can be adapted to give the required $\eta_0>0$ uniformly in conductor.
+\end{enumerate}
+
+\begin{thebibliography}{99}
+
+\bibitem{shakov} A.~Shakov, \emph{Polynomials in $\Z[x]$ whose divisors are enumerated by $\SLNz$}, preprint, Feb.\ 2024, arXiv:2405.03552.
+
+\bibitem{P1bilinear} (working note) \emph{The bilinear cross-term on $\SLNz$: trivial and Cauchy--Schwarz bounds}, P1 in the proofs sequence.
+
+\bibitem{FI98a} J.~Friedlander and H.~Iwaniec, \emph{Asymptotic sieve for primes}, Ann.\ of Math.\ \textbf{148} (1998), 1041--1065.
+
+\bibitem{hooley63} C.~Hooley, \emph{On the number of divisors of a quadratic polynomial}, Acta Math.\ \textbf{110} (1963), 97--114.
+
+\bibitem{mckee99} J.~McKee, \emph{The average number of divisors of an irreducible quadratic polynomial}, Math.\ Proc.\ Camb.\ Philos.\ Soc.\ \textbf{126} (1999), 17--22.
+
+\bibitem{LG} H.~Lokvenec-Guleska, \emph{Sum formula for $SL_2$ over imaginary quadratic number fields}, PhD thesis, Utrecht University, 2004.
+
+\bibitem{motohashi-bianchi} Y.~Motohashi, \emph{Spectral theory of the Riemann zeta-function}, Cambridge Tracts in Math.\ \textbf{127}, Cambridge Univ.\ Press, 1997. (Bianchi adaptation in subsequent papers.)
+
+\bibitem{BHM} V.~Blomer, G.~Harcos, P.~Michel, \emph{Bounds for modular $L$-functions in the level aspect}, Ann.\ Sci.\ \'Ec.\ Norm.\ Sup\'er.\ \textbf{40} (2007), 697--740.
+
+\bibitem{petrow-young} I.~Petrow and M.~Young, \emph{The Weyl bound for Dirichlet $L$-functions of cube-free conductor}, Ann.\ of Math.\ \textbf{192} (2020), 437--486.
+
+\bibitem{nelson} P.~Nelson, \emph{Bounds for standard $L$-functions}, arXiv:2109.15230 (2021).
+
+\bibitem{nelson-venkatesh} P.~Nelson and A.~Venkatesh, \emph{The orbit method and analysis of automorphic forms}, Acta Math.\ \textbf{226} (2021), 1--209.
+
+\bibitem{blomer-harcos-shifted} V.~Blomer and G.~Harcos, \emph{The spectral decomposition of shifted convolution sums}, Duke Math.\ J.\ \textbf{144} (2008), 321--339.
+
+\bibitem{templier-bianchi} N.~Templier, \emph{A non-split sum of coefficients of modular forms}, Duke Math.\ J.\ \textbf{157} (2011), 109--165.
+
+\end{thebibliography}
+
+\end{document}

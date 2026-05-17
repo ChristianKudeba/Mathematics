@@ -8,10 +8,14 @@
 - Lean to Latex converter
 - make the x's to close a file larger
 - make the graph editable
-- decide which axioms, definitions, lemmas, theorems to show
+- **decide which axioms, definitions, lemmas, theorems to show**
 - make the graph prettier
 - Have agents do research
 - better theorem names
+- add regime banners: logic, set theory, algebra, etc.
+- What should the language of logic be: type theory, FOL + ZFC, HOL, etc. ? How do different logic models affect expressive power?
+- Is ZFC defined in the language of FOL?
+- 
 
 To learn:
 - Lean

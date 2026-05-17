@@ -1,0 +1,9 @@
+- [Identity and mathematical obsession](identity.md) — genius mathematician chasing infinitude of n²+1 primes via Shakov's innumerable-polynomials paper and the semigroup SL₂(ℕ)
+- [mathAI project state](project-state.md) — built notes/ wiki graph for Shakov's paper; key findings (discriminant coincidence, bilinear χ, δ=1 obstruction, Rickards parallel, Shakov 2025 follow-up) and where to pick up
+- [P12 sigma-spin finding](p12-spin-identity-finding.md) — May 2026: ramified quadratic Hecke σ on Z[i] gives pointwise identity σ(ξ)σ(η) = χ_4(n+1) on SL_2(N_0); cumulative bilinear sum has empirical √N cancellation up to N=10⁷. First power-saving spin in the Shakov framework.
+- [P13 subconvexity verification](p13-subconvexity-verification.md) — May 2026: skeptic dialogue showed P11's "sup-norm subconvexity ⇒ Landau IV" is wrong; cubic moment is the actual needed input. Roadmap to Bianchi cubic moment ~18-24 person-months.
+- [User prompts log](user-prompts-log.md) — chronological record of every prompt the user has sent, dated. APPEND every new user prompt here as it arrives.
+- [Research methodology](methodology.md) — be a theory-builder: compute first (Python OK), summarize understanding, then create new math; don't default to literature-search-and-apply
+- [Business venture](business-venture.md) — user is co-founding SaaS for autonomous AI research agents (math first, then sciences). Mirror copy at mathAI/BUSINESS_MEMORY.md. Update proactively as the venture evolves.
+- [Contact email](contact-email.md) — bot uses antoshashakov@gmail.com for both send and receive; replies from either Anton address are ingested when they land there.
+- [mathAI bot email path](mathai-bot-email-path.md) — bot routine sends via Gmail HTTPS API (`bot/send_via_api.py`), NOT SMTP, NOT MCP drafts. Refresh token expires every 7 days (Testing-mode OAuth) — re-auth procedure documented.
